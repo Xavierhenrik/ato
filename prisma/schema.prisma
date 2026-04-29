@@ -1,0 +1,226 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Usuário (espelha Supabase Auth) ──────────────────────────────────────────
+
+model User {
+  id          String   @id @default(uuid())
+  supabaseId  String   @unique @map("supabase_id")
+  email       String   @unique
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  profile      Profile?
+  subscription Subscription?
+  studyPlan    StudyPlan?
+  sessions     TutorSession[]
+  attempts     SimuladoAttempt[]
+  annotations  Annotation[]
+
+  @@map("users")
+}
+
+// ── Perfil e onboarding ───────────────────────────────────────────────────────
+
+model Profile {
+  id                String    @id @default(uuid())
+  userId            String    @unique @map("user_id")
+  name              String
+  avatarUrl         String?   @map("avatar_url")
+  // Onboarding fields (T03-T06)
+  studyGoal         String?   @map("study_goal")       // "oab_first" | "oab_second" | "both"
+  knowledgeLevel    String?   @map("knowledge_level")  // "beginner" | "intermediate" | "advanced"
+  dailyStudyMins    Int?      @map("daily_study_mins")
+  onboardingStep    Int       @default(0) @map("onboarding_step") // 0-4
+  onboardingDone    Boolean   @default(false) @map("onboarding_done")
+  // Gamification
+  streakDays        Int       @default(0) @map("streak_days")
+  longestStreak     Int       @default(0) @map("longest_streak")
+  lastStudyDate     DateTime? @map("last_study_date")
+  // Notifications (T21)
+  notifEnabled      Boolean   @default(true) @map("notif_enabled")
+  notifTime         String?   @map("notif_time")   // "08:00"
+  oneSignalPlayerId String?   @map("onesignal_player_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// ── Plano de estudos (T19) ────────────────────────────────────────────────────
+
+model StudyPlan {
+  id          String   @id @default(uuid())
+  userId      String   @unique @map("user_id")
+  goal        String                          // "oab_first" | "oab_second"
+  durationDays Int     @map("duration_days")
+  dailyMins   Int      @map("daily_mins")
+  areas       Json                            // [{code, name, weight, topicsCount}]
+  generatedAt DateTime @default(now()) @map("generated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("study_plans")
+}
+
+// ── Assinatura PRO (T22-T23) ─────────────────────────────────────────────────
+
+model Subscription {
+  id            String    @id @default(uuid())
+  userId        String    @unique @map("user_id")
+  plan          String    @default("free")    // "free" | "pro"
+  revenueCatId  String?   @unique @map("revenuecat_id")
+  status        String    @default("active")  // "active" | "cancelled" | "expired"
+  expiresAt     DateTime? @map("expires_at")
+  activatedAt   DateTime? @map("activated_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+// ── Manual — tópicos (T09-T13) ────────────────────────────────────────────────
+
+model Topic {
+  id       String  @id @default(uuid())
+  code     String  @unique                // "CC-001", "CF-005"
+  title    String
+  lawCode  String  @map("law_code")       // "CC", "CF", etc.
+  chapter  String?
+  content  String  @db.Text
+  order    Int
+  isPro    Boolean @default(false) @map("is_pro")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  annotations Annotation[]
+
+  @@index([lawCode])
+  @@map("topics")
+}
+
+// ── Tutor IA — sessões (M4) ───────────────────────────────────────────────────
+// Histórico ativo fica no Redis (TTL 4h, 8 msgs).
+// Este model persiste sessões finalizadas para analytics.
+
+model TutorSession {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  mode      String                      // "reading" | "simulado" | "direct"
+  topicId   String?   @map("topic_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  endedAt   DateTime? @map("ended_at")
+  msgCount  Int       @default(0) @map("msg_count")
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages TutorMessage[]
+
+  @@index([userId])
+  @@map("tutor_sessions")
+}
+
+model TutorMessage {
+  id        String   @id @default(uuid())
+  sessionId String   @map("session_id")
+  role      String                      // "user" | "assistant"
+  content   String   @db.Text
+  sources   Json?                       // CitationSchema[]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  session TutorSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@map("tutor_messages")
+}
+
+// ── Simulados — banco de questões (M5) ───────────────────────────────────────
+
+model Question {
+  id            String  @id @default(uuid())
+  externalId    String? @unique @map("external_id")  // ID do banco externo
+  statement     String  @db.Text
+  options       Json                                  // {A, B, C, D: string}
+  correctAnswer String  @map("correct_answer")        // "A" | "B" | "C" | "D"
+  explanation   String? @db.Text
+  subject       String                                // "Constitucional", "Civil"
+  topic         String?
+  lawCode       String? @map("law_code")
+  board         String?                               // "FGV", "CESPE"
+  year          Int?
+  phase         String?                               // "1a_fase" | "2a_fase"
+  difficulty    String? @default("medium")            // "easy" | "medium" | "hard"
+  isPro         Boolean @default(false) @map("is_pro")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  simuladoQuestions SimuladoQuestion[]
+
+  @@index([subject])
+  @@index([lawCode])
+  @@map("questions")
+}
+
+model SimuladoAttempt {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  mode        String                      // "custom" | "oab_phase1" | "oab_phase2" | "weak_areas"
+  totalQ      Int       @map("total_q")
+  correctQ    Int       @default(0) @map("correct_q")
+  score       Float?
+  startedAt   DateTime  @default(now()) @map("started_at")
+  completedAt DateTime? @map("completed_at")
+
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  questions SimuladoQuestion[]
+
+  @@index([userId])
+  @@map("simulado_attempts")
+}
+
+model SimuladoQuestion {
+  id            String    @id @default(uuid())
+  attemptId     String    @map("attempt_id")
+  questionId    String    @map("question_id")
+  order         Int
+  studentAnswer String?   @map("student_answer")  // "A" | "B" | "C" | "D" | null
+  isCorrect     Boolean?  @map("is_correct")
+  timeSpentSecs Int?      @map("time_spent_secs")
+  answeredAt    DateTime? @map("answered_at")
+
+  attempt  SimuladoAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question Question        @relation(fields: [questionId], references: [id])
+
+  @@unique([attemptId, questionId])
+  @@map("simulado_questions")
+}
+
+// ── Anotações (T12, M6) ───────────────────────────────────────────────────────
+
+model Annotation {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  topicId    String?  @map("topic_id")
+  lawCode    String?  @map("law_code")
+  articleRef String?  @map("article_ref")  // "Art. 186 do CC"
+  content    String   @db.Text
+  highlight  String?  @db.Text             // trecho destacado no original
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic? @relation(fields: [topicId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@map("annotations")
+}
