@@ -3,7 +3,9 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import jwt from '@fastify/jwt';
 import rateLimit from '@fastify/rate-limit';
+import * as Sentry from '@sentry/node';
 
+import { AppError } from './shared/errors';
 import { authRoutes } from './modules/auth/auth.routes';
 import { onboardingRoutes } from './modules/onboarding/onboarding.routes';
 import { dashboardRoutes } from './modules/dashboard/dashboard.routes';
@@ -25,15 +27,47 @@ export async function buildApp() {
   });
 
   await app.register(helmet);
-  await app.register(cors, {
-    origin: process.env.NODE_ENV === 'production' ? false : true,
-  });
+
+  const corsOrigin: string | string[] | boolean =
+    process.env.NODE_ENV === 'production'
+      ? process.env.CORS_ORIGIN
+        ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+        : true
+      : true;
+
+  await app.register(cors, { origin: corsOrigin });
   await app.register(jwt, {
     secret: process.env.SUPABASE_JWT_SECRET!,
   });
   await app.register(rateLimit, {
     max: 200,
     timeWindow: '1 minute',
+  });
+
+  app.setErrorHandler((error, _req, reply) => {
+    if (error instanceof AppError) {
+      return reply.status(error.statusCode).send({
+        error: error.code,
+        message: error.message,
+        statusCode: error.statusCode,
+      });
+    }
+
+    if (error.statusCode === 400) {
+      return reply.status(400).send({
+        error: 'VALIDATION_ERROR',
+        message: error.message,
+        statusCode: 400,
+      });
+    }
+
+    Sentry.captureException(error);
+    reply.log.error(error);
+    return reply.status(500).send({
+      error: 'INTERNAL_ERROR',
+      message: 'Erro interno do servidor',
+      statusCode: 500,
+    });
   });
 
   // Health check

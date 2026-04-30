@@ -32,8 +32,7 @@ export class TutorController {
   private tutorSvc = new TutorService();
   private sessionSvc = new SessionService();
 
-  async newSession(req: FastifyRequest, reply: FastifyReply) {
-    const { v4: uuidv4 } = await import('crypto');
+  async newSession(_req: FastifyRequest, reply: FastifyReply) {
     const sessionId = crypto.randomUUID();
     return reply.send({ session_id: sessionId });
   }

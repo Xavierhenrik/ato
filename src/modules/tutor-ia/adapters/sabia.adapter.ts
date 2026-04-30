@@ -23,6 +23,9 @@ interface MaritacaResponse {
   usage: { prompt_tokens: number; completion_tokens: number };
 }
 
+const TIMEOUT_MS = 30_000;
+const RETRYABLE_STATUS = new Set([500, 503]);
+
 export class SabiaAdapter implements LLMAdapter {
   private baseUrl = process.env.MARITACA_BASE_URL ?? 'https://chat.maritaca.ai/api';
   private apiKey = process.env.MARITACA_API_KEY!;
@@ -46,21 +49,46 @@ export class SabiaAdapter implements LLMAdapter {
       body.tool_choice = 'auto';
     }
 
-    const res = await fetch(`${this.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
+    return this.fetchWithRetry(body);
+  }
 
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(`Maritaca API error ${res.status}: ${err}`);
+  private async fetchWithRetry(
+    body: Record<string, unknown>,
+    attempt = 1,
+  ): Promise<LLMResponse> {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+    let res: Response;
+    try {
+      res = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      clearTimeout(timeout);
+      console.error('[SabiaAdapter] fetch error:', err);
+      throw err;
+    } finally {
+      clearTimeout(timeout);
     }
 
-    const data: MaritacaResponse = await res.json();
+    if (!res.ok) {
+      if (attempt === 1 && RETRYABLE_STATUS.has(res.status)) {
+        console.warn(`[SabiaAdapter] status ${res.status} — retrying (attempt 2/2)`);
+        return this.fetchWithRetry(body, 2);
+      }
+      const errText = await res.text();
+      console.error(`[SabiaAdapter] API error ${res.status}:`, errText);
+      throw new Error(`Maritaca API error ${res.status}: ${errText}`);
+    }
+
+    const data = (await res.json()) as MaritacaResponse;
     const choice = data.choices[0];
     const msg = choice.message;
 

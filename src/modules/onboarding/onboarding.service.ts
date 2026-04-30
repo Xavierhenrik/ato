@@ -1,10 +1,8 @@
 import { db } from '../../shared/db';
 import { Errors } from '../../shared/errors';
 
-// T03 — Objetivo
-type StudyGoal = 'oab_first' | 'oab_second' | 'both';
-// T04 — Nível de conhecimento
-type KnowledgeLevel = 'beginner' | 'intermediate' | 'advanced';
+// Spec v5.0 — Passo 1/4: Fase acadêmica
+type AcademicPhase = 'graduation_start' | 'graduation_mid' | 'oab_prep';
 
 export class OnboardingService {
   async getState(userId: string) {
@@ -15,9 +13,10 @@ export class OnboardingService {
       step: profile.onboardingStep,
       done: profile.onboardingDone,
       data: {
-        studyGoal: profile.studyGoal,
-        knowledgeLevel: profile.knowledgeLevel,
+        academicPhase: profile.academicPhase,
         dailyStudyMins: profile.dailyStudyMins,
+        selectedSubjects: profile.selectedSubjects,
+        nivelamentoPendente: profile.nivelamentoPendente,
       },
     };
   }
@@ -25,9 +24,12 @@ export class OnboardingService {
   async updateStep(userId: string, step: number, data: Record<string, unknown>) {
     const updateData: Record<string, unknown> = { onboardingStep: step };
 
-    if (step === 1) updateData.studyGoal = data.studyGoal as StudyGoal;
-    if (step === 2) updateData.knowledgeLevel = data.knowledgeLevel as KnowledgeLevel;
-    if (step === 3) updateData.dailyStudyMins = data.dailyStudyMins as number;
+    // Passo 1 → fase acadêmica
+    if (step === 1) updateData.academicPhase = data.academicPhase as AcademicPhase;
+    // Passo 2 → meta de minutos diários
+    if (step === 2) updateData.dailyStudyMins = data.dailyStudyMins as number;
+    // Passo 3 → disciplinas selecionadas (array de códigos)
+    if (step === 3) updateData.selectedSubjects = data.selectedSubjects;
 
     const profile = await db.profile.update({
       where: { userId },
@@ -41,21 +43,62 @@ export class OnboardingService {
     const profile = await db.profile.findUnique({ where: { userId } });
     if (!profile) throw Errors.notFound('Perfil');
 
+    const isOabPrep = profile.academicPhase === 'oab_prep';
+
     await db.profile.update({
       where: { userId },
-      data: { onboardingDone: true, onboardingStep: 4 },
+      data: {
+        onboardingDone: true,
+        onboardingStep: 4,
+        // Se fase OAB, quiz diagnóstico fica pendente (RF14, T08-T09)
+        ...(isOabPrep && { nivelamentoPendente: true }),
+      },
     });
 
     // Gera plano de estudos baseado no perfil (T19)
     const plan = await this.generateStudyPlan(userId, profile);
-    return { done: true, studyPlan: plan };
+
+    // Fork de roteamento: Fluxo A → Home direto; Fluxo B (OAB) → Quiz Diagnóstico
+    return {
+      done: true,
+      studyPlan: plan,
+      flow: isOabPrep ? 'B' : 'A',
+      nivelamentoPendente: isOabPrep,
+    };
+  }
+
+  // T08 — Usuário concluiu o Quiz Diagnóstico OAB (RF14)
+  async completeQuiz(userId: string) {
+    await db.profile.update({
+      where: { userId },
+      data: { nivelamentoPendente: false },
+    });
+    return { nivelamentoPendente: false };
+  }
+
+  // T09 — Usuário confirmou o skip do Quiz Diagnóstico (RF14)
+  async skipQuiz(userId: string) {
+    // nivelamentoPendente já é true após complete() para OAB — apenas confirma e retorna estado
+    const profile = await db.profile.findUnique({ where: { userId } });
+    if (!profile) throw Errors.notFound('Perfil');
+    // Garante que está marcado como pendente mesmo que chamado diretamente
+    if (!profile.nivelamentoPendente) {
+      await db.profile.update({
+        where: { userId },
+        data: { nivelamentoPendente: true },
+      });
+    }
+    return { nivelamentoPendente: true };
   }
 
   private async generateStudyPlan(
     userId: string,
-    profile: { studyGoal: string | null; dailyStudyMins: number | null },
+    profile: { academicPhase: string | null; dailyStudyMins: number | null },
   ) {
-    const goal = (profile.studyGoal as StudyGoal) ?? 'oab_first';
+    const phase = profile.academicPhase as AcademicPhase | null;
+    const goal = 'oab_first';
+    const durationDays =
+      phase === 'oab_prep' ? 90 : phase === 'graduation_mid' ? 120 : 180;
     const dailyMins = profile.dailyStudyMins ?? 60;
 
     // Áreas OAB com pesos padrão
@@ -70,8 +113,6 @@ export class OnboardingService {
       { code: 'CDC', name: 'Consumidor', weight: 0.03 },
       { code: 'EOAB', name: 'Estatuto OAB', weight: 0.02 },
     ];
-
-    const durationDays = goal === 'oab_first' ? 90 : 120;
 
     return db.studyPlan.upsert({
       where: { userId },

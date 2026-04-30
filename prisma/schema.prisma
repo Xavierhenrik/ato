@@ -16,12 +16,13 @@ model User {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  profile      Profile?
-  subscription Subscription?
-  studyPlan    StudyPlan?
-  sessions     TutorSession[]
-  attempts     SimuladoAttempt[]
-  annotations  Annotation[]
+  profile          Profile?
+  subscription     Subscription?
+  studyPlan        StudyPlan?
+  sessions         TutorSession[]
+  attempts         SimuladoAttempt[]
+  annotations      Annotation[]
+  answeredQuestions UserQuestionAnswered[]
 
   @@map("users")
 }
@@ -33,12 +34,14 @@ model Profile {
   userId            String    @unique @map("user_id")
   name              String
   avatarUrl         String?   @map("avatar_url")
-  // Onboarding fields (T03-T06)
-  studyGoal         String?   @map("study_goal")       // "oab_first" | "oab_second" | "both"
-  knowledgeLevel    String?   @map("knowledge_level")  // "beginner" | "intermediate" | "advanced"
+  // Onboarding fields (T03-T06 / spec v5.0)
+  studyGoal         String?   @map("study_goal")        // "oab_first" | "oab_second" | "both"
+  academicPhase     String?   @map("academic_phase")    // "graduation_start" | "graduation_mid" | "oab_prep"
   dailyStudyMins    Int?      @map("daily_study_mins")
+  selectedSubjects  Json?     @map("selected_subjects") // ["CC","CF","CP"...]
   onboardingStep    Int       @default(0) @map("onboarding_step") // 0-4
   onboardingDone    Boolean   @default(false) @map("onboarding_done")
+  nivelamentoPendente Boolean @default(false) @map("nivelamento_pendente") // Quiz Diagnóstico OAB (RF14)
   // Gamification
   streakDays        Int       @default(0) @map("streak_days")
   longestStreak     Int       @default(0) @map("longest_streak")
@@ -165,6 +168,7 @@ model Question {
   createdAt     DateTime @default(now()) @map("created_at")
 
   simuladoQuestions SimuladoQuestion[]
+  answeredBy        UserQuestionAnswered[]
 
   @@index([subject])
   @@index([lawCode])
@@ -175,6 +179,8 @@ model SimuladoAttempt {
   id          String    @id @default(uuid())
   userId      String    @map("user_id")
   mode        String                      // "custom" | "oab_phase1" | "oab_phase2" | "weak_areas"
+  status      String    @default("in_progress") @map("status") // "in_progress" | "completed" | "abandoned"
+  subjects    Json?     @map("subjects") // disciplinas selecionadas na configuração
   totalQ      Int       @map("total_q")
   correctQ    Int       @default(0) @map("correct_q")
   score       Float?
@@ -203,6 +209,22 @@ model SimuladoQuestion {
 
   @@unique([attemptId, questionId])
   @@map("simulado_questions")
+}
+
+// ── Questões respondidas (RF58 — PRO: questões inéditas) ─────────────────────
+
+model UserQuestionAnswered {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  questionId String   @map("question_id")
+  answeredAt DateTime @default(now()) @map("answered_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([userId])
+  @@map("user_question_answered")
 }
 
 // ── Anotações (T12, M6) ───────────────────────────────────────────────────────

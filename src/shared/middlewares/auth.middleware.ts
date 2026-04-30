@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { db } from '../db';
 import { Errors } from '../errors';
 
-export async function requireAuth(req: FastifyRequest, reply: FastifyReply) {
+export async function requireAuth(req: FastifyRequest, _reply: FastifyReply) {
   try {
     await req.jwtVerify();
 

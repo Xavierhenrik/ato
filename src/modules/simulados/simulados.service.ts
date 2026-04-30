@@ -1,5 +1,6 @@
 import { db } from '../../shared/db';
 import { Errors } from '../../shared/errors';
+import { Prisma } from '@prisma/client';
 
 interface StartParams {
   mode: string;
@@ -44,18 +45,23 @@ export class SimuladosService {
   }
 
   async startAttempt(userId: string, params: StartParams) {
-    // Seleciona questões aleatórias
-    const where =
-      params.mode === 'custom' && params.subject ? { subject: params.subject } : {};
-    const questions = await db.question.findMany({
-      where,
-      take: params.totalQ,
-      orderBy: { id: 'asc' },
-    });
+    // Seleção aleatória via ORDER BY random() para evitar viés
+    const subjectFilter =
+      params.mode === 'custom' && params.subject
+        ? Prisma.sql`WHERE subject = ${params.subject}`
+        : Prisma.empty;
 
-    if (questions.length < params.totalQ) {
+    const rawIds = await db.$queryRaw<{ id: string }[]>(
+      Prisma.sql`SELECT id FROM questions ${subjectFilter} ORDER BY random() LIMIT ${params.totalQ}`,
+    );
+
+    if (rawIds.length < params.totalQ) {
       throw Errors.notFound('Questões suficientes para o simulado');
     }
+
+    const questions = await db.question.findMany({
+      where: { id: { in: rawIds.map((r) => r.id) } },
+    });
 
     const attempt = await db.simuladoAttempt.create({
       data: {
@@ -106,6 +112,7 @@ export class SimuladosService {
     return { isCorrect, correctAnswer: question.correctAnswer };
   }
 
+  // TODO: quando o handler de abandono for implementado, gravar status: 'abandoned'
   async completeAttempt(userId: string, attemptId: string) {
     const attempt = await db.simuladoAttempt.findFirst({
       where: { id: attemptId, userId },
@@ -116,7 +123,7 @@ export class SimuladosService {
 
     return db.simuladoAttempt.update({
       where: { id: attemptId },
-      data: { completedAt: new Date(), score },
+      data: { completedAt: new Date(), score, status: 'completed' },
     });
   }
 

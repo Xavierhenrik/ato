@@ -1,6 +1,12 @@
 import { db } from '../../shared/db';
 import { Errors } from '../../shared/errors';
 
+function lastWeekday(from: Date): Date {
+  const d = new Date(from);
+  do { d.setDate(d.getDate() - 1); } while (d.getDay() === 0 || d.getDay() === 6);
+  return d;
+}
+
 export class DashboardService {
   async getHomeData(userId: string) {
     const [profile, subscription, recentAttempts] = await Promise.all([
@@ -41,6 +47,12 @@ export class DashboardService {
     const profile = await db.profile.findUnique({ where: { userId } });
     if (!profile) throw Errors.notFound('Perfil');
 
+    // RF21: fins de semana não quebram nem incrementam o streak
+    const todayDow = new Date().getDay();
+    if (todayDow === 0 || todayDow === 6) {
+      return { streak: profile.streakDays, updated: false };
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -50,8 +62,8 @@ export class DashboardService {
     const isToday = lastStudy?.getTime() === today.getTime();
     if (isToday) return { streak: profile.streakDays, updated: false };
 
-    const isYesterday =
-      lastStudy?.getTime() === today.getTime() - 86_400_000;
+    const prevWorkday = lastWeekday(today);
+    const isYesterday = lastStudy?.getTime() === prevWorkday.getTime();
 
     const newStreak = isYesterday ? profile.streakDays + 1 : 1;
 
