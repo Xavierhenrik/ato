@@ -50,6 +50,7 @@ export async function buildApp() {
         error: error.code,
         message: error.message,
         statusCode: error.statusCode,
+        ...error.extra,
       });
     }
 

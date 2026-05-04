@@ -10,6 +10,7 @@ export const keys = {
   tutorSession: (sessionId: string) => `tutor:session:${sessionId}`,
   tutorRateLimit: (userId: string) => `tutor:rate:${userId}`,
   tutorTokenBudget: (sessionId: string) => `tutor:tokens:${sessionId}`,
+  simuladoDaily: (userId: string) => `simulado:daily:${userId}`,
 };
 
 export const TTL = {
