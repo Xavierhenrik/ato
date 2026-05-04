@@ -23,6 +23,7 @@ model User {
   attempts         SimuladoAttempt[]
   annotations      Annotation[]
   answeredQuestions UserQuestionAnswered[]
+  topicReads       TopicRead[]
 
   @@map("users")
 }
@@ -41,7 +42,9 @@ model Profile {
   selectedSubjects  Json?     @map("selected_subjects") // ["CC","CF","CP"...]
   onboardingStep    Int       @default(0) @map("onboarding_step") // 0-4
   onboardingDone    Boolean   @default(false) @map("onboarding_done")
-  nivelamentoPendente Boolean @default(false) @map("nivelamento_pendente") // Quiz Diagnóstico OAB (RF14)
+  nivelamentoPendente  Boolean @default(false) @map("nivelamento_pendente")   // universal — todos os usuários
+  nivelamentoConcluido Boolean @default(false) @map("nivelamento_concluido") // true = quiz concluído; false = pendente ou dispensado
+  nivelamentoPath      String? @map("nivelamento_path")                       // "oab" | "graduation"
   // Gamification
   streakDays        Int       @default(0) @map("streak_days")
   longestStreak     Int       @default(0) @map("longest_streak")
@@ -109,6 +112,8 @@ model Topic {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   annotations Annotation[]
+  reads       TopicRead[]
+  questions   Question[]
 
   @@index([lawCode])
   @@map("topics")
@@ -165,13 +170,19 @@ model Question {
   phase         String?                               // "1a_fase" | "2a_fase"
   difficulty    String? @default("medium")            // "easy" | "medium" | "hard"
   isPro         Boolean @default(false) @map("is_pro")
+  type          String  @default("simulado")          // "simulado" | "review"
+  source        String  @default("oab_exam")          // "oab_exam" | "llm_generated"
+  topicId       String? @map("topic_id")
+  status        String  @default("active")            // "active" | "pending_review" | "rejected"
   createdAt     DateTime @default(now()) @map("created_at")
 
   simuladoQuestions SimuladoQuestion[]
   answeredBy        UserQuestionAnswered[]
+  topicRef          Topic? @relation(fields: [topicId], references: [id])
 
   @@index([subject])
   @@index([lawCode])
+  @@index([topicId])
   @@map("questions")
 }
 
@@ -237,6 +248,9 @@ model Annotation {
   articleRef String?  @map("article_ref")  // "Art. 186 do CC"
   content    String   @db.Text
   highlight  String?  @db.Text             // trecho destacado no original
+  title      String?
+  tags       Json?    @map("tags")          // string[]
+  subject    String?  @map("subject")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
@@ -245,4 +259,20 @@ model Annotation {
 
   @@index([userId])
   @@map("annotations")
+}
+
+// ── Leitura de tópicos do Manual (M3) ─────────────────────────────────────────
+
+model TopicRead {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  topicId   String   @map("topic_id")
+  readAt    DateTime @default(now()) @map("read_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topicId])
+  @@index([userId])
+  @@map("topic_reads")
 }
