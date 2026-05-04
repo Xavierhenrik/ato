@@ -1,25 +1,93 @@
 import { db } from '../../shared/db';
 import { Prisma } from '@prisma/client';
 import { Errors } from '../../shared/errors';
+import { randomUUID } from 'crypto';
 
 export class ManualService {
-  async listTopics(lawCode?: string) {
-    return db.topic.findMany({
+  async listTopics(userId: string, lawCode?: string) {
+    const topics = await db.topic.findMany({
       where: lawCode ? { lawCode } : undefined,
       select: { id: true, code: true, title: true, lawCode: true, chapter: true, order: true, isPro: true },
       orderBy: [{ lawCode: 'asc' }, { order: 'asc' }],
     });
+
+    if (!topics.length) return [];
+
+    const readCounts = await db.topicRead.groupBy({
+      by: ['topicId'],
+      where: { userId },
+      _count: { topicId: true },
+    });
+    const readTopicIds = new Set(readCounts.map(r => r.topicId));
+
+    // Conta total por lawCode
+    const totalByCode = new Map<string, number>();
+    const readByCode = new Map<string, number>();
+
+    for (const topic of topics) {
+      totalByCode.set(topic.lawCode, (totalByCode.get(topic.lawCode) ?? 0) + 1);
+      if (readTopicIds.has(topic.id)) {
+        readByCode.set(topic.lawCode, (readByCode.get(topic.lawCode) ?? 0) + 1);
+      }
+    }
+
+    return topics.map(t => ({
+      ...t,
+      progress: {
+        readCount: readByCode.get(t.lawCode) ?? 0,
+        totalTopics: totalByCode.get(t.lawCode) ?? 0,
+      },
+    }));
   }
 
-  async getTopic(id: string) {
+  async getTopic(id: string, userId: string) {
     const topic = await db.topic.findUnique({ where: { id } });
     if (!topic) throw Errors.notFound('Tópico');
-    return topic;
+
+    const read = await db.topicRead.findUnique({ where: { userId_topicId: { userId, topicId: id } } });
+
+    return { ...topic, isRead: !!read };
   }
 
-  async search(q: string, lawCode?: string) {
-    // Delega para a tabela legal_articles via raw SQL (BM25 com portuguese_unaccent)
-    const rows = await db.$queryRaw<
+  async markAsRead(userId: string, topicId: string) {
+    const topic = await db.topic.findUnique({ where: { id: topicId }, select: { id: true } });
+    if (!topic) throw Errors.notFound('Tópico');
+
+    const existing = await db.topicRead.findUnique({
+      where: { userId_topicId: { userId, topicId } },
+    });
+
+    if (existing) {
+      return { topicId, readAt: existing.readAt.toISOString(), isNew: false };
+    }
+
+    const record = await db.topicRead.create({
+      data: { id: randomUUID(), userId, topicId },
+    });
+
+    return { topicId, readAt: record.readAt.toISOString(), isNew: true };
+  }
+
+  async search(_userId: string, q: string, lawCode?: string) {
+    // Busca em topics (ILIKE em title e content) — máximo 5
+    const topicResults = await db.topic.findMany({
+      where: {
+        AND: [
+          lawCode ? { lawCode } : {},
+          {
+            OR: [
+              { title: { contains: q, mode: 'insensitive' } },
+              { content: { contains: q, mode: 'insensitive' } },
+            ],
+          },
+        ],
+      },
+      select: { id: true, title: true, lawCode: true, content: true },
+      take: 5,
+    });
+
+    // Busca em legal_articles via BM25 — máximo 10
+    const articleResults = await db.$queryRaw<
       Array<{ law_code: string; article_number: string; full_reference: string; content: string; score: number }>
     >(
       Prisma.sql`
@@ -33,7 +101,25 @@ export class ManualService {
       `,
     );
 
-    return rows;
+    const results = [
+      ...topicResults.map(t => ({
+        source: 'topic' as const,
+        id: t.id,
+        title: t.title,
+        lawCode: t.lawCode,
+        snippet: t.content.substring(0, 200),
+      })),
+      ...articleResults.map(a => ({
+        source: 'article' as const,
+        lawCode: a.law_code,
+        articleNumber: a.article_number,
+        fullReference: a.full_reference,
+        content: a.content,
+        score: Number(a.score),
+      })),
+    ];
+
+    return { results };
   }
 
   async getArticle(params: {
