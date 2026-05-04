@@ -1,117 +1,95 @@
 import { db } from '../../shared/db';
 import { Errors } from '../../shared/errors';
 
-// Spec v5.0 — Passo 1/4: Fase acadêmica
-type AcademicPhase = 'graduation_start' | 'graduation_mid' | 'oab_prep';
+type AcademicPhase = 'graduation_start' | 'graduation_mid' | 'graduation_end' | 'oab_prep';
+
+const DURATION_BY_PHASE: Record<AcademicPhase, number> = {
+  graduation_start: 180,
+  graduation_mid: 120,
+  graduation_end: 90,
+  oab_prep: 90,
+};
 
 export class OnboardingService {
-  async getState(userId: string) {
+  async complete(userId: string, academicPhase: AcademicPhase, dailyStudyMins: number) {
     const profile = await db.profile.findUnique({ where: { userId } });
     if (!profile) throw Errors.notFound('Perfil');
 
-    return {
-      step: profile.onboardingStep,
-      done: profile.onboardingDone,
-      data: {
-        academicPhase: profile.academicPhase,
-        dailyStudyMins: profile.dailyStudyMins,
-        selectedSubjects: profile.selectedSubjects,
-        nivelamentoPendente: profile.nivelamentoPendente,
-      },
-    };
-  }
-
-  async updateStep(userId: string, step: number, data: Record<string, unknown>) {
-    const updateData: Record<string, unknown> = { onboardingStep: step };
-
-    // Passo 1 → fase acadêmica
-    if (step === 1) updateData.academicPhase = data.academicPhase as AcademicPhase;
-    // Passo 2 → meta de minutos diários
-    if (step === 2) updateData.dailyStudyMins = data.dailyStudyMins as number;
-    // Passo 3 → disciplinas selecionadas (array de códigos)
-    if (step === 3) updateData.selectedSubjects = data.selectedSubjects;
-
-    const profile = await db.profile.update({
-      where: { userId },
-      data: updateData,
-    });
-
-    return { step: profile.onboardingStep };
-  }
-
-  async complete(userId: string) {
-    const profile = await db.profile.findUnique({ where: { userId } });
-    if (!profile) throw Errors.notFound('Perfil');
-
-    const isOabPrep = profile.academicPhase === 'oab_prep';
+    const flow = academicPhase === 'oab_prep' ? 'oab' : 'graduation';
+    const nivelamentoPath = flow;
 
     await db.profile.update({
       where: { userId },
       data: {
+        academicPhase,
+        dailyStudyMins,
         onboardingDone: true,
-        onboardingStep: 4,
-        // Se fase OAB, quiz diagnóstico fica pendente (RF14, T08-T09)
-        ...(isOabPrep && { nivelamentoPendente: true }),
+        onboardingStep: 1,
+        nivelamentoPendente: true,
+        nivelamentoPath,
       },
     });
 
-    // Gera plano de estudos baseado no perfil (T19)
-    const plan = await this.generateStudyPlan(userId, profile);
+    const studyPlan = await this.upsertStudyPlan(userId, academicPhase, dailyStudyMins);
 
-    // Fork de roteamento: Fluxo A → Home direto; Fluxo B (OAB) → Quiz Diagnóstico
     return {
       done: true,
-      studyPlan: plan,
-      flow: isOabPrep ? 'B' : 'A',
-      nivelamentoPendente: isOabPrep,
+      flow,
+      nivelamentoPendente: true,
+      nivelamentoPath,
+      studyPlan: { id: studyPlan.id, durationDays: studyPlan.durationDays, dailyMins: studyPlan.dailyMins },
     };
   }
 
-  // T08 — Usuário concluiu o Quiz Diagnóstico OAB (RF14)
   async completeQuiz(userId: string) {
-    await db.profile.update({
-      where: { userId },
-      data: { nivelamentoPendente: false },
-    });
-    return { nivelamentoPendente: false };
-  }
-
-  // T09 — Usuário confirmou o skip do Quiz Diagnóstico (RF14)
-  async skipQuiz(userId: string) {
-    // nivelamentoPendente já é true após complete() para OAB — apenas confirma e retorna estado
     const profile = await db.profile.findUnique({ where: { userId } });
     if (!profile) throw Errors.notFound('Perfil');
-    // Garante que está marcado como pendente mesmo que chamado diretamente
-    if (!profile.nivelamentoPendente) {
-      await db.profile.update({
-        where: { userId },
-        data: { nivelamentoPendente: true },
-      });
-    }
-    return { nivelamentoPendente: true };
+
+    await db.profile.update({
+      where: { userId },
+      data: { nivelamentoPendente: false, nivelamentoConcluido: true },
+    });
+
+    return { nivelamentoPendente: false, nivelamentoConcluido: true };
   }
 
-  private async generateStudyPlan(
-    userId: string,
-    profile: { academicPhase: string | null; dailyStudyMins: number | null },
-  ) {
-    const phase = profile.academicPhase as AcademicPhase | null;
-    const goal = 'oab_first';
-    const durationDays =
-      phase === 'oab_prep' ? 90 : phase === 'graduation_mid' ? 120 : 180;
-    const dailyMins = profile.dailyStudyMins ?? 60;
+  async dismissQuiz(userId: string) {
+    const profile = await db.profile.findUnique({ where: { userId } });
+    if (!profile) throw Errors.notFound('Perfil');
 
-    // Áreas OAB com pesos padrão
+    // Idempotência: se já concluído, não sobrescreve nivelamentoConcluido: true
+    if (!profile.nivelamentoConcluido) {
+      await db.profile.update({
+        where: { userId },
+        data: { nivelamentoPendente: false },
+      });
+    } else {
+      await db.profile.update({
+        where: { userId },
+        data: { nivelamentoPendente: false },
+      });
+    }
+
+    return {
+      nivelamentoPendente: false,
+      nivelamentoConcluido: profile.nivelamentoConcluido,
+    };
+  }
+
+  private async upsertStudyPlan(userId: string, phase: AcademicPhase, dailyMins: number) {
+    const durationDays = DURATION_BY_PHASE[phase];
+    const goal = phase === 'oab_prep' ? 'oab_first' : 'graduation';
+
     const areas = [
-      { code: 'CC', name: 'Código Civil', weight: 0.20 },
-      { code: 'CF', name: 'Constitucional', weight: 0.20 },
-      { code: 'CPC', name: 'Processo Civil', weight: 0.15 },
-      { code: 'CP', name: 'Penal', weight: 0.15 },
-      { code: 'CPP', name: 'Processo Penal', weight: 0.10 },
-      { code: 'CLT', name: 'Trabalhista', weight: 0.10 },
-      { code: 'CTN', name: 'Tributário', weight: 0.05 },
-      { code: 'CDC', name: 'Consumidor', weight: 0.03 },
-      { code: 'EOAB', name: 'Estatuto OAB', weight: 0.02 },
+      { code: 'CC',   name: 'Código Civil',     weight: 0.20 },
+      { code: 'CF',   name: 'Constitucional',   weight: 0.20 },
+      { code: 'CPC',  name: 'Processo Civil',   weight: 0.15 },
+      { code: 'CP',   name: 'Penal',            weight: 0.15 },
+      { code: 'CPP',  name: 'Processo Penal',   weight: 0.10 },
+      { code: 'CLT',  name: 'Trabalhista',      weight: 0.10 },
+      { code: 'CTN',  name: 'Tributário',       weight: 0.05 },
+      { code: 'CDC',  name: 'Consumidor',       weight: 0.03 },
+      { code: 'EOAB', name: 'Estatuto OAB',     weight: 0.02 },
     ];
 
     return db.studyPlan.upsert({
