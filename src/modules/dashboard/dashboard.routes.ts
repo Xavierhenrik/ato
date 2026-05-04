@@ -5,12 +5,9 @@ import { DashboardController } from './dashboard.controller';
 export async function dashboardRoutes(app: FastifyInstance) {
   const ctrl = new DashboardController();
 
-  // T07 — Home data (streak + progresso + atividade recente)
-  app.get('/', { preHandler: [requireAuth] }, ctrl.getHome.bind(ctrl));
-
-  // T08 — Streak details
-  app.get('/streak', { preHandler: [requireAuth] }, ctrl.getStreak.bind(ctrl));
-
-  // Registra sessão de estudo (atualiza streak)
+  app.get('/',             { preHandler: [requireAuth] }, ctrl.getHome.bind(ctrl));
+  app.get('/revision-cards', { preHandler: [requireAuth] }, ctrl.getRevisionCards.bind(ctrl));
+  app.get('/performance',  { preHandler: [requireAuth] }, ctrl.getPerformance.bind(ctrl));
+  app.get('/streak',       { preHandler: [requireAuth] }, ctrl.getStreak.bind(ctrl));
   app.post('/study-session', { preHandler: [requireAuth] }, ctrl.logStudySession.bind(ctrl));
 }
