@@ -3,14 +3,15 @@ import { z } from 'zod';
 import { UsersService } from './users.service';
 
 const UpdateProfileSchema = z.object({
-  name: z.string().min(1).optional(),
-  avatarUrl: z.string().url().optional(),
+  name:          z.string().min(1).optional(),
+  avatarUrl:     z.string().url().optional(),
+  academicPhase: z.enum(['graduation_start', 'graduation_mid', 'graduation_end', 'oab_prep']).optional(),
 });
 
 const UpdateNotifSchema = z.object({
-  notifEnabled: z.boolean(),
-  notifTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
-  oneSignalPlayerId: z.string().optional(),
+  notifEnabled:       z.boolean(),
+  notifTime:          z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  oneSignalPlayerId:  z.string().optional(),
 });
 
 export class UsersController {
