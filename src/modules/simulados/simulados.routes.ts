@@ -5,8 +5,14 @@ import { SimuladosController } from './simulados.controller';
 export async function simuladosRoutes(app: FastifyInstance) {
   const ctrl = new SimuladosController();
 
-  // T15 — Banco de questões (filtros por matéria, diploma, dificuldade)
+  // Banco de questões (filtros por matéria, diploma, dificuldade)
   app.get('/questions', { preHandler: [requireAuth] }, ctrl.listQuestions.bind(ctrl));
+
+  // Simulado em andamento
+  app.get('/in-progress', { preHandler: [requireAuth] }, ctrl.inProgress.bind(ctrl));
+
+  // Histórico de simulados concluídos
+  app.get('/history', { preHandler: [requireAuth] }, ctrl.getHistory.bind(ctrl));
 
   // Inicia simulado
   app.post('/start', { preHandler: [requireAuth] }, ctrl.start.bind(ctrl));
@@ -17,9 +23,9 @@ export async function simuladosRoutes(app: FastifyInstance) {
   // Finaliza simulado
   app.post('/:id/complete', { preHandler: [requireAuth] }, ctrl.complete.bind(ctrl));
 
-  // T17 — Resultados de uma tentativa
-  app.get('/:id/results', { preHandler: [requireAuth] }, ctrl.getResults.bind(ctrl));
+  // Abandona simulado
+  app.post('/:id/abandon', { preHandler: [requireAuth] }, ctrl.abandon.bind(ctrl));
 
-  // Histórico de simulados do usuário
-  app.get('/history', { preHandler: [requireAuth] }, ctrl.getHistory.bind(ctrl));
+  // Resultados de uma tentativa
+  app.get('/:id/results', { preHandler: [requireAuth] }, ctrl.getResults.bind(ctrl));
 }

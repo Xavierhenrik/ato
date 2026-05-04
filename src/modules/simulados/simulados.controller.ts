@@ -1,11 +1,14 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { SimuladosService } from './simulados.service';
+import { db } from '../../shared/db';
 
 const StartSchema = z.object({
   mode: z.enum(['custom', 'oab_phase1', 'oab_phase2', 'weak_areas']),
   subject: z.string().optional(),
+  subjects: z.array(z.string()).optional(),
   totalQ: z.number().int().min(5).max(80).default(30),
+  excludeAnswered: z.boolean().optional(),
 });
 
 const AnswerSchema = z.object({
@@ -13,6 +16,11 @@ const AnswerSchema = z.object({
   answer: z.enum(['A', 'B', 'C', 'D']),
   timeSpentSecs: z.number().int().optional(),
 });
+
+async function getIsPro(userId: string): Promise<boolean> {
+  const sub = await db.subscription.findUnique({ where: { userId } });
+  return sub?.plan === 'pro' && sub?.status === 'active';
+}
 
 export class SimuladosController {
   private svc = new SimuladosService();
@@ -32,14 +40,16 @@ export class SimuladosController {
   async start(req: FastifyRequest, reply: FastifyReply) {
     const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
     const body = StartSchema.parse(req.body);
-    return reply.send(await this.svc.startAttempt(user.id, body));
+    const isPro = await getIsPro(user.id);
+    return reply.send(await this.svc.startAttempt(user.id, { ...body, isPro }));
   }
 
   async answer(req: FastifyRequest, reply: FastifyReply) {
     const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
     const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
     const body = AnswerSchema.parse(req.body);
-    return reply.send(await this.svc.submitAnswer(user.id, id, body));
+    const isPro = await getIsPro(user.id);
+    return reply.send(await this.svc.submitAnswer(user.id, id, { ...body, isPro }));
   }
 
   async complete(req: FastifyRequest, reply: FastifyReply) {
@@ -48,10 +58,22 @@ export class SimuladosController {
     return reply.send(await this.svc.completeAttempt(user.id, id));
   }
 
+  async abandon(req: FastifyRequest, reply: FastifyReply) {
+    const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
+    const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
+    return reply.send(await this.svc.abandonAttempt(user.id, id));
+  }
+
+  async inProgress(req: FastifyRequest, reply: FastifyReply) {
+    const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
+    return reply.send(await this.svc.listInProgress(user.id));
+  }
+
   async getResults(req: FastifyRequest, reply: FastifyReply) {
     const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
     const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
-    return reply.send(await this.svc.getResults(user.id, id));
+    const isPro = await getIsPro(user.id);
+    return reply.send(await this.svc.getResults(user.id, id, isPro));
   }
 
   async getHistory(req: FastifyRequest, reply: FastifyReply) {
