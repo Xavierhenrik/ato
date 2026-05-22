@@ -1,8 +1,18 @@
-node_modules/
-dist/
-.env
-*.env.local
-prisma/migrations/dev.db
+# Node
+**/node_modules/
+**/dist/
+**/.env
+**/.env.local
+**/coverage/
+**/prisma/migrations/dev.db
+
+# Frontend Flutter
+front/lcf_app/.dart_tool/
+front/lcf_app/build/
+front/lcf_app/.flutter-plugins
+front/lcf_app/.flutter-plugins-dependencies
+front/lcf_app/pubspec.lock
+
+# Geral
 .DS_Store
 *.log
-coverage/

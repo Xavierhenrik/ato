@@ -1,0 +1,83 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx claude-code-templates@latest *)",
+      "Bash(pip show *)",
+      "Bash(pip install *)",
+      "Bash(python main.py --phase all --diploma CTN)",
+      "Bash(python main.py --phase download --diploma CTN)",
+      "Bash(python main.py --phase parse --diploma CTN)",
+      "Bash(python main.py --phase validate-pre --diploma CTN)",
+      "Bash(python main.py --phase load --diploma CTN)",
+      "Bash(python -c ' *)",
+      "Bash(python main.py --phase validate-post --diploma CTN)",
+      "Bash(python main.py --phase all)",
+      "Bash(python main.py --phase download --diploma CDC)",
+      "Bash(python main.py --phase parse --diploma CDC)",
+      "Bash(python main.py --phase validate-pre --diploma CDC)",
+      "Bash(python main.py --phase load --diploma CDC)",
+      "Bash(python main.py --phase validate-post)",
+      "Bash(python main.py --phase parse --diploma CC)",
+      "Bash(python main.py --phase parse --diploma CPC)",
+      "Bash(python main.py --phase load --diploma CC)",
+      "Bash(python main.py --phase load --diploma CPC)",
+      "Bash(python main.py --phase validate-post --diploma CC)",
+      "Bash(python main.py --phase validate-post --diploma CDC)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git add *)",
+      "Bash(.claude/hooks/session-end.sh)",
+      "Bash(python -c \"import config; print\\('config OK'\\); import src.transformers.question_normalizer as n; print\\('normalizer OK'\\); import src.validators.question_validator; print\\('validator OK'\\)\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(python scripts/migrate_to_new_dbs.py --dry-run)",
+      "Bash(python scripts/migrate_to_new_dbs.py)",
+      "Bash(python main.py --phase inspect)",
+      "Bash(python main.py --phase transform)",
+      "Bash(python main.py --phase validate-pre)",
+      "Bash(python main.py --phase load --target supabase-staging)",
+      "Bash(python main.py --phase load --target supabase-live)",
+      "PowerShell(Get-ChildItem \"C:\\\\maida\\\\cod-servicos\\\\22768\\\\pessoa-api\" -Recurse | Where-Object { !$_.PSIsContainer } | Select-Object FullName)",
+      "Bash(npx tsc *)",
+      "Bash(ls \"C:\\\\Users\\\\Win10\\\\.claude\")",
+      "Bash(python scripts/enrich_topics_llm.py --target staging --dry-run)",
+      "Bash(python scripts/enrich_topics_llm.py --target live --dry-run)",
+      "Bash(ping -n 2 aws-1-us-west-2.pooler.supabase.com)",
+      "Bash(python scripts/enrich_topics_llm.py --target staging)",
+      "Bash(tee logs/enrich_topics_20260519.log)",
+      "Bash(powercfg /query SCHEME_CURRENT SUB_SLEEP STANDBYIDLE)",
+      "Bash(findstr \"Indice\\\\|Definicao\\\\|Current\\\\|AC\\\\|DC\")",
+      "Bash(powercfg /query SCHEME_CURRENT SUB_SLEEP)",
+      "PowerShell(powercfg /query SCHEME_CURRENT SUB_SLEEP 2>&1)",
+      "Bash(npx next *)",
+      "Bash(ls \"C:\\\\maida\\\\cod-servicos\\\\22293-23189\\\\\")",
+      "Bash(find /c/maida/cod-servicos -maxdepth 2 -name \"contratos-web-2\" -o -name \"contratos-web-2\" 2>/dev/null; find /c/maida -maxdepth 3 -name \"contratos-web-2\" 2>/dev/null)",
+      "Bash(xargs grep -l \"salarioBruto\\\\|unMaskCurrency\")",
+      "Bash(xargs grep -l \"unMaskCurrencyWithDecimal\")",
+      "PowerShell(cmd /c \"dir C:\\\\maida\\\\cod-servicos\\\\22293-23189 /a\")",
+      "Skill(senior-frontend)",
+      "Skill(senior-frontend:*)",
+      "Bash(tee logs/enrich_topics_resume.log)",
+      "Bash(tee logs/enrich_topics_v2_staging.log)",
+      "PowerShell(Get-ChildItem -Recurse \"C:\\\\Projetos\\\\BX\\\\LCF\\\\front\\\\lcf_app\" | Where-Object { !$_.PSIsContainer } | Select-Object FullName)",
+      "PowerShell(flutter --version)",
+      "Bash(where flutter *)",
+      "Read(//c/flutter/**)",
+      "Read(//c/Users/Win10/flutter/**)",
+      "Read(//c/development/flutter/**)",
+      "Bash(ls /c/ | head -20)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/session-end.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
