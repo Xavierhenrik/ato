@@ -8,24 +8,31 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/presentation/screens/cadastro_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/reset_senha_screen.dart';
+import '../../features/auth/providers/auth_provider.dart';
+import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/onboarding/presentation/screens/diagnostico_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../shared/widgets/scaffold_with_nav.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 
 part 'app_router.g.dart';
 
-// Routes que não exigem autenticação
+// Rotas públicas (acessíveis sem sessão; bloqueiam usuários logados)
 const _publicRoutes = {'/login', '/cadastro', '/esqueci-senha'};
+// Rotas acessíveis com sessão mas antes do onboarding ser concluído
+const _preOnboardingRoutes = {'/onboarding', '/diagnostico'};
 
-// ChangeNotifier que dispara refresh no GoRouter ao mudar estado de auth
-class _AuthChangeNotifier extends ChangeNotifier {
+class _RouterNotifier extends ChangeNotifier {
   late final StreamSubscription<AuthState> _sub;
 
-  _AuthChangeNotifier() {
+  _RouterNotifier() {
     _sub = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
       notifyListeners();
     });
   }
+
+  void refresh() => notifyListeners();
 
   @override
   void dispose() {
@@ -36,8 +43,23 @@ class _AuthChangeNotifier extends ChangeNotifier {
 
 @riverpod
 GoRouter appRouter(AppRouterRef ref) {
-  final notifier = _AuthChangeNotifier();
+  final notifier = _RouterNotifier();
   ref.onDispose(notifier.dispose);
+
+  // Refresh router quando o estado de onboarding muda
+  ref.listen<bool>(onboardingDoneProvider, (_, __) => notifier.refresh());
+
+  // Ao trocar de usuário (login/logout), re-sincroniza o estado de onboarding
+  ref.listen<AsyncValue<User?>>(authUserStreamProvider, (_, curr) {
+    final user = curr.valueOrNull;
+    if (user == null) {
+      ref.read(onboardingDoneProvider.notifier).reset();
+    } else {
+      final done = user.userMetadata?['onboarding_done'] as bool? ?? false;
+      if (done) ref.read(onboardingDoneProvider.notifier).markDone();
+    }
+    notifier.refresh();
+  });
 
   return GoRouter(
     refreshListenable: notifier,
@@ -46,9 +68,20 @@ GoRouter appRouter(AppRouterRef ref) {
       final user = Supabase.instance.client.auth.currentUser;
       final isLoggedIn = user != null;
       final loc = state.matchedLocation;
+      final onboardingDone = ref.read(onboardingDoneProvider);
 
+      // 1. Não autenticado + rota protegida → login
       if (!isLoggedIn && !_publicRoutes.contains(loc)) return '/login';
+
+      // 2. Autenticado + rota pública → dashboard
       if (isLoggedIn && _publicRoutes.contains(loc)) return '/dashboard';
+
+      // 3. Autenticado + onboarding pendente + fora das telas de onboarding → onboarding
+      if (isLoggedIn &&
+          !onboardingDone &&
+          !_preOnboardingRoutes.contains(loc)) {
+        return '/onboarding';
+      }
 
       return null;
     },
@@ -77,25 +110,61 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (context, state) => const DiagnosticoScreen(),
       ),
 
+      // ── Push routes (sem ShellRoute) — implementadas em F4 / F5 ────────
+      GoRoute(
+        path: '/manual',
+        builder: (context, state) =>
+            const _PlaceholderScreen(label: 'Manual'),
+        routes: [
+          GoRoute(
+            path: 'topic/:id',
+            builder: (context, state) =>
+                const _PlaceholderScreen(label: 'Tópico'),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/simulados',
+        builder: (context, state) =>
+            const _PlaceholderScreen(label: 'Simulados'),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) =>
+                const _PlaceholderScreen(label: 'Simulado em andamento'),
+            routes: [
+              GoRoute(
+                path: 'results',
+                builder: (context, state) =>
+                    const _PlaceholderScreen(label: 'Resultado'),
+              ),
+            ],
+          ),
+        ],
+      ),
+
       // ── Shell — telas com BottomNav ────────────────────────────────────
       ShellRoute(
         builder: (context, state, child) => ScaffoldWithNav(child: child),
         routes: [
           GoRoute(
             path: '/tutor',
-            builder: (context, state) => const _PlaceholderScreen(label: 'Tutor IA'),
+            builder: (context, state) =>
+                const _PlaceholderScreen(label: 'Tutor IA'),
           ),
           GoRoute(
             path: '/anotacoes',
-            builder: (context, state) => const _PlaceholderScreen(label: 'Anotações'),
+            builder: (context, state) =>
+                const _PlaceholderScreen(label: 'Anotações'),
           ),
           GoRoute(
             path: '/dashboard',
-            builder: (context, state) => const _PlaceholderScreen(label: 'Dashboard'),
+            builder: (context, state) => const DashboardScreen(),
           ),
           GoRoute(
             path: '/perfil',
-            builder: (context, state) => const _PlaceholderScreen(label: 'Perfil'),
+            builder: (context, state) =>
+                const _PlaceholderScreen(label: 'Perfil'),
           ),
         ],
       ),
@@ -109,11 +178,12 @@ class _PlaceholderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        label,
-        style: const TextStyle(color: Colors.white, fontSize: 20),
-      ),
+    // Scaffold próprio para rotas fora do ShellRoute (manual, simulados, etc.)
+    // Removido quando a tela real for implementada em F4/F5.
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(title: Text(label, style: AppTextStyles.h3)),
+      body: Center(child: Text(label, style: AppTextStyles.h2)),
     );
   }
 }

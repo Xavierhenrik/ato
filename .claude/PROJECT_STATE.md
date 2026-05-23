@@ -1,6 +1,6 @@
 ---
-updated: 2026-05-22
-sprint: "Sprint 3 concluído · Sprint F1 Flutter iniciado"
+updated: 2026-05-23
+sprint: "Sprint 3 concluído · Sprint F1 auditado · Sprint F2 Dashboard concluído"
 ---
 
 # LCF — Estado do Projeto
@@ -149,8 +149,8 @@ sprint: "Sprint 3 concluído · Sprint F1 Flutter iniciado"
 
 | Sprint | Status | Descrição |
 |--------|--------|-----------|
-| **F1 — Fundação + Auth + Onboarding** | 🔄 Código criado — aguardando `flutter create` + `build_runner` | Core theme, router, auth, onboarding — 22 arquivos |
-| **F2 — Dashboard** | ⏳ Pendente F1 compilando | — |
+| **F1 — Fundação + Auth + Onboarding** | 🔄 Auditado, 4 widgets criados, prefer_const clean — aguardando `flutter create` + `build_runner` | 26 arquivos — só faltam g.dart (codegen) e plataformas |
+| **F2 — Dashboard** | ✅ Concluído | 10 arquivos criados — models, repository, providers, screen, 5 widgets, router atualizado |
 | **F3 — Tutor IA** | ⏳ Pendente F1 | — |
 | **F4 — Manual** | ⏳ Pendente F1 | — |
 | **F5 — Simulados** | ⏳ Pendente F1 | — |
@@ -197,6 +197,8 @@ flutter run \
 | 2026-05-16 | sessions/2026-05-16_sprint3_tutor_subscriptions.md | Sprint 3 completo: M4 gaps PRO (chips, auto-save, persistência sessão) + Subscriptions hardening |
 | 2026-05-22 | sessions/2026-05-22_flutter_f1_foundation.md | Sprint F1: 22 arquivos Flutter criados — core/theme, router, auth, onboarding (aguardando build_runner) |
 | 2026-05-22 | sessions/2026-05-22_monorepo_restructure.md | Monorepo: git mv back/ + front/docs + docs/ + .claude/ — commits 2c2df2f e d3360fc |
+| 2026-05-23 | sessions/2026-05-23_sprint_f1_finalizacao.md | Sprint F1 finalização: 4 widgets novos, OnboardingDone guard, app_router reescrito, prefer_const clean — 26 arquivos auditados |
+| 2026-05-23 | sessions/2026-05-23_sprint_f2_dashboard.md | Sprint F2 Dashboard: 10 arquivos Flutter — models, repository, providers, 5 widgets, dashboard_screen, router. build_runner + flutter analyze zero issues |
 
 
 
