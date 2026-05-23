@@ -1,5 +1,6 @@
 import { redis, keys, TTL } from '../../../shared/redis';
 import { ChatMessage } from '../adapters/llm.interface';
+import { db } from '../../../shared/db';
 
 const MAX_HISTORY = 8; // últimas 8 mensagens (spec seção 8.1)
 
@@ -39,6 +40,31 @@ export class SessionService {
     }
 
     return { allowed: true, remaining: dailyLimit - count - 1 };
+  }
+
+  async persistToDB(sessionId: string, userId: string, mode: string): Promise<void> {
+    const history = await this.getHistory(sessionId);
+    if (history.length === 0) return;
+
+    const session = await db.tutorSession.create({
+      data: {
+        userId,
+        mode,
+        endedAt: new Date(),
+        msgCount: history.length,
+      },
+    });
+
+    for (const msg of history) {
+      await db.tutorMessage.create({
+        data: {
+          sessionId: session.id,
+          role: msg.role,
+          content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
+          sources: undefined,
+        },
+      });
+    }
   }
 
   async checkTokenBudget(sessionId: string, tokensUsed: number): Promise<boolean> {

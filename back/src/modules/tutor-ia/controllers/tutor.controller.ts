@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { TutorService } from '../services/tutor.service';
 import { SessionService } from '../services/session.service';
 import { db } from '../../../shared/db';
+import { FOLLOW_UP_CHIPS } from '../prompts/chips.config';
 
 const MessageBodySchema = z.object({
   session_id: z.string().uuid(),
@@ -53,7 +54,7 @@ export class TutorController {
       context: body.context,
     });
 
-    return reply.send(response);
+    return reply.send({ ...response, chips: FOLLOW_UP_CHIPS });
   }
 
   async getSession(req: FastifyRequest, reply: FastifyReply) {
@@ -64,6 +65,12 @@ export class TutorController {
 
   async deleteSession(req: FastifyRequest, reply: FastifyReply) {
     const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
+    const { mode } = z.object({
+      mode: z.enum(['reading', 'simulado', 'direct']).default('direct'),
+    }).parse(req.query);
+    const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
+
+    await this.sessionSvc.persistToDB(id, user.id, mode);
     await this.sessionSvc.clear(id);
     return reply.code(204).send();
   }

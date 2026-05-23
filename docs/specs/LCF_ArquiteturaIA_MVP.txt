@@ -1,0 +1,1111 @@
+LCF
+
+Plataforma Juridica Inteligente
+
+ARQUITETURA TECNICA DE INTEGRACAO DE IA
+
+Modulo M4 — Tutor IA | MVP
+
+Grounded Generation | Tool Use | BM25 | LLM Hibrido
+
+Versao
+
+1.0 — Definitivo
+
+Data
+
+Abril 2026
+
+LLM
+
+Sabia-4 + Claude Sonnet 4.6
+
+1. Visao Geral
+A arquitetura de IA do LCF e construida sobre tres principios inegociaveis: confiabilidade maxima no dominio juridico, custo operacional controlado para o MVP, e evolucao incremental sem reescrita.
+
+Pilar
+
+Decisao
+
+Mecanismo
+
+Anti-alucinacao
+
+Grounded Generation
+
+Claude so cita artigos que existem no banco — via Tool Use
+
+Retrieval
+
+BM25 nativo PostgreSQL
+
+tsvector/tsquery no Supabase — zero custo adicional
+
+LLM
+
+Estrategia hibrida
+
+Sabia-4 para queries simples, Claude Sonnet 4.6 para complexas
+
+Corpus
+
+Vade Mecum (LexML)
+
+Legislacao federal estruturada, publica, disponivel dia 1
+
+2. Corpus — Vade Mecum via LexML
+O LexML (lexml.gov.br) e o portal oficial do Senado Federal com toda a legislacao federal brasileira em formato estruturado e aberto. E a mesma fonte que os aplicativos comerciais de Vade Mecum utilizam.
+
+Atributo
+
+Detalhe
+
+Volume
+
+220.000+ normas federais desde 1822
+
+Formatos
+
+XML (LexML), JSON-LD (Schema.org/Legislation), API SRU
+
+Custo
+
+Zero — dominio publico
+
+Cobertura MVP
+
+CF/88, CC, CP, CLT, CPC, CPP, CTN, CDC, Estatuto da OAB
+
+Chunk natural
+
+Artigo — unidade semantica ideal para retrieval juridico
+
+Manutencao
+
+Indice construido uma vez; atualizacao incremental por publicacao no DOU
+
+2.1 Schema — Tabela legal_articles
+CREATE TABLE legal_articles (
+
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+law_code TEXT NOT NULL, -- "CC", "CF", "CP", "CLT", "CPC"...
+
+law_name TEXT NOT NULL, -- "Codigo Civil"
+
+article_number TEXT NOT NULL, -- "186", "5"
+
+paragraph TEXT, -- "unico", "1", "2"
+
+inciso TEXT, -- "I", "II", "III"
+
+alinea TEXT, -- "a", "b"
+
+full_reference TEXT NOT NULL, -- "Art. 186 do CC"
+
+content TEXT NOT NULL, -- texto literal do dispositivo
+
+content_tsv TSVECTOR, -- indice BM25 (gerado por trigger)
+
+embedding VECTOR(1536), -- NULL no MVP; preenchido na v1.1
+
+effective_date DATE
+
+);
+
+-- Indice full-text (BM25 via tsvector nativo)
+
+CREATE INDEX idx_articles_fts ON legal_articles USING gin(content_tsv);
+
+-- Trigger: mantém content_tsv sincronizado com content
+
+CREATE TRIGGER tsvector_upd BEFORE INSERT OR UPDATE ON legal_articles
+
+FOR EACH ROW EXECUTE FUNCTION
+
+tsvector_update_trigger(content_tsv, 'pg_catalog.portuguese', content);
+
+Storage estimado: 50k artigos (corpus OAB) x ~500 bytes = ~25 MB. Dentro do free tier Supabase (500 MB). Embeddings (v1.1): adiciona ~650 MB — gatilho para upgrade Supabase Pro ($25/mes).
+
+2.2 ETL — Pipeline de Ingestao
+Download do XML LexML para os 9 diplomas prioritarios OAB: CF, CC, CP, CLT, CPC, CPP, CTN, CDC, Estatuto da OAB.
+Parser XML -> JSON estruturado respeitando hierarquia: artigo -> paragrafo -> inciso -> alinea. Preservar numeracao exata.
+Importacao em lote via Prisma. O trigger gera content_tsv automaticamente.
+Validacao: contagem de artigos importados vs. fonte + spot-check manual em 20 artigos por diploma.
+(v1.1) Embeddings em batch via text-embedding-3-small. Custo one-time: ~$3 para 50k artigos.
+Estimativa: 3-5 dias de engenharia, incluindo validacao. Nao e bloqueador de timeline.
+
+3. Grounded Generation via Tool Use
+O mecanismo central de anti-alucinacao. Claude recebe duas tools e e instruido a nunca citar um artigo sem antes ter chamado lookup_article. Se o artigo nao for encontrado no banco, Claude declara a limitacao ao usuario — nao fabrica a referencia.
+
+DECISAO: Diferente de prompt engineering, este e um controle arquitetural: Claude fisicamente nao tem como retornar uma citacao verificada sem que o artigo exista no banco. O risco de alucinacao em citacoes especificas passa de probabilistico para impossivel.
+
+3.1 Definicao das Tools
+const tools = [
+
+{
+
+name: "lookup_article",
+
+description: "Busca o texto exato de um artigo da legislacao brasileira.
+
+Use SEMPRE que precisar citar um artigo especifico.
+
+Se nao encontrar, informe que nao pode verificar.",
+
+input_schema: {
+
+type: "object",
+
+properties: {
+
+law_code: { type: "string" }, // "CC", "CF", "CP", "CLT"...
+
+article: { type: "string" }, // "186", "5"
+
+paragraph: { type: "string", nullable: true },
+
+inciso: { type: "string", nullable: true },
+
+},
+
+required: ["law_code", "article"]
+
+}
+
+},
+
+{
+
+name: "search_legislation",
+
+description: "Busca artigos relevantes sobre um tema na legislacao.
+
+Use para encontrar dispositivos relacionados a pergunta.",
+
+input_schema: {
+
+type: "object",
+
+properties: {
+
+query: { type: "string" },
+
+law_code: { type: "string", nullable: true },
+
+limit: { type: "number", default: 5 }
+
+},
+
+required: ["query"]
+
+}
+
+}
+
+];
+
+3.2 Handler das Tools — citation.service.ts
+async function handleToolCall(tc: ToolCall): Promise<ToolResult> {
+
+if (tc.name === "lookup_article") {
+
+const { law_code, article, paragraph, inciso } = tc.input;
+
+const row = await db.legal_articles.findFirst({
+
+where: { law_code, article_number: article, paragraph, inciso }
+
+});
+
+if (!row) return {
+
+content: "ARTIGO NAO ENCONTRADO. Nao cite este artigo.",
+
+is_error: false
+
+};
+
+return { content: JSON.stringify({
+
+full_reference: row.full_reference,
+
+content: row.content,
+
+law_name: row.law_name
+
+})};
+
+}
+
+if (tc.name === "search_legislation") {
+
+const { query, law_code, limit = 5 } = tc.input;
+
+const rows = await db.$queryRaw`
+
+SELECT full_reference, content, law_name,
+
+ts_rank(content_tsv, plainto_tsquery('portuguese', ${query})) AS rank
+
+FROM legal_articles
+
+WHERE content_tsv @@ plainto_tsquery('portuguese', ${query})
+
+${law_code ? Prisma.sql`AND law_code = ${law_code}` : Prisma.empty}
+
+ORDER BY rank DESC LIMIT ${limit}
+
+`;
+
+return { content: JSON.stringify(rows) };
+
+}
+
+}
+
+4. Estrategia LLM Hibrida
+4.1 Modelos
+LLM
+
+Custo Input
+
+Custo Output
+
+Contexto
+
+Perfil
+
+Sabia-4 (Maritaca AI)
+
+R$ 1,00 / 1M tokens
+
+R$ 4,00 / 1M tokens
+
+128k tokens
+
+Especializado em Direito BR, baixa latencia
+
+Claude Sonnet 4.6 (claude-sonnet-4-6)
+
+$ 3,00 / 1M tokens
+
+$ 15,00 / 1M tokens
+
+200k tokens
+
+Raciocinio complexo, pedagogia aprofundada
+
+4.2 Roteamento por Tipo de Query
+Tipo de query
+
+LLM
+
+% do volume
+
+Definicao de conceito juridico
+
+Sabia-4
+
+35%
+
+Explicacao de artigo recuperado pela Tool
+
+Sabia-4
+
+25%
+
+Relacao entre institutos juridicos
+
+Sabia-4
+
+15%
+
+Analise pos-erro de simulado (PRO)
+
+Claude Sonnet
+
+15%
+
+Jurisprudencia controversa ou doutrina divergente
+
+Claude Sonnet
+
+10%
+
+// llm.router.ts
+
+function selectLLM(ctx: TutorContext): LLMAdapter {
+
+if (ctx.mode === "simulado") return claudeAdapter;
+
+if (ctx.complexity === "high") return claudeAdapter;
+
+return sabiaAdapter; // default
+
+}
+
+4.3 Custo Operacional Estimado
+Cenario
+
+Assinantes
+
+MAU ativo
+
+Custo IA / mes
+
+Minimo
+
+100
+
+30
+
+~$1–3
+
+Medio
+
+300
+
+100
+
+~$8–12
+
+Maximo
+
+500
+
+200
+
+~$24–32
+
+5. Arquitetura do Modulo tutor-ia
+5.1 Estrutura de Pastas
+/src/modules/tutor-ia/
+
+adapters/
+
+llm.interface.ts # contrato agnostico
+
+claude.adapter.ts # Anthropic SDK
+
+sabia.adapter.ts # Maritaca AI SDK
+
+llm.router.ts # roteador por complexidade
+
+prompts/
+
+system.prompt.ts # instrucoes + regras de Tool Use
+
+context-reading.ts # template: contexto topico T13
+
+context-simulado.ts # template: bundle questao pos-erro
+
+chips.config.ts # chips estaticos por dominio
+
+tools/
+
+lookup-article.tool.ts # handler lookup_article
+
+search-legislation.tool.ts # handler search_legislation
+
+services/
+
+tutor.service.ts # orquestrador + loop agentico
+
+context.service.ts # montagem de prompt por modo
+
+session.service.ts # historico de sessao (Redis)
+
+citation.service.ts # executa tool calls, parse output
+
+controllers/
+
+tutor.controller.ts # endpoints REST
+
+schemas/
+
+tutor-response.schema.ts # Zod — output estruturado
+
+5.2 Interface LLM Agnostica
+// llm.interface.ts
+
+interface LLMAdapter {
+
+complete(req: LLMRequest): Promise<LLMResponse>;
+
+}
+
+interface LLMRequest {
+
+systemPrompt: string;
+
+messages: ChatMessage[];
+
+tools?: Tool[];
+
+maxTokens?: number; // default 1024
+
+temperature?: number; // default 0.2
+
+}
+
+interface LLMResponse {
+
+content: string;
+
+stop_reason: "end_turn" | "tool_use";
+
+tool_calls?: ToolCall[];
+
+inputTokens: number;
+
+outputTokens: number;
+
+}
+
+5.3 Schema do Output Estruturado
+// tutor-response.schema.ts
+
+const CitationSchema = z.object({
+
+full_reference: z.string(),
+
+content: z.string(),
+
+law_name: z.string(),
+
+certainty: z.enum(["verified", "not_found"]),
+
+manual_topic_id: z.string().optional(), // deep link futuro -> T13
+
+});
+
+const TutorResponseSchema = z.object({
+
+message: z.string(),
+
+sources: z.array(CitationSchema),
+
+confidence: z.enum(["high", "medium", "low"]),
+
+disclaimer: z.string().optional(),
+
+mode: z.enum(["reading", "simulado", "direct"]),
+
+});
+
+5.4 Loop Agentico — tutor.service.ts
+async function chat(req: TutorRequest): Promise<TutorResponse> {
+
+const adapter = llmRouter.select(req);
+
+const history = await sessionService.getHistory(req.sessionId);
+
+const system = contextService.build(req);
+
+const messages = [...history, { role:"user", content:req.message }];
+
+// Loop: Claude chama tools ate ter resposta final
+
+let res = await adapter.complete({ systemPrompt:system, messages, tools });
+
+while (res.stop_reason === "tool_use") {
+
+const results = await Promise.all(
+
+res.tool_calls.map(tc => citationService.handle(tc))
+
+);
+
+messages.push({ role:"assistant", content:res.content });
+
+messages.push({ role:"user", content:results });
+
+res = await adapter.complete({ systemPrompt:system, messages, tools });
+
+}
+
+await sessionService.append(req.sessionId, messages);
+
+return citationService.parse(res.content);
+
+}
+
+6. Modos de Operacao
+Modo
+
+Ativacao
+
+Contexto injetado
+
+LLM padrao
+
+Leitura
+
+Botao flutuante em T13
+
+Texto completo do topico em leitura (~8k tokens). Tool Use disponivel para buscar artigos referenciados no topico.
+
+Sabia-4
+
+Simulado (PRO)
+
+Automatico apos erro em questao
+
+Bundle: enunciado + alternativas + gabarito + resposta do aluno + materia + banca + ano. Claude explica com base no texto real recuperado pela Tool.
+
+Claude Sonnet
+
+Direto
+
+Acesso via nav bar
+
+Sem contexto pre-carregado. Tool Use ativa para todas as citacoes.
+
+Sabia-4
+
+6.1 Prompt Structure por Modo
+Modo Leitura
+[SYSTEM PROMPT]
+
++
+
+"O aluno esta lendo o seguinte topico do Manual:
+
+{topic.title}
+
+{topic.content}
+
+Priorize este conteudo nas suas respostas.",
+
++
+
+[HISTORICO DA SESSAO — ultimas 8 mensagens]
+
++
+
+[MENSAGEM DO USUARIO]
+
+Modo Simulado
+[SYSTEM PROMPT]
+
++
+
+"O aluno errou a seguinte questao:
+
+ENUNCIADO: {question.statement}
+
+ALTERNATIVAS: A) ... B) ... C) ... D) ...
+
+GABARITO: {question.correctLetter} — {question.correctAnswer}
+
+RESPOSTA DO ALUNO: {question.studentLetter}
+
+MATERIA: {question.subject} | BANCA: {question.board} | ANO: {question.year}
+
+Explique por que a resposta correta esta certa e a do aluno errada.",
+
++
+
+[TRIGGER AUTOMATICO: "Pode explicar esse erro?"] // sem acao do usuario
+
+Modo Direto
+[SYSTEM PROMPT]
+
++
+
+[HISTORICO DA SESSAO — ultimas 8 mensagens]
+
++
+
+[MENSAGEM DO USUARIO]
+
+7. System Prompt — Camadas de Controle
+O system prompt opera em cinco camadas, sendo a primeira a mais critica em termos de anti-alucinacao.
+
+Camada
+
+Instrucao
+
+Efeito
+
+1 — Tool Use obrigatorio
+
+Nunca cite um artigo sem antes chamar lookup_article. Se o artigo nao for encontrado, declare a limitacao.
+
+Impossibilita citacao fabricada
+
+2 — Identidade e escopo
+
+Voce e o Tutor IA do LCF, especialista em Direito Brasileiro e OAB. Nao responda fora do dominio juridico-educacional.
+
+Delimita o perimetro de atuacao
+
+3 — Registro didatico
+
+Responda como professor explicando para aluno de graduacao. Use exemplos concretos. Evite jargao excessivo.
+
+Garante linguagem adequada ao publico
+
+4 — Output estruturado
+
+Retorne sempre JSON valido seguindo o schema TutorResponseSchema.
+
+Força tipagem e campos de certeza
+
+5 — Sinalizacao de limite
+
+Quando nao tiver certeza suficiente, declare no campo disclaimer e defina confidence: low.
+
+Transparencia ativa com o usuario
+
+8. Sessao e Rate Limiting
+8.1 Gestao de Sessao
+Parametro
+
+Valor
+
+Justificativa
+
+Storage
+
+Redis (Upstash — serverless, free tier)
+
+Zero configuracao, TTL nativo, sem custo fixo no MVP
+
+Chave
+
+session_id UUID gerado no client
+
+Sem vinculo obrigatorio ao user_id. Simplifica LGPD.
+
+Historico
+
+Ultimas 8 mensagens (user + assistant)
+
+~2-3k tokens de historico. Continuidade sem custo excessivo.
+
+TTL
+
+4 horas de inatividade
+
+Sessao expira naturalmente. Usuario que retorna comeca do zero.
+
+Memoria inter-sessoes
+
+Fora do MVP
+
+Requer sistema de memoria episodica completo. Roadmap v2.0.
+
+8.2 Rate Limiting
+Plano
+
+Limite diario
+
+Mecanismo
+
+Free
+
+20 mensagens/dia ao Tutor
+
+Redis counter com TTL de 24h. HTTP 429 com mensagem de upgrade.
+
+PRO
+
+200 mensagens/dia
+
+Mesmo mecanismo, limite maior.
+
+Controle
+
+Parametro
+
+Max tokens por request (input)
+
+8.192 tokens
+
+Max tokens por request (output)
+
+1.024 tokens
+
+Budget por sessao
+
+20.000 tokens totais (in + out)
+
+9. Endpoints REST
+Metodo
+
+Rota
+
+Descricao
+
+POST
+
+/tutor/message
+
+Envia mensagem. Body: { session_id, message, mode, context? }
+
+GET
+
+/tutor/session/:id
+
+Retorna historico ativo (ultimas 8 mensagens)
+
+POST
+
+/tutor/session/new
+
+Cria sessao, retorna session_id. Encerra a anterior se existir.
+
+DELETE
+
+/tutor/session/:id
+
+Encerra sessao e limpa historico do Redis
+
+Body — POST /tutor/message
+{
+
+"session_id": "uuid",
+
+"message": "string",
+
+"mode": "reading | simulado | direct",
+
+"context": { // obrigatorio para reading e simulado
+
+"topic_id": "string", // mode=reading
+
+"topic_content": "string", // mode=reading
+
+"question_bundle": { // mode=simulado
+
+"statement": "string",
+
+"options": { "A":"...", "B":"...", "C":"...", "D":"..." },
+
+"correct_answer": "A",
+
+"student_answer": "C",
+
+"subject": "Constitucional",
+
+"board": "OAB",
+
+"year": 2024
+
+}
+
+}
+
+}
+
+10. Escopo do M4 — O que Entra e o que Fica Fora
+Feature
+
+MVP
+
+Motivo / Condicao de entrada
+
+Chat com fonte validada (Tool Use)
+
+Sim
+
+Core do produto. Diferenciador primario.
+
+Injecao de contexto via T13 (leitura)
+
+Sim
+
+Chamada de API com conteudo do topico. Alto valor, custo zero.
+
+Analise pos-erro simulado (PRO)
+
+Sim
+
+Ground truth no bundle. Alta percepcao de valor.
+
+Chips de follow-up estaticos (4)
+
+Sim
+
+"Explique com exemplo", "Como cai na OAB?", "Qual a base legal?", "Simplifique".
+
+Chips de follow-up gerados por IA
+
+Nao
+
+Segunda call por interacao. Latencia e custo sem proporcao. Entra quando dados de uso justificarem.
+
+Entrada por voz (Whisper)
+
+Nao
+
+Custo/valor desfavoravel para MVP. Pipeline de texto nao muda ao reintroduzir.
+
+Acesso as anotacoes do aluno
+
+Nao
+
+Notas vazias no lancamento. Valor near-zero para usuario novo. Roadmap v1.2.
+
+Memoria persistente entre sessoes
+
+Nao
+
+Sistema de memoria episodica completo. Roadmap v2.0.
+
+Deep link citacao -> topico T13
+
+Nao
+
+Requer mapeamento curado. Citacao como texto destacado ja e suficiente. Roadmap v1.1.
+
+11. Checklist de Implementacao
+#
+
+Tarefa
+
+Dep.
+
+Est.
+
+1
+
+ETL: parser LexML XML para os 9 diplomas OAB prioritarios
+
+—
+
+2 dias
+
+2
+
+Importar legal_articles no Supabase + trigger tsvector + indice GIN
+
+1
+
+4h
+
+3
+
+llm.interface.ts — tipos LLMRequest, LLMResponse, ChatMessage
+
+—
+
+2h
+
+4
+
+claude.adapter.ts — Anthropic SDK + retry + error handling
+
+3
+
+3h
+
+5
+
+sabia.adapter.ts — Maritaca AI SDK
+
+3
+
+3h
+
+6
+
+llm.router.ts — roteador por modo/complexidade
+
+4, 5
+
+2h
+
+7
+
+lookup-article.tool.ts — handler lookup direto no banco
+
+2
+
+2h
+
+8
+
+search-legislation.tool.ts — handler BM25 tsvector
+
+2
+
+3h
+
+9
+
+system.prompt.ts — 5 camadas incluindo instrucoes de Tool Use
+
+—
+
+3h
+
+10
+
+context.service.ts — 3 modos de montagem de prompt
+
+9
+
+5h
+
+11
+
+session.service.ts — Redis Upstash, TTL 4h, truncamento 8 msgs
+
+—
+
+3h
+
+12
+
+citation.service.ts — loop agentico Tool Use + parse output
+
+7, 8
+
+5h
+
+13
+
+tutor.service.ts — orquestrador com roteador LLM
+
+6, 10-12
+
+4h
+
+14
+
+tutor.controller.ts — 4 endpoints + rate limiting
+
+13
+
+4h
+
+15
+
+chips.config.ts — 4 chips estaticos por modo
+
+—
+
+1h
+
+16
+
+Testes: lookup de 50 artigos reais + 3 modos + artigo nao encontrado
+
+1–15
+
+8h
+
+Total
+
+~2,5 semanas
+
+12. Roadmap Pos-MVP
+Fase
+
+Feature
+
+O que habilita
+
+Esforco
+
+v1.1
+
+Embeddings + hybrid retrieval (BM25 + pgvector + RRF)
+
+Queries semanticas e cross-diploma com retrieval mais preciso
+
+1 sprint
+
+v1.1
+
+Deep link citacao -> topico T13
+
+UX premium: clicar na citacao e navegar para o Manual
+
+1 sprint
+
+v1.1
+
+Reranker leve (cross-encoder)
+
+Qualidade de retrieval superior para queries ambiguas
+
+0,5 sprint
+
+v1.2
+
+Chips de follow-up gerados por IA
+
+Follow-up inteligente contextualizado
+
+0,5 sprint
+
+v1.2
+
+Acesso as anotacoes (LGPD flow completo)
+
+Personalizacao apos historico de uso consolidado
+
+1 sprint
+
+v1.2
+
+Cache Redis de respostas frequentes
+
+Reducao de custo LLM em 15-30%
+
+0,5 sprint
+
+v2.0
+
+Memoria episodica entre sessoes
+
+Continuidade de aprendizado personalizada
+
+2 sprints
+
+13. Pontos em Aberto
+#
+
+Questao
+
+Urgencia
+
+A
+
+Gateway de pagamento: RevenueCat (IAP mobile) + Stripe (web). Corrigir inconsistencia no Stack doc — Stripe direto resulta em rejeicao na App Store.
+
+Critica
+
+B
+
+Redis: adotar Upstash (serverless, free tier). Adicionar ao Stack doc.
+
+Alta
+
+C
+
+Sabiazinho-4: avaliar custo/qualidade quando pricing for publicado. Pode substituir Sabia-4 para queries mais simples.
+
+Media
+
+D
+
+Limite diario Free: validar 20 msgs/dia com pesquisa de usuario antes de fixar o valor.
+
+Media
+
+E
+
+Cobertura do corpus: confirmar que os 9 diplomas cobrem 95% das queries previstas antes de fechar a ETL.
+
+Alta
+
+LCF Plataforma Juridica Inteligente
+
+Arquitetura Tecnica de Integracao de IA — MVP | Abril 2026
+
+Documento confidencial. Uso interno.

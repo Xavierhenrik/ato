@@ -8,6 +8,7 @@ import { CitationService } from './citation.service';
 import { TutorResponse } from '../schemas/tutor-response.schema';
 import { QuestionBundle } from '../prompts/context-simulado';
 import { Errors } from '../../../shared/errors';
+import { db } from '../../../shared/db';
 
 const TOOLS = [LOOKUP_ARTICLE_TOOL, SEARCH_LEGISLATION_TOOL];
 
@@ -30,7 +31,7 @@ export class TutorService {
   private contextSvc = new ContextService();
   private citationSvc = new CitationService();
 
-  async chat(req: TutorRequest): Promise<TutorResponse> {
+  async chat(req: TutorRequest): Promise<TutorResponse & { autoSavedAnnotationId?: string }> {
     // Rate limit check
     const rate = await this.sessionSvc.checkRateLimit(req.userId, req.isPro);
     if (!rate.allowed) {
@@ -74,6 +75,22 @@ export class TutorService {
     ];
     await this.sessionSvc.append(req.sessionId, newMessages);
 
-    return this.citationSvc.parse(res.content, req.mode);
+    const parsed = this.citationSvc.parse(res.content, req.mode);
+
+    // PRO: auto-save como anotação quando confidence === "high"
+    let autoSavedAnnotationId: string | undefined;
+    if (req.isPro && parsed.confidence === 'high') {
+      const annotation = await db.annotation.create({
+        data: {
+          userId: req.userId,
+          title: parsed.message.substring(0, 60),
+          content: parsed.message,
+          subject: req.context?.question_bundle?.subject ?? req.context?.topic_title ?? undefined,
+        },
+      });
+      autoSavedAnnotationId = annotation.id;
+    }
+
+    return { ...parsed, autoSavedAnnotationId };
   }
 }

@@ -15,6 +15,12 @@ export class SubscriptionsController {
       return reply.code(401).send({ error: 'Unauthorized' });
     }
 
+    const rcBody = req.body as { event?: { type?: string; app_user_id?: string } };
+    req.log.info(
+      { event: rcBody?.event?.type, userId: rcBody?.event?.app_user_id },
+      'RevenueCat webhook'
+    );
+
     const event = req.body as Record<string, unknown>;
     await this.svc.handleWebhook(event);
 

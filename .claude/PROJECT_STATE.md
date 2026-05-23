@@ -6,7 +6,7 @@ sprint: "Sprint 3 concluído · Sprint F1 Flutter iniciado"
 # LCF — Estado do Projeto
 
 > Atualizado pelo Claude ao fim de cada sessão de trabalho.
-> Para detalhes de implementação de cada módulo, ver `../back/docs/ROADMAP.md`.
+> Para detalhes de implementação de cada módulo, ver `../docs/ROADMAP.md`.
 
 ---
 
@@ -196,6 +196,7 @@ flutter run \
 | 2026-05-07 | sessions/2026-05-07_review_questions_sabia4.md | Migração para Sabiá-4 (Maritaca AI) — pipeline rodando, ~6h para conclusão completa |
 | 2026-05-16 | sessions/2026-05-16_sprint3_tutor_subscriptions.md | Sprint 3 completo: M4 gaps PRO (chips, auto-save, persistência sessão) + Subscriptions hardening |
 | 2026-05-22 | sessions/2026-05-22_flutter_f1_foundation.md | Sprint F1: 22 arquivos Flutter criados — core/theme, router, auth, onboarding (aguardando build_runner) |
+| 2026-05-22 | sessions/2026-05-22_monorepo_restructure.md | Monorepo: git mv back/ + front/docs + docs/ + .claude/ — commits 2c2df2f e d3360fc |
 
 
 

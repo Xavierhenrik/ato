@@ -39,11 +39,13 @@ Produto jurídico: **alucinação = perda de credibilidade imediata**. Toda deci
 | Documento | Caminho | Quando ler |
 |-----------|---------|-----------|
 | **Roadmap Backend** | `docs/ROADMAP.md` | Antes de implementar qualquer módulo — contém sprints, critérios de aceite e contratos de API |
-| **Spec MVP** | `LCF_Especificacao_Sistema.txt` | Requisitos funcionais completos |
-| **Free vs PRO** | `LCF_Free_vs_PRO.txt` | Sempre que implementar feature com diferenciação de plano |
-| **Arquitetura IA** | `LCF_ArquiteturaIA_MVP.txt` | Antes de tocar no módulo tutor-ia |
-| **Stack Infra** | `LCF_Stack_Infraestrutura_v1.0.txt` | Decisões de infraestrutura |
+| **Spec MVP** | `docs/specs/LCF_Especificacao_Sistema.txt` | Requisitos funcionais completos |
+| **Free vs PRO** | `docs/specs/LCF_Free_vs_PRO.txt` | Sempre que implementar feature com diferenciação de plano |
+| **Arquitetura IA** | `docs/specs/LCF_ArquiteturaIA_MVP.txt` | Antes de tocar no módulo tutor-ia |
+| **Stack Infra** | `docs/specs/LCF_Stack_Infraestrutura_v1.0.txt` | Decisões de infraestrutura |
 | **API Contract** | `docs/api-contract.md` | Referência de contratos |
+| **Arquitetura** | `docs/architecture-overview.md` | Visão geral da arquitetura do sistema |
+| **Env Setup** | `docs/env-checklist.md` | Checklist de variáveis de ambiente |
 | **Estado atual** | `.claude/PROJECT_STATE.md` | Início de cada sessão |
 | **Última sessão** | `.claude/sessions/` | Início de cada sessão |
 
@@ -66,12 +68,12 @@ back/
 │       ├── auth/                 # ✅ Completo
 │       ├── tutor-ia/             # ✅ Completo — loop agêntico, adapters, tools
 │       ├── subscriptions/        # ✅ Completo — RevenueCat webhook
-│       ├── onboarding/           # 🔄 Esqueleto — ver Sprint 1 no ROADMAP
-│       ├── dashboard/            # 🔄 Esqueleto — ver Sprint 1 no ROADMAP
-│       ├── manual/               # 🔄 Esqueleto — ver Sprint 1 no ROADMAP
-│       ├── anotacoes/            # 🔄 Esqueleto — ver Sprint 1 no ROADMAP
-│       ├── users/                # 🔄 Esqueleto — ver Sprint 1 no ROADMAP
-│       └── simulados/            # 🔄 Esqueleto — ver Sprint 2 no ROADMAP
+│       ├── onboarding/           # ✅ Completo — Sprint 1
+│       ├── dashboard/            # ✅ Completo — Sprint 1
+│       ├── manual/               # ✅ Completo — Sprint 1
+│       ├── anotacoes/            # ✅ Completo — Sprint 1
+│       ├── users/                # ✅ Completo — Sprint 1
+│       └── simulados/            # ✅ Completo — Sprint 2
 ```
 
 Para convenções de código obrigatórias (Errors factory, Zod, requireAuth, Redis keys), veja `back/CLAUDE.md`.

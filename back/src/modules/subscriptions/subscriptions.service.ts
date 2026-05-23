@@ -48,11 +48,24 @@ export class SubscriptionsService {
         });
         break;
 
+      case 'UNCANCELLATION':
+        await db.subscription.update({
+          where: { userId: user.id },
+          data: { plan: 'pro', status: 'active' },
+        });
+        break;
+
       case 'CANCELLATION':
+        await db.subscription.update({
+          where: { userId: user.id },
+          data: { status: 'cancelled' },
+        });
+        break;
+
       case 'EXPIRATION':
         await db.subscription.update({
           where: { userId: user.id },
-          data: { status: event.type === 'EXPIRATION' ? 'expired' : 'cancelled' },
+          data: { plan: 'free', status: 'expired' },
         });
         break;
     }
