@@ -12,6 +12,8 @@ import '../../features/auth/providers/auth_provider.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/onboarding/presentation/screens/diagnostico_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/manual/presentation/screens/manual_detail_screen.dart';
+import '../../features/manual/presentation/screens/manual_list_screen.dart';
 import '../../features/tutor/presentation/screens/tutor_screen.dart';
 import '../../shared/widgets/scaffold_with_nav.dart';
 import '../theme/app_colors.dart';
@@ -111,16 +113,16 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (context, state) => const DiagnosticoScreen(),
       ),
 
-      // ── Push routes (sem ShellRoute) — implementadas em F4 / F5 ────────
+      // ── Push routes (sem ShellRoute) ─────────────────────────────────────
       GoRoute(
         path: '/manual',
-        builder: (context, state) =>
-            const _PlaceholderScreen(label: 'Manual'),
+        builder: (context, state) => const ManualListScreen(),
         routes: [
           GoRoute(
             path: 'topic/:id',
-            builder: (context, state) =>
-                const _PlaceholderScreen(label: 'Tópico'),
+            builder: (context, state) => ManualDetailScreen(
+              topicId: state.pathParameters['id']!,
+            ),
           ),
         ],
       ),

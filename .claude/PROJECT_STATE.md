@@ -1,6 +1,6 @@
 ---
 updated: 2026-05-23
-sprint: "Sprint 3 concluído · Sprint F1 auditado · Sprint F2 Dashboard concluído · Sprint F3 Tutor IA concluído"
+sprint: "Sprint 3 concluído · Sprint F1 auditado · Sprint F2 Dashboard concluído · Sprint F3 Tutor IA concluído · Sprint F4 Manual concluído"
 ---
 
 # LCF — Estado do Projeto
@@ -152,7 +152,7 @@ sprint: "Sprint 3 concluído · Sprint F1 auditado · Sprint F2 Dashboard conclu
 | **F1 — Fundação + Auth + Onboarding** | 🔄 Auditado, 4 widgets criados, prefer_const clean — aguardando `flutter create` + `build_runner` | 26 arquivos — só faltam g.dart (codegen) e plataformas |
 | **F2 — Dashboard** | ✅ Concluído | 10 arquivos criados — models, repository, providers, screen, 5 widgets, router atualizado |
 | **F3 — Tutor IA** | ✅ Concluído | — |
-| **F4 — Manual** | ⏳ Pendente F1 | — |
+| **F4 — Manual** | ✅ Concluído | — |
 | **F5 — Simulados** | ⏳ Pendente F1 | — |
 | **F6 — Anotações** | ⏳ Pendente F1 | — |
 | **F7 — Perfil + Assinatura** | ⏳ Pendente F1 | — |
@@ -200,6 +200,7 @@ flutter run \
 | 2026-05-23 | sessions/2026-05-23_sprint_f1_finalizacao.md | Sprint F1 finalização: 4 widgets novos, OnboardingDone guard, app_router reescrito, prefer_const clean — 26 arquivos auditados |
 | 2026-05-23 | sessions/2026-05-23_sprint_f2_dashboard.md | Sprint F2 Dashboard: 10 arquivos Flutter — models, repository, providers, 5 widgets, dashboard_screen, router. build_runner + flutter analyze zero issues |
 | 2026-05-23 | sessions/2026-05-23_sprint_f3_tutor.md | Sprint F3 Tutor IA: 11 arquivos Flutter — tutor_models, tutor_repository, tutor_provider, 7 widgets, tutor_screen, router atualizado. build_runner + flutter analyze zero issues |
+| 2026-05-23 | sessions/2026-05-23_sprint_f4_manual.md | Sprint F4 Manual: 10 arquivos Flutter — manual_models, manual_repository, manual_provider, 5 widgets, 2 screens, router atualizado. build_runner + flutter analyze zero issues |
 
 
 
