@@ -50,6 +50,7 @@ class _SimuladoConfigScreenState
           );
       if (mounted) {
         context.push('/simulados/${attempt.id}', extra: attempt);
+        ref.invalidate(simuladoHistoryProvider);
       }
     } on DioException catch (e) {
       if (!mounted) return;
@@ -62,9 +63,12 @@ class _SimuladoConfigScreenState
             ? e.response?.data['inProgressId'] as String?
             : null;
         await _handleInProgress(inProgressId);
-      } else if (status == 400 || status == 403 || status == 429) {
-        await ProGateSheet.show(context,
-            feature: 'simulados ilimitados');
+      } else if (status == 403 || status == 429) {
+        await ProGateSheet.show(context, feature: 'simulados ilimitados');
+      } else if (status == 400) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Parâmetros inválidos. Tente novamente.')),
+        );
       } else if (status == 401) {
         context.go('/login');
       } else {
@@ -86,8 +90,8 @@ class _SimuladoConfigScreenState
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.backgroundCard,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
-        title: const Text('Simulado em andamento', style: AppTextStyles.h3),
-        content: const Text(
+        title: Text('Simulado em andamento', style: AppTextStyles.h3),
+        content: Text(
           'Você já tem um simulado em andamento. Deseja continuar ou iniciar um novo?',
           style: AppTextStyles.bodyMedium,
         ),
@@ -170,7 +174,7 @@ class _SimuladoConfigScreenState
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Simulado', style: AppTextStyles.h1),
+            Text('Simulado', style: AppTextStyles.h1),
             const SizedBox(height: AppSpacing.xl),
 
             // Mode selector

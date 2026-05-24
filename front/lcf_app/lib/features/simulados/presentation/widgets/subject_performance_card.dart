@@ -23,7 +23,7 @@ class SubjectPerformanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Desempenho por matéria', style: AppTextStyles.h3),
+          Text('Desempenho por matéria', style: AppTextStyles.h3),
           const SizedBox(height: AppSpacing.lg),
           ...bySubject.entries.map(
             (e) => Padding(

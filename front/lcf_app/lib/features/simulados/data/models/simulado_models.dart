@@ -39,7 +39,7 @@ class Question {
   factory Question.fromJson(Map<String, dynamic> json) {
     final raw = json['opcoes'] as Map<String, dynamic>? ?? {};
     return Question(
-      id: json['id'] as String,
+      id: json['id'] as String? ?? '',
       enunciado: json['enunciado'] as String? ??
           json['statement'] as String? ??
           '',
@@ -67,7 +67,7 @@ class SimuladoAttempt {
     final questions =
         raw.map((q) => Question.fromJson(q as Map<String, dynamic>)).toList();
     return SimuladoAttempt(
-      id: json['id'] as String,
+      id: json['id'] as String? ?? '',
       totalQuestions:
           json['totalQuestions'] as int? ?? questions.length,
       questions: questions,
@@ -87,8 +87,8 @@ class AnswerResult {
   final String? explanation;
 
   factory AnswerResult.fromJson(Map<String, dynamic> json) => AnswerResult(
-        correct: json['correct'] as bool,
-        correctAnswer: json['correctAnswer'] as String,
+        correct: json['correct'] as bool? ?? false,
+        correctAnswer: (json['correctAnswer'] ?? json['correct_answer'] ?? '') as String,
         explanation: json['explanation'] as String?,
       );
 }
@@ -151,7 +151,7 @@ class SimuladoResult {
     final total = json['total'] as int? ?? 0;
     final correct = json['correct'] as int? ?? 0;
     return SimuladoResult(
-      id: json['id'] as String,
+      id: json['id'] as String? ?? '',
       total: total,
       correct: correct,
       wrong: json['wrong'] as int? ?? (total - correct),
@@ -171,7 +171,7 @@ class SimuladoHistoryItem {
     required this.mode,
     required this.totalQuestions,
     required this.score,
-    required this.completedAt,
+    this.completedAt,
     this.subject,
   });
 
@@ -179,17 +179,18 @@ class SimuladoHistoryItem {
   final String mode;
   final int totalQuestions;
   final double score;
-  final DateTime completedAt;
+  final DateTime? completedAt;
   final String? subject;
 
   factory SimuladoHistoryItem.fromJson(Map<String, dynamic> json) =>
       SimuladoHistoryItem(
-        id: json['id'] as String,
+        id: json['id'] as String? ?? '',
         mode: json['mode'] as String? ?? 'custom',
         totalQuestions: json['totalQuestions'] as int? ?? 0,
         score: (json['score'] as num?)?.toDouble() ?? 0.0,
-        completedAt:
-            DateTime.parse(json['completedAt'] as String),
+        completedAt: json['completedAt'] != null
+            ? DateTime.parse(json['completedAt'] as String)
+            : null,
         subject: json['subject'] as String?,
       );
 }

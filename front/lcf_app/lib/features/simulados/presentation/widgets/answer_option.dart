@@ -23,6 +23,9 @@ class AnswerOption extends StatelessWidget {
     required this.onTap,
   });
 
+  static final TextStyle _letterStyle = AppTextStyles.labelLarge;
+  static final TextStyle _textStyle = AppTextStyles.bodyMedium;
+
   final String letter;
   final String text;
   final AnswerState state;
@@ -30,50 +33,57 @@ class AnswerOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: AppSpacing.cardPadding,
-        decoration: BoxDecoration(
-          color: _bg,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: _bg,
+        borderRadius: AppRadius.card,
+        border: Border.all(color: _border, width: 1.5),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
           borderRadius: AppRadius.card,
-          border: Border.all(color: _border, width: 1.5),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                color: _letterBg,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                letter,
-                style: AppTextStyles.labelLarge.copyWith(color: _textColor),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  text,
-                  style: AppTextStyles.bodyMedium.copyWith(color: _textColor),
+          splashColor: AppColors.accent.withValues(alpha: 0.12),
+          highlightColor: AppColors.accent.withValues(alpha: 0.06),
+          child: Padding(
+            padding: AppSpacing.cardPadding,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: _letterBg,
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(letter, style: _letterStyle),
                 ),
-              ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(text, style: _textStyle),
+                  ),
+                ),
+                if (state == AnswerState.correct) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  const Icon(
+                    Icons.check_circle,
+                    color: _kCorrectGreen,
+                    size: 20,
+                  ),
+                ] else if (state == AnswerState.wrong) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  const Icon(Icons.cancel, color: AppColors.error, size: 20),
+                ],
+              ],
             ),
-            if (state == AnswerState.correct) ...[
-              const SizedBox(width: AppSpacing.sm),
-              const Icon(Icons.check_circle, color: _kCorrectGreen, size: 20),
-            ] else if (state == AnswerState.wrong) ...[
-              const SizedBox(width: AppSpacing.sm),
-              const Icon(Icons.cancel, color: AppColors.error, size: 20),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -92,13 +102,6 @@ class AnswerOption extends StatelessWidget {
         AnswerState.selected => AppColors.borderAccent,
         AnswerState.correct => _kCorrectGreen,
         AnswerState.wrong => AppColors.error,
-      };
-
-  Color get _textColor => switch (state) {
-        AnswerState.idle => AppColors.textPrimary,
-        AnswerState.selected => AppColors.textPrimary,
-        AnswerState.correct => AppColors.textPrimary,
-        AnswerState.wrong => AppColors.textPrimary,
       };
 
   Color get _letterBg => switch (state) {

@@ -136,9 +136,9 @@ class _SimuladoAttemptScreenState
         backgroundColor: AppColors.backgroundCard,
         shape:
             RoundedRectangleBorder(borderRadius: AppRadius.card),
-        title: const Text('Abandonar simulado?',
+        title: Text('Abandonar simulado?',
             style: AppTextStyles.h3),
-        content: const Text(
+        content: Text(
           'Seu progresso será perdido e o simulado será encerrado.',
           style: AppTextStyles.bodyMedium,
         ),

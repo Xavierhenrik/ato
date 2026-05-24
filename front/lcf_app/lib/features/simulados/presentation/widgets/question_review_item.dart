@@ -17,6 +17,17 @@ class QuestionReviewItem extends StatelessWidget {
     required this.onProGate,
   });
 
+  static final TextStyle _indexBase = AppTextStyles.labelLarge;
+  static final TextStyle _enunciadoStyle = AppTextStyles.bodyMedium;
+  static final TextStyle _answerLabel = AppTextStyles.labelSmall;
+  static final TextStyle _answerValueBase = AppTextStyles.labelMedium;
+  static final TextStyle _explanationStyle = AppTextStyles.bodySmall;
+  static final TextStyle _gateStyle = AppTextStyles.labelSmall.copyWith(
+    color: AppColors.textMuted,
+  );
+  static final TextStyle _correctAnswerStyle = AppTextStyles.labelMedium
+      .copyWith(color: _kGreen);
+
   final QuestionReview review;
   final int index;
   final VoidCallback onProGate;
@@ -43,13 +54,13 @@ class QuestionReviewItem extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: review.isCorrect ? _kGreenBg : const Color(0xFF3A1A1A),
+                  color: review.isCorrect ? _kGreenBg : AppColors.errorBg,
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   '${index + 1}',
-                  style: AppTextStyles.labelLarge.copyWith(color: accent),
+                  style: _indexBase.copyWith(color: accent),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -67,7 +78,7 @@ class QuestionReviewItem extends StatelessWidget {
           // Enunciado
           Text(
             review.enunciado,
-            style: AppTextStyles.bodyMedium,
+            style: _enunciadoStyle,
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -80,13 +91,10 @@ class QuestionReviewItem extends StatelessWidget {
               RichText(
                 text: TextSpan(
                   children: [
-                    const TextSpan(
-                      text: 'Sua resposta: ',
-                      style: AppTextStyles.labelSmall,
-                    ),
+                    TextSpan(text: 'Sua resposta: ', style: _answerLabel),
                     TextSpan(
                       text: review.userAnswer,
-                      style: AppTextStyles.labelMedium.copyWith(color: accent),
+                      style: _answerValueBase.copyWith(color: accent),
                     ),
                   ],
                 ),
@@ -95,14 +103,10 @@ class QuestionReviewItem extends StatelessWidget {
                 RichText(
                   text: TextSpan(
                     children: [
-                      const TextSpan(
-                        text: '  Correta: ',
-                        style: AppTextStyles.labelSmall,
-                      ),
+                      TextSpan(text: '  Correta: ', style: _answerLabel),
                       TextSpan(
                         text: review.correctAnswer,
-                        style: AppTextStyles.labelMedium
-                            .copyWith(color: _kGreen),
+                        style: _correctAnswerStyle,
                       ),
                     ],
                   ),
@@ -120,10 +124,7 @@ class QuestionReviewItem extends StatelessWidget {
                 color: AppColors.backgroundSheet,
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
-              child: Text(
-                review.explanation!,
-                style: AppTextStyles.bodySmall,
-              ),
+              child: Text(review.explanation!, style: _explanationStyle),
             )
           else
             GestureDetector(
@@ -143,8 +144,7 @@ class QuestionReviewItem extends StatelessWidget {
                     const SizedBox(width: AppSpacing.sm),
                     Text(
                       'Assine o PRÓ para ver a explicação',
-                      style: AppTextStyles.labelSmall
-                          .copyWith(color: AppColors.textMuted),
+                      style: _gateStyle,
                     ),
                   ],
                 ),

@@ -11,6 +11,11 @@ const Color _kGreenBg = Color(0xFF1A3A1A);
 class ScoreHeaderCard extends StatelessWidget {
   const ScoreHeaderCard({super.key, required this.result});
 
+  static final TextStyle _scoreBase = AppTextStyles.displayLarge.copyWith(
+    fontSize: 52,
+    fontWeight: FontWeight.w700,
+  );
+
   final SimuladoResult result;
 
   @override
@@ -18,7 +23,7 @@ class ScoreHeaderCard extends StatelessWidget {
     final pct = (result.score * 100).round();
     final passed = result.score >= 0.6;
     final accent = passed ? _kGreen : AppColors.error;
-    final bg = passed ? _kGreenBg : const Color(0xFF3A1A1A);
+    final bg = passed ? _kGreenBg : AppColors.errorBg;
 
     return Container(
       width: double.infinity,
@@ -32,11 +37,7 @@ class ScoreHeaderCard extends StatelessWidget {
         children: [
           Text(
             '$pct%',
-            style: AppTextStyles.displayLarge.copyWith(
-              color: accent,
-              fontSize: 52,
-              fontWeight: FontWeight.w700,
-            ),
+            style: _scoreBase.copyWith(color: accent),
           ),
           const SizedBox(height: AppSpacing.sm),
           Container(
@@ -76,20 +77,20 @@ class ScoreHeaderCard extends StatelessWidget {
 class _Stat extends StatelessWidget {
   const _Stat({required this.label, required this.value, this.valueColor});
 
+  static final TextStyle _valuePrimary = AppTextStyles.h2;
+
   final String label;
   final String value;
   final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
+    final style = valueColor == null
+        ? _valuePrimary
+        : _valuePrimary.copyWith(color: valueColor);
     return Column(
       children: [
-        Text(
-          value,
-          style: AppTextStyles.h2.copyWith(
-            color: valueColor ?? AppColors.textPrimary,
-          ),
-        ),
+        Text(value, style: style),
         const SizedBox(height: AppSpacing.xs),
         Text(label, style: AppTextStyles.labelSmall),
       ],
