@@ -66,7 +66,9 @@ export class SimuladosController {
 
   async inProgress(req: FastifyRequest, reply: FastifyReply) {
     const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
-    return reply.send(await this.svc.listInProgress(user.id));
+    const result = await this.svc.getInProgress(user.id);
+    if (!result) return reply.code(204).send();
+    return reply.send(result);
   }
 
   async getResults(req: FastifyRequest, reply: FastifyReply) {
