@@ -1,6 +1,6 @@
 ---
 updated: 2026-05-24
-sprint: "Sprint 3 concluído · F1–F6 flutter analyze zero issues"
+sprint: "Sprint 3 concluído · F8 Hardening: UI/UX pass concluído · flutter analyze zero issues"
 ---
 
 # LCF — Estado do Projeto
@@ -156,7 +156,7 @@ sprint: "Sprint 3 concluído · F1–F6 flutter analyze zero issues"
 | **F5 — Simulados** | ✅ Concluído | — |
 | **F6 — Anotações** | ✅ Concluído | — |
 | **F7 — Perfil + Assinatura** | ✅ Concluído | 12 arquivos — models, repository, provider, 5 widgets, 2 screens, router atualizado. url_launcher adicionado. `flutter analyze` zero issues |
-| **F8 — Hardening + Offline** | ⏳ Pendente F1–F7 | — |
+| **F8 — Hardening + Offline** | 🟡 Em andamento | UI/UX pass concluído (waves 1–4); offline-first (Isar) pendente |
 
 ### Para ativar o Sprint F1 (próximos passos obrigatórios)
 
@@ -208,6 +208,7 @@ flutter run \
 | 2026-05-24 | sessions/2026-05-24_sprint_f7_perfil.md | Sprint F7 Perfil + Assinatura: 12 arquivos Flutter — perfil_models, perfil_repository, perfil_provider, 5 widgets (ProfileHeader, DadosPessoaisCard, SegurancaCard, LcfProBannerCard, PreferenciasCard), 2 screens (PerfilScreen, SubscriptionScreen), router atualizado, url_launcher adicionado. build_runner + flutter analyze zero issues. |
 | 2026-05-24 | sessions/2026-05-24_contract_fix_simulados.md | Contract fix simulados: 4 blockers corrigidos em simulados.service.ts — enunciado/opcoes (startAttempt+getInProgress), total/correct/wrong/bySubject/questões achatadas (getResults), lista→objeto único 204 (getInProgress), totalQuestions/correctAnswers (getHistory). tsc --noEmit zero erros. |
 | 2026-05-24 | — | Hotfix submitAnswer: `isCorrect` → `correct` em simulados.service.ts (field name mismatch Flutter). tsc --noEmit zero erros. |
+| 2026-05-24 | — | F8 Hardening · UI/UX pass concluído (waves 1–4): bugs críticos (ProGateSheet→/subscription, ChatBubble markdown, AppColors.success verde), perf (ListView.builder result, TextStyle static, scroll throttle), polish (InkWell+Haptics, Material3 NavigationBar, custom transitions, fake streaming, chips ShaderMask), auth (Google icon real, Lembrar-me persistente). flutter_markdown + shared_preferences adicionados. flutter analyze zero issues. |
 
 
 
