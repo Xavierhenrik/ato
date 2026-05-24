@@ -35,7 +35,7 @@ class AppRadius {
   static final BorderRadius chip   = BorderRadius.circular(100);
   static final BorderRadius button = BorderRadius.circular(12);
   static final BorderRadius input  = BorderRadius.circular(10);
-  static final BorderRadius sheet  = const BorderRadius.vertical(
+  static const BorderRadius sheet  = BorderRadius.vertical(
     top: Radius.circular(24),
   );
 }
@@ -44,6 +44,7 @@ class AppTheme {
   AppTheme._();
 
   static ThemeData get dark => ThemeData(
+        useMaterial3: true,
         brightness: Brightness.dark,
         scaffoldBackgroundColor: AppColors.background,
         colorScheme: const ColorScheme.dark(
@@ -52,25 +53,19 @@ class AppTheme {
           onPrimary: Colors.white,
           onSurface: AppColors.textPrimary,
         ),
-        appBarTheme: const AppBarTheme(
+        appBarTheme: AppBarTheme(
           backgroundColor: AppColors.background,
           elevation: 0,
           centerTitle: true,
           titleTextStyle: AppTextStyles.logoTitle,
-          iconTheme: IconThemeData(color: AppColors.textPrimary),
+          iconTheme: const IconThemeData(color: AppColors.textPrimary),
         ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
           backgroundColor: AppColors.backgroundNav,
           selectedItemColor: AppColors.accent,
           unselectedItemColor: AppColors.textMuted,
-          selectedLabelStyle: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-          ),
-          unselectedLabelStyle: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w400,
-          ),
+          selectedLabelStyle: AppTextStyles.navLabelSelected,
+          unselectedLabelStyle: AppTextStyles.navLabelUnselected,
           elevation: 0,
           type: BottomNavigationBarType.fixed,
         ),
@@ -103,7 +98,7 @@ class AppTheme {
           ),
           hintStyle: const TextStyle(color: AppColors.textMuted),
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           color: AppColors.backgroundCard,
           elevation: 0,
           shape: RoundedRectangleBorder(

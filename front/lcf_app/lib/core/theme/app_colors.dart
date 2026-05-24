@@ -27,9 +27,10 @@ class AppColors {
 
   // Semânticas
   static const Color tagBackground = Color(0xFF5A1A1A);
-  static const Color success       = Color(0xFFC9922A);
+  static const Color success       = Color(0xFF4CAF50);
   static const Color info          = Color(0xFF2A4A7A);
   static const Color error         = Color(0xFF8B2020);
+  static const Color errorBg       = Color(0xFF3A1A1A);
 
   // Streak / Progresso
   static const Color streakFire   = Color(0xFFFF6B00);

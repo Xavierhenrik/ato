@@ -10,6 +10,9 @@ linter:
     sized_box_for_whitespace: true
 
 analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
   errors:
     missing_required_param: error
     missing_return: error

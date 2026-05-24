@@ -1,100 +1,105 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'app_colors.dart';
 
 class AppTextStyles {
   AppTextStyles._();
 
-  static const String _fontFamily = 'Inter';
+  static TextStyle _inter({
+    double? fontSize,
+    FontWeight? fontWeight,
+    Color? color,
+    double? letterSpacing,
+    double? height,
+    TextDecoration? decoration,
+    Color? decorationColor,
+  }) =>
+      GoogleFonts.inter(
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        color: color,
+        letterSpacing: letterSpacing,
+        height: height,
+        decoration: decoration,
+        decorationColor: decorationColor,
+      );
 
   // Display
-  static const TextStyle displayLarge = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle displayLarge = _inter(
     fontSize: 28,
     fontWeight: FontWeight.w700,
     color: AppColors.textPrimary,
   );
 
   // Headings
-  static const TextStyle h1 = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle h1 = _inter(
     fontSize: 24,
     fontWeight: FontWeight.w700,
     color: AppColors.textPrimary,
   );
-  static const TextStyle h2 = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle h2 = _inter(
     fontSize: 20,
     fontWeight: FontWeight.w700,
     color: AppColors.textPrimary,
   );
-  static const TextStyle h3 = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle h3 = _inter(
     fontSize: 18,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
-  static const TextStyle h3Gold = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle h3Gold = _inter(
     fontSize: 18,
     fontWeight: FontWeight.w600,
     color: AppColors.accent,
   );
 
   // Body
-  static const TextStyle bodyLarge = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle bodyLarge = _inter(
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
   );
-  static const TextStyle bodyMedium = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle bodyMedium = _inter(
     fontSize: 14,
     fontWeight: FontWeight.w400,
     color: AppColors.textPrimary,
   );
-  static const TextStyle bodySmall = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle bodySmall = _inter(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     color: AppColors.textSecondary,
   );
 
   // Labels
-  static const TextStyle labelLarge = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle labelLarge = _inter(
     fontSize: 14,
     fontWeight: FontWeight.w600,
     color: AppColors.textPrimary,
   );
-  static const TextStyle labelMedium = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle labelMedium = _inter(
     fontSize: 12,
     fontWeight: FontWeight.w500,
     color: AppColors.textSecondary,
   );
-  static const TextStyle labelSmall = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle labelSmall = _inter(
     fontSize: 10,
     fontWeight: FontWeight.w400,
     color: AppColors.textMuted,
   );
 
   // Accent / Gold
-  static const TextStyle accentLarge = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle accentLarge = _inter(
     fontSize: 20,
     fontWeight: FontWeight.w700,
     color: AppColors.accent,
   );
-  static const TextStyle accentMedium = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle accentMedium = _inter(
     fontSize: 14,
     fontWeight: FontWeight.w600,
     color: AppColors.accent,
   );
-  static const TextStyle link = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle link = _inter(
     fontSize: 14,
     fontWeight: FontWeight.w400,
     color: AppColors.accent,
@@ -103,11 +108,20 @@ class AppTextStyles {
   );
 
   // Logo / Brand
-  static const TextStyle logoTitle = TextStyle(
-    fontFamily: _fontFamily,
+  static TextStyle logoTitle = _inter(
     fontSize: 22,
     fontWeight: FontWeight.w700,
     color: AppColors.accent,
     letterSpacing: 2,
+  );
+
+  // Bottom nav labels (I8 — single source of truth para BottomNavigationBar)
+  static TextStyle navLabelSelected = _inter(
+    fontSize: 10,
+    fontWeight: FontWeight.w500,
+  );
+  static TextStyle navLabelUnselected = _inter(
+    fontSize: 10,
+    fontWeight: FontWeight.w400,
   );
 }
