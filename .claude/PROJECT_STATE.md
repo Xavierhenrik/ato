@@ -1,6 +1,6 @@
 ---
-updated: 2026-05-23
-sprint: "Sprint 3 concluído · Sprint F1 auditado · Sprint F2 Dashboard concluído · Sprint F3 Tutor IA concluído · Sprint F4 Manual concluído · Sprint F5 Simulados concluído"
+updated: 2026-05-24
+sprint: "Sprint 3 concluído · F1–F6 flutter analyze zero issues"
 ---
 
 # LCF — Estado do Projeto
@@ -30,7 +30,7 @@ sprint: "Sprint 3 concluído · Sprint F1 auditado · Sprint F2 Dashboard conclu
 | **M3 — Manual** | ✅ Completo | — | 1 |
 | **M6 — Anotações** | ✅ Completo | — | 1 |
 | **Users** | ✅ Completo | — | 1 |
-| **M5 — Simulados** | ✅ Completo | — | 2 |
+| **M5 — Simulados** | ✅ Completo (bug response field names — FIXED) | — | 2 |
 | **Push Notifications** | ⏳ Bloqueado | Aguardando ONESIGNAL_APP_ID + API_KEY | 3 |
 
 ---
@@ -149,13 +149,13 @@ sprint: "Sprint 3 concluído · Sprint F1 auditado · Sprint F2 Dashboard conclu
 
 | Sprint | Status | Descrição |
 |--------|--------|-----------|
-| **F1 — Fundação + Auth + Onboarding** | 🔄 Auditado, 4 widgets criados, prefer_const clean — aguardando `flutter create` + `build_runner` | 26 arquivos — só faltam g.dart (codegen) e plataformas |
+| **F1 — Fundação + Auth + Onboarding** | ✅ Concluído (Hotfix aplicado) | `flutter analyze` zero issues |
 | **F2 — Dashboard** | ✅ Concluído | 10 arquivos criados — models, repository, providers, screen, 5 widgets, router atualizado |
 | **F3 — Tutor IA** | ✅ Concluído | — |
 | **F4 — Manual** | ✅ Concluído | — |
 | **F5 — Simulados** | ✅ Concluído | — |
-| **F6 — Anotações** | ⏳ Pendente F1 | — |
-| **F7 — Perfil + Assinatura** | ⏳ Pendente F1 | — |
+| **F6 — Anotações** | ✅ Concluído | — |
+| **F7 — Perfil + Assinatura** | ✅ Concluído | 12 arquivos — models, repository, provider, 5 widgets, 2 screens, router atualizado. url_launcher adicionado. `flutter analyze` zero issues |
 | **F8 — Hardening + Offline** | ⏳ Pendente F1–F7 | — |
 
 ### Para ativar o Sprint F1 (próximos passos obrigatórios)
@@ -202,6 +202,12 @@ flutter run \
 | 2026-05-23 | sessions/2026-05-23_sprint_f3_tutor.md | Sprint F3 Tutor IA: 11 arquivos Flutter — tutor_models, tutor_repository, tutor_provider, 7 widgets, tutor_screen, router atualizado. build_runner + flutter analyze zero issues |
 | 2026-05-23 | sessions/2026-05-23_sprint_f4_manual.md | Sprint F4 Manual: 10 arquivos Flutter — manual_models, manual_repository, manual_provider, 5 widgets, 2 screens, router atualizado. build_runner + flutter analyze zero issues |
 | 2026-05-23 | sessions/2026-05-23_sprint_f5_simulados.md | Sprint F5 Simulados: 13 arquivos Flutter — simulado_models, simulado_repository, simulado_provider, 7 widgets, 3 screens, router atualizado. build_runner + flutter analyze zero issues |
+| 2026-05-23 | sessions/2026-05-23_review_f1_f5.md | Auditoria forense F1–F5: 80 arquivos Dart auditados em 12 fases — 5 bugs críticos (crash/placeholder/fonte), 10 findings importantes, 5 gaps vs SCREENS.md. Score 7.1/10. Sem correções — apenas relatório. |
+| 2026-05-23 | sessions/2026-05-23_hotfix_f1_f5.md | Hotfix F1–F5: C1–C5 (parsing nullable, fonte Inter/GoogleFonts, placeholder produção), I1/I3–I10 (endpoints API, invalidate, catch genérico, 401 redirects, errorBg), M1/M4 (super.key, comentários). flutter analyze zero issues. |
+| 2026-05-24 | sessions/2026-05-24_sprint_f6_anotacoes.md | Sprint F6 Anotações: 9 arquivos Dart criados — anotacao_models, anotacao_repository, anotacao_provider, 3 widgets (card, filter_chips, search_bar), 2 screens (lista, editor), router atualizado. build_runner + flutter analyze zero issues. |
+| 2026-05-24 | sessions/2026-05-24_sprint_f7_perfil.md | Sprint F7 Perfil + Assinatura: 12 arquivos Flutter — perfil_models, perfil_repository, perfil_provider, 5 widgets (ProfileHeader, DadosPessoaisCard, SegurancaCard, LcfProBannerCard, PreferenciasCard), 2 screens (PerfilScreen, SubscriptionScreen), router atualizado, url_launcher adicionado. build_runner + flutter analyze zero issues. |
+| 2026-05-24 | sessions/2026-05-24_contract_fix_simulados.md | Contract fix simulados: 4 blockers corrigidos em simulados.service.ts — enunciado/opcoes (startAttempt+getInProgress), total/correct/wrong/bySubject/questões achatadas (getResults), lista→objeto único 204 (getInProgress), totalQuestions/correctAnswers (getHistory). tsc --noEmit zero erros. |
+| 2026-05-24 | — | Hotfix submitAnswer: `isCorrect` → `correct` em simulados.service.ts (field name mismatch Flutter). tsc --noEmit zero erros. |
 
 
 

@@ -149,7 +149,22 @@ export class SimuladosService {
       include: { questions: { include: { question: true }, orderBy: { order: 'asc' } } },
     });
 
-    return attempt;
+    return {
+      id: attempt.id,
+      mode: attempt.mode,
+      status: attempt.status,
+      totalQ: attempt.totalQ,
+      subjects: attempt.subjects,
+      startedAt: attempt.startedAt,
+      questions: attempt.questions.map((sq) => ({
+        id: sq.id,
+        order: sq.order,
+        enunciado: sq.question.statement,
+        opcoes: sq.question.options as Record<string, string>,
+        subject: sq.question.subject,
+        difficulty: sq.question.difficulty,
+      })),
+    };
   }
 
   async submitAnswer(userId: string, attemptId: string, params: AnswerParams) {
@@ -206,7 +221,7 @@ export class SimuladosService {
     }
 
     return {
-      isCorrect,
+      correct: isCorrect,
       correctAnswer: question.correctAnswer,
       ...(params.isPro && question.explanation ? { explanation: question.explanation } : {}),
     };
@@ -225,27 +240,34 @@ export class SimuladosService {
     });
   }
 
-  async listInProgress(userId: string) {
-    const attempts = await db.simuladoAttempt.findMany({
+  async getInProgress(userId: string) {
+    const attempt = await db.simuladoAttempt.findFirst({
       where: { userId, status: 'in_progress' },
       include: {
         questions: {
-          where: { studentAnswer: { not: null } },
-          select: { id: true },
+          include: { question: true },
+          orderBy: { order: 'asc' },
         },
       },
       orderBy: { startedAt: 'desc' },
     });
 
+    if (!attempt) return null;
+
     return {
-      attempts: attempts.map((a) => ({
-        id: a.id,
-        mode: a.mode,
-        status: a.status,
-        totalQ: a.totalQ,
-        subjects: a.subjects,
-        questionsAnswered: a.questions.length,
-        startedAt: a.startedAt,
+      id: attempt.id,
+      mode: attempt.mode,
+      status: attempt.status,
+      totalQ: attempt.totalQ,
+      subjects: attempt.subjects,
+      startedAt: attempt.startedAt,
+      questions: attempt.questions.map((sq) => ({
+        id: sq.id,
+        order: sq.order,
+        enunciado: sq.question.statement,
+        opcoes: sq.question.options as Record<string, string>,
+        subject: sq.question.subject,
+        difficulty: sq.question.difficulty,
       })),
     };
   }
@@ -276,32 +298,42 @@ export class SimuladosService {
     });
     if (!attempt) throw Errors.notFound('Simulado');
 
+    const total = attempt.totalQ;
+    const correct = attempt.correctQ;
+    const wrong = total - correct;
+
+    const bySubject: Record<string, { total: number; correct: number }> = {};
+    for (const sq of attempt.questions) {
+      const subj = sq.question.subject;
+      if (!bySubject[subj]) bySubject[subj] = { total: 0, correct: 0 };
+      bySubject[subj].total += 1;
+      if (sq.isCorrect === true) bySubject[subj].correct += 1;
+    }
+
     return {
       id: attempt.id,
       score: attempt.score,
-      totalQ: attempt.totalQ,
-      correctQ: attempt.correctQ,
+      total,
+      correct,
+      wrong,
       completedAt: attempt.completedAt,
+      bySubject,
       questions: attempt.questions.map((sq) => ({
         id: sq.id,
         order: sq.order,
+        enunciado: sq.question.statement,
+        opcoes: sq.question.options as Record<string, string>,
+        correctAnswer: sq.question.correctAnswer,
         studentAnswer: sq.studentAnswer,
         isCorrect: sq.isCorrect,
-        correctAnswer: sq.question.correctAnswer,
-        question: {
-          statement: sq.question.statement,
-          options: sq.question.options,
-          subject: sq.question.subject,
-          board: sq.question.board,
-          year: sq.question.year,
-          ...(isPro && sq.question.explanation ? { explanation: sq.question.explanation } : {}),
-        },
+        subject: sq.question.subject,
+        ...(isPro && sq.question.explanation ? { explanation: sq.question.explanation } : {}),
       })),
     };
   }
 
   async getHistory(userId: string) {
-    return db.simuladoAttempt.findMany({
+    const items = await db.simuladoAttempt.findMany({
       where: { userId, completedAt: { not: null } },
       orderBy: { completedAt: 'desc' },
       take: 20,
@@ -314,5 +346,14 @@ export class SimuladosService {
         completedAt: true,
       },
     });
+
+    return items.map((a) => ({
+      id: a.id,
+      score: a.score,
+      totalQuestions: a.totalQ,
+      correctAnswers: a.correctQ,
+      completedAt: a.completedAt,
+      mode: a.mode,
+    }));
   }
 }
