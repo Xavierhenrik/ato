@@ -154,10 +154,11 @@ export class SimuladosService {
       mode: attempt.mode,
       status: attempt.status,
       totalQ: attempt.totalQ,
+      totalQuestions: attempt.totalQ,
       subjects: attempt.subjects,
       startedAt: attempt.startedAt,
       questions: attempt.questions.map((sq) => ({
-        id: sq.id,
+        id: sq.question.id,
         order: sq.order,
         enunciado: sq.question.statement,
         opcoes: sq.question.options as Record<string, string>,
@@ -259,10 +260,11 @@ export class SimuladosService {
       mode: attempt.mode,
       status: attempt.status,
       totalQ: attempt.totalQ,
+      totalQuestions: attempt.totalQ,
       subjects: attempt.subjects,
       startedAt: attempt.startedAt,
       questions: attempt.questions.map((sq) => ({
-        id: sq.id,
+        id: sq.question.id,
         order: sq.order,
         enunciado: sq.question.statement,
         opcoes: sq.question.options as Record<string, string>,
@@ -302,12 +304,17 @@ export class SimuladosService {
     const correct = attempt.correctQ;
     const wrong = total - correct;
 
-    const bySubject: Record<string, { total: number; correct: number }> = {};
+    // Compute accuracy per subject as percentage (0-100). Flutter expects Map<String, double>.
+    const subjectStats: Record<string, { total: number; correct: number }> = {};
     for (const sq of attempt.questions) {
       const subj = sq.question.subject;
-      if (!bySubject[subj]) bySubject[subj] = { total: 0, correct: 0 };
-      bySubject[subj].total += 1;
-      if (sq.isCorrect === true) bySubject[subj].correct += 1;
+      if (!subjectStats[subj]) subjectStats[subj] = { total: 0, correct: 0 };
+      subjectStats[subj].total += 1;
+      if (sq.isCorrect === true) subjectStats[subj].correct += 1;
+    }
+    const bySubject: Record<string, number> = {};
+    for (const [subj, stats] of Object.entries(subjectStats)) {
+      bySubject[subj] = stats.total > 0 ? (stats.correct / stats.total) * 100 : 0;
     }
 
     return {
@@ -319,11 +326,13 @@ export class SimuladosService {
       completedAt: attempt.completedAt,
       bySubject,
       questions: attempt.questions.map((sq) => ({
-        id: sq.id,
+        questionId: sq.question.id,
+        id: sq.question.id,
         order: sq.order,
         enunciado: sq.question.statement,
         opcoes: sq.question.options as Record<string, string>,
         correctAnswer: sq.question.correctAnswer,
+        userAnswer: sq.studentAnswer,
         studentAnswer: sq.studentAnswer,
         isCorrect: sq.isCorrect,
         subject: sq.question.subject,
