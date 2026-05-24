@@ -3,11 +3,68 @@ import { Prisma } from '@prisma/client';
 import { Errors } from '../../shared/errors';
 import { randomUUID } from 'crypto';
 
+interface TopicSection {
+  order: number;
+  title: string;
+  content: string;
+}
+
+const CANONICAL_TITLES: Record<string, string> = {
+  'fundamento': 'fundamento',
+  'artigos centrais': 'artigos_centrais',
+  'exemplo prático': 'exemplo_pratico',
+  'exemplo pratico': 'exemplo_pratico',
+  'atenção': 'atencao',
+  'atencao': 'atencao',
+  'como cai na oab': 'oab',
+  'resumo': 'resumo',
+};
+
+function normalizeTitle(raw: string): string {
+  const lower = raw.toLowerCase().trim();
+  return CANONICAL_TITLES[lower] ?? raw.trim();
+}
+
+function countWords(text: string): number {
+  return text.trim().split(/\s+/).filter(w => w.length > 0).length;
+}
+
+function parseMarkdownSections(content: string): TopicSection[] {
+  const blocks = content.split(/^## /m);
+  const sections: TopicSection[] = [];
+  let order = 0;
+
+  for (const block of blocks) {
+    const trimmed = block.trim();
+    if (!trimmed) continue;
+
+    const newlineIndex = trimmed.indexOf('\n');
+    const rawTitle = newlineIndex === -1 ? trimmed : trimmed.slice(0, newlineIndex);
+    const body = newlineIndex === -1 ? '' : trimmed.slice(newlineIndex + 1).trim();
+
+    if (!rawTitle.trim()) continue;
+
+    sections.push({ order: order++, title: normalizeTitle(rawTitle), content: body });
+  }
+
+  return sections;
+}
+
 export class ManualService {
   async listTopics(userId: string, lawCode?: string) {
     const topics = await db.topic.findMany({
       where: lawCode ? { lawCode } : undefined,
-      select: { id: true, code: true, title: true, lawCode: true, chapter: true, order: true, isPro: true },
+      select: {
+        id: true,
+        code: true,
+        title: true,
+        lawCode: true,
+        chapter: true,
+        order: true,
+        isPro: true,
+        updatedAt: true,
+        content: true,
+      },
       orderBy: [{ lawCode: 'asc' }, { order: 'asc' }],
     });
 
@@ -31,8 +88,9 @@ export class ManualService {
       }
     }
 
-    return topics.map(t => ({
+    return topics.map(({ content, ...t }) => ({
       ...t,
+      readTimeMinutes: Math.max(1, Math.round(countWords(content) / 200)),
       progress: {
         readCount: readByCode.get(t.lawCode) ?? 0,
         totalTopics: totalByCode.get(t.lawCode) ?? 0,
@@ -44,9 +102,22 @@ export class ManualService {
     const topic = await db.topic.findUnique({ where: { id } });
     if (!topic) throw Errors.notFound('Tópico');
 
-    const read = await db.topicRead.findUnique({ where: { userId_topicId: { userId, topicId: id } } });
+    const read = await db.topicRead.findUnique({
+      where: { userId_topicId: { userId, topicId: id } },
+    });
 
-    return { ...topic, isRead: !!read };
+    const readTimeMinutes = Math.max(1, Math.round(countWords(topic.content) / 200));
+    const sections = parseMarkdownSections(topic.content);
+
+    return {
+      id: topic.id,
+      title: topic.title,
+      lawCode: topic.lawCode,
+      isRead: !!read,
+      updatedAt: topic.updatedAt,
+      readTimeMinutes,
+      sections,
+    };
   }
 
   async markAsRead(userId: string, topicId: string) {
