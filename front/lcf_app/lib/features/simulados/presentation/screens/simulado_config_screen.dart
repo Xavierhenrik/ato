@@ -168,7 +168,7 @@ class _SimuladoConfigScreenState
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const LcfAppBar(),
+      appBar: const LcfAppBar(showBack: true, fallbackRoute: '/dashboard'),
       body: SingleChildScrollView(
         padding: AppSpacing.screenPadding,
         child: Column(

@@ -52,7 +52,7 @@ class _ResetSenhaScreenState extends ConsumerState<ResetSenhaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const LcfAppBar(),
+      appBar: const LcfAppBar(showBack: true, fallbackRoute: '/login'),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: AppSpacing.screenPadding,

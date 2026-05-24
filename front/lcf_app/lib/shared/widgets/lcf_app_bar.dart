@@ -1,22 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
 
 // AppBar padrão — título "LCF" centralizado, sem elevação
+//
+// Back button behavior:
+// - If `leading` is provided, it overrides everything.
+// - If `showBack: true`, always renders a back button:
+//   - Uses context.pop() when Navigator has a previous route
+//   - Falls back to context.go(fallbackRoute) when stack is empty (refresh / deep link)
+// - If `showBack: false` (default), behaves like the previous version (no leading).
 class LcfAppBar extends StatelessWidget implements PreferredSizeWidget {
   const LcfAppBar({
     super.key,
     this.leading,
     this.actions,
+    this.showBack = false,
+    this.fallbackRoute = '/dashboard',
   });
 
   final Widget? leading;
   final List<Widget>? actions;
+  final bool showBack;
+  final String fallbackRoute;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  Widget? _resolveLeading(BuildContext context) {
+    if (leading != null) return leading;
+    if (!showBack) return null;
+    return IconButton(
+      icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+      tooltip: 'Voltar',
+      onPressed: () {
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(fallbackRoute);
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +52,11 @@ class LcfAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: AppColors.background,
       elevation: 0,
       centerTitle: true,
-      leading: leading,
+      // Disable Flutter's implicit back button — we control it explicitly.
+      automaticallyImplyLeading: false,
+      leading: _resolveLeading(context),
       actions: actions,
-      title: const Text('LCF', style: AppTextStyles.logoTitle),
+      title: Text('LCF', style: AppTextStyles.logoTitle),
     );
   }
 }
@@ -58,7 +88,7 @@ class LcfTutorAppBar extends StatelessWidget implements PreferredSizeWidget {
               borderRadius: BorderRadius.circular(AppRadius.xs),
             ),
             alignment: Alignment.center,
-            child: const Text('LCF', style: AppTextStyles.accentMedium),
+            child: Text('LCF', style: AppTextStyles.accentMedium),
           ),
           const SizedBox(width: AppSpacing.md),
           Column(

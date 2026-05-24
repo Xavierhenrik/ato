@@ -61,11 +61,8 @@ class _ManualListScreenState extends ConsumerState<ManualListScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: LcfAppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: AppColors.textPrimary,
-          onPressed: () => context.pop(),
-        ),
+        showBack: true,
+        fallbackRoute: '/dashboard',
         actions: _isSearching
             ? null
             : [

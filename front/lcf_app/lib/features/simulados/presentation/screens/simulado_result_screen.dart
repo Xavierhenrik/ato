@@ -26,7 +26,7 @@ class SimuladoResultScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const LcfAppBar(),
+      appBar: const LcfAppBar(showBack: true, fallbackRoute: '/simulados'),
       body: resultAsync.when(
         loading: () => const LcfLoadingShimmer(),
         error: (e, _) => LcfErrorState(

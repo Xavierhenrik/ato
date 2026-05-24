@@ -55,12 +55,9 @@ class _ManualDetailScreenState extends ConsumerState<ManualDetailScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: LcfAppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: AppColors.textPrimary,
-          onPressed: () => context.pop(),
-        ),
+      appBar: const LcfAppBar(
+        showBack: true,
+        fallbackRoute: '/manual',
       ),
       body: detailAsync.when(
         loading: () => const _DetailShimmer(),
