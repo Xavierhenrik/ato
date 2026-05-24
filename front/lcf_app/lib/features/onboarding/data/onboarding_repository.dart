@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:retrofit/retrofit.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/network/api_client.dart';
@@ -9,7 +8,7 @@ part 'onboarding_repository.g.dart';
 
 // ── Models ────────────────────────────────────────────────────────────────────
 
-@JsonSerializable()
+@JsonSerializable(createFactory: false)
 class OnboardingRequest {
   const OnboardingRequest({
     required this.academicPhase,
@@ -22,7 +21,7 @@ class OnboardingRequest {
   Map<String, dynamic> toJson() => _$OnboardingRequestToJson(this);
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class StudyPlan {
   const StudyPlan({
     required this.id,
@@ -38,7 +37,7 @@ class StudyPlan {
       _$StudyPlanFromJson(json);
 }
 
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class OnboardingResponse {
   const OnboardingResponse({
     required this.done,
@@ -60,19 +59,25 @@ class OnboardingResponse {
 
 // ── Repository ────────────────────────────────────────────────────────────────
 
-@RestApi()
-abstract class OnboardingRepository {
-  factory OnboardingRepository(Dio dio, {String? baseUrl}) =
-      _OnboardingRepository;
+class OnboardingRepository {
+  const OnboardingRepository(this._dio);
+  final Dio _dio;
 
-  @POST('/onboarding/complete')
-  Future<OnboardingResponse> complete(@Body() OnboardingRequest body);
+  Future<OnboardingResponse> complete(OnboardingRequest body) async {
+    final resp = await _dio.post<Map<String, dynamic>>(
+      '/onboarding/complete',
+      data: body.toJson(),
+    );
+    return OnboardingResponse.fromJson(resp.data!);
+  }
 
-  @POST('/onboarding/diagnostic/complete')
-  Future<void> diagnosticComplete();
+  Future<void> diagnosticComplete() {
+    return _dio.post<void>('/onboarding/diagnostic/complete');
+  }
 
-  @POST('/onboarding/diagnostic/dismiss')
-  Future<void> diagnosticDismiss();
+  Future<void> diagnosticDismiss() {
+    return _dio.post<void>('/onboarding/diagnostic/dismiss');
+  }
 }
 
 @riverpod

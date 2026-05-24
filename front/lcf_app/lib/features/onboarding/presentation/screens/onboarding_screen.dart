@@ -31,7 +31,7 @@ class OnboardingScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: AppSpacing.lg),
-              const Text(
+              Text(
                 'Vamos montar seu plano de estudos',
                 style: AppTextStyles.h2,
               ),
@@ -147,7 +147,7 @@ class _PhaseCard extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.accent.withOpacity(0.12)
+              ? AppColors.accent.withValues(alpha: 0.12)
               : AppColors.backgroundCard,
           borderRadius: AppRadius.card,
           border: Border.all(
@@ -200,7 +200,7 @@ class _MinsRow extends ConsumerWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.accent.withOpacity(0.12)
+                      ? AppColors.accent.withValues(alpha: 0.12)
                       : AppColors.backgroundCard,
                   borderRadius: AppRadius.chip,
                   border: Border.all(

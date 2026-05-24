@@ -21,9 +21,9 @@ class DiagnosticoScreen extends ConsumerWidget {
         backgroundColor: AppColors.background,
         body: SafeArea(
           child: switch (step) {
-            DiagnosticoStep.intro    => _IntroState(),
-            DiagnosticoStep.answering => _AnsweringState(),
-            DiagnosticoStep.done     => _DoneState(),
+            DiagnosticoStep.intro    => const _IntroState(),
+            DiagnosticoStep.answering => const _AnsweringState(),
+            DiagnosticoStep.done     => const _DoneState(),
           },
         ),
       ),
@@ -34,6 +34,8 @@ class DiagnosticoScreen extends ConsumerWidget {
 // ─── Intro ────────────────────────────────────────────────────────────────────
 
 class _IntroState extends ConsumerWidget {
+  const _IntroState();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
@@ -55,7 +57,7 @@ class _IntroState extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          const Text(
+          Text(
             'Vamos personalizar seu aprendizado',
             style: AppTextStyles.h2,
             textAlign: TextAlign.center,
@@ -69,11 +71,11 @@ class _IntroState extends ConsumerWidget {
           const SizedBox(height: AppSpacing.xl),
 
           // Info chips
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _InfoChip(icon: Icons.timer_outlined, label: '5 minutos'),
-              const SizedBox(width: AppSpacing.md),
+              SizedBox(width: AppSpacing.md),
               _InfoChip(icon: Icons.quiz_outlined, label: '15 questões'),
             ],
           ),
@@ -104,9 +106,18 @@ class _IntroState extends ConsumerWidget {
   }
 }
 
-// ─── Answering (placeholder — questões via Sprint F5) ────────────────────────
+// ─── Answering (em breve — implementação completa no sprint de diagnóstico) ───
 
 class _AnsweringState extends ConsumerWidget {
+  const _AnsweringState();
+
+  Future<void> _skipDiagnostic(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref.read(diagnosticoNotifierProvider.notifier).dismiss();
+    } catch (_) {}
+    if (context.mounted) context.go('/dashboard');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
@@ -114,36 +125,42 @@ class _AnsweringState extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              Text('Diagnóstico', style: AppTextStyles.h3),
-              const Spacer(),
-              Text('Questão 1 de 15', style: AppTextStyles.bodySmall),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          // Progress bar
-          ClipRRect(
-            borderRadius: AppRadius.chip,
-            child: LinearProgressIndicator(
-              value: 1 / 15,
-              backgroundColor: AppColors.backgroundCard,
-              color: AppColors.accent,
-              minHeight: 6,
+          const Spacer(),
+          Center(
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.borderAccent, width: 1.5),
+                color: AppColors.backgroundCard,
+              ),
+              child: const Icon(
+                Icons.hourglass_top_rounded,
+                color: AppColors.accent,
+                size: 36,
+              ),
             ),
           ),
-          const Spacer(),
+          const SizedBox(height: AppSpacing.xl),
           Text(
-            'As questões do diagnóstico serão exibidas aqui (Sprint F5 — Simulados).',
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+            'Diagnóstico em breve',
+            style: AppTextStyles.h2,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'O diagnóstico personalizado estará disponível em breve. '
+            'Por enquanto, você pode pular e começar a estudar normalmente.',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
             textAlign: TextAlign.center,
           ),
           const Spacer(),
           LcfButton(
-            label: 'Concluir diagnóstico (simulado)',
-            onPressed: () =>
-                ref.read(diagnosticoNotifierProvider.notifier).complete(),
+            label: 'Pular por agora',
+            onPressed: () => _skipDiagnostic(context, ref),
           ),
           const SizedBox(height: AppSpacing.lg),
         ],
@@ -155,6 +172,8 @@ class _AnsweringState extends ConsumerWidget {
 // ─── Done ─────────────────────────────────────────────────────────────────────
 
 class _DoneState extends StatelessWidget {
+  const _DoneState();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -176,7 +195,7 @@ class _DoneState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          const Text(
+          Text(
             'Diagnóstico concluído!',
             style: AppTextStyles.h2,
             textAlign: TextAlign.center,

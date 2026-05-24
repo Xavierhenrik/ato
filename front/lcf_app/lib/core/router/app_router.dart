@@ -5,23 +5,26 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../features/anotacoes/data/models/anotacao_models.dart';
+import '../../features/anotacoes/presentation/screens/anotacao_editor_screen.dart';
+import '../../features/anotacoes/presentation/screens/anotacoes_screen.dart';
 import '../../features/auth/presentation/screens/cadastro_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/reset_senha_screen.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
-import '../../features/onboarding/presentation/screens/diagnostico_screen.dart';
-import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/manual/presentation/screens/manual_detail_screen.dart';
 import '../../features/manual/presentation/screens/manual_list_screen.dart';
+import '../../features/onboarding/presentation/screens/diagnostico_screen.dart';
+import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../../features/perfil/presentation/screens/perfil_screen.dart';
+import '../../features/perfil/presentation/screens/subscription_screen.dart';
 import '../../features/simulados/data/models/simulado_models.dart';
 import '../../features/simulados/presentation/screens/simulado_attempt_screen.dart';
 import '../../features/simulados/presentation/screens/simulado_config_screen.dart';
 import '../../features/simulados/presentation/screens/simulado_result_screen.dart';
 import '../../features/tutor/presentation/screens/tutor_screen.dart';
 import '../../shared/widgets/scaffold_with_nav.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_text_styles.dart';
 
 part 'app_router.g.dart';
 
@@ -46,6 +49,32 @@ class _RouterNotifier extends ChangeNotifier {
     _sub.cancel();
     super.dispose();
   }
+}
+
+CustomTransitionPage<void> _fadeSlidePage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    transitionDuration: const Duration(milliseconds: 220),
+    reverseTransitionDuration: const Duration(milliseconds: 180),
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeInOut,
+        ),
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0.04, 0),
+            end: Offset.zero,
+          ).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+          ),
+          child: child,
+        ),
+      );
+    },
+  );
 }
 
 @riverpod
@@ -117,15 +146,35 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (context, state) => const DiagnosticoScreen(),
       ),
 
-      // ── Push routes (sem ShellRoute) ─────────────────────────────────────
+      // ── Push routes (sem ShellRoute) ──────────────────────────────────
+      GoRoute(
+        path: '/subscription',
+        builder: (context, state) => const SubscriptionScreen(),
+      ),
+      GoRoute(
+        path: '/anotacoes/nova',
+        pageBuilder: (context, state) =>
+            _fadeSlidePage(state, const AnotacaoEditorScreen()),
+      ),
+      GoRoute(
+        path: '/anotacoes/:id/editar',
+        pageBuilder: (context, state) {
+          final anotacao = state.extra as Anotacao?;
+          return _fadeSlidePage(
+            state,
+            AnotacaoEditorScreen(anotacao: anotacao),
+          );
+        },
+      ),
       GoRoute(
         path: '/manual',
         builder: (context, state) => const ManualListScreen(),
         routes: [
           GoRoute(
             path: 'topic/:id',
-            builder: (context, state) => ManualDetailScreen(
-              topicId: state.pathParameters['id']!,
+            pageBuilder: (context, state) => _fadeSlidePage(
+              state,
+              ManualDetailScreen(topicId: state.pathParameters['id']!),
             ),
           ),
         ],
@@ -136,16 +185,21 @@ GoRouter appRouter(AppRouterRef ref) {
         routes: [
           GoRoute(
             path: ':id',
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final attempt = state.extra as SimuladoAttempt?;
-              if (attempt == null) return const SimuladoConfigScreen();
-              return SimuladoAttemptScreen(attempt: attempt);
+              final screen = attempt == null
+                  ? const SimuladoConfigScreen()
+                  : SimuladoAttemptScreen(attempt: attempt);
+              return _fadeSlidePage(state, screen);
             },
             routes: [
               GoRoute(
                 path: 'results',
-                builder: (context, state) => SimuladoResultScreen(
-                  simuladoId: state.pathParameters['id']!,
+                pageBuilder: (context, state) => _fadeSlidePage(
+                  state,
+                  SimuladoResultScreen(
+                    simuladoId: state.pathParameters['id']!,
+                  ),
                 ),
               ),
             ],
@@ -163,8 +217,7 @@ GoRouter appRouter(AppRouterRef ref) {
           ),
           GoRoute(
             path: '/anotacoes',
-            builder: (context, state) =>
-                const _PlaceholderScreen(label: 'Anotações'),
+            builder: (context, state) => const AnotacoesScreen(),
           ),
           GoRoute(
             path: '/dashboard',
@@ -172,27 +225,10 @@ GoRouter appRouter(AppRouterRef ref) {
           ),
           GoRoute(
             path: '/perfil',
-            builder: (context, state) =>
-                const _PlaceholderScreen(label: 'Perfil'),
+            builder: (context, state) => const PerfilScreen(),
           ),
         ],
       ),
     ],
   );
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    // Scaffold próprio para rotas fora do ShellRoute (manual, simulados, etc.)
-    // Removido quando a tela real for implementada em F4/F5.
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text(label, style: AppTextStyles.h3)),
-      body: Center(child: Text(label, style: AppTextStyles.h2)),
-    );
-  }
 }

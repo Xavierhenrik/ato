@@ -1,5 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../features/auth/providers/auth_provider.dart';
 import '../data/onboarding_repository.dart';
 
 part 'onboarding_provider.g.dart';
@@ -89,6 +91,14 @@ class OnboardingNotifier extends _$OnboardingNotifier {
               dailyStudyMins: state.selectedMins!.value,
             ),
           );
+      // Persiste no metadata Supabase (para guard no router após restart)
+      try {
+        await Supabase.instance.client.auth.updateUser(
+          UserAttributes(data: {'onboarding_done': true}),
+        );
+      } catch (_) {}
+      // Marca na sessão atual (garante que o guard funciona mesmo se updateUser falhar)
+      ref.read(onboardingDoneProvider.notifier).markDone();
       state = state.copyWith(isLoading: false, result: response);
       return response;
     } catch (e) {
