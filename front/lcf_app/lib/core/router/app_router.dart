@@ -14,6 +14,10 @@ import '../../features/onboarding/presentation/screens/diagnostico_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../../features/manual/presentation/screens/manual_detail_screen.dart';
 import '../../features/manual/presentation/screens/manual_list_screen.dart';
+import '../../features/simulados/data/models/simulado_models.dart';
+import '../../features/simulados/presentation/screens/simulado_attempt_screen.dart';
+import '../../features/simulados/presentation/screens/simulado_config_screen.dart';
+import '../../features/simulados/presentation/screens/simulado_result_screen.dart';
 import '../../features/tutor/presentation/screens/tutor_screen.dart';
 import '../../shared/widgets/scaffold_with_nav.dart';
 import '../theme/app_colors.dart';
@@ -128,18 +132,21 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: '/simulados',
-        builder: (context, state) =>
-            const _PlaceholderScreen(label: 'Simulados'),
+        builder: (context, state) => const SimuladoConfigScreen(),
         routes: [
           GoRoute(
             path: ':id',
-            builder: (context, state) =>
-                const _PlaceholderScreen(label: 'Simulado em andamento'),
+            builder: (context, state) {
+              final attempt = state.extra as SimuladoAttempt?;
+              if (attempt == null) return const SimuladoConfigScreen();
+              return SimuladoAttemptScreen(attempt: attempt);
+            },
             routes: [
               GoRoute(
                 path: 'results',
-                builder: (context, state) =>
-                    const _PlaceholderScreen(label: 'Resultado'),
+                builder: (context, state) => SimuladoResultScreen(
+                  simuladoId: state.pathParameters['id']!,
+                ),
               ),
             ],
           ),
