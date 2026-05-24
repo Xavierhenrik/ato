@@ -66,7 +66,7 @@ class _MetasDiariasContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Metas diárias', style: AppTextStyles.h3),
+          Text('Metas diárias', style: AppTextStyles.h3),
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
@@ -86,7 +86,7 @@ class _MetasDiariasContent extends StatelessWidget {
                               '$questionsToday/$dailyGoal',
                               style: AppTextStyles.accentMedium,
                             ),
-                            const Text(
+                            Text(
                               'questões',
                               style: AppTextStyles.labelSmall,
                             ),

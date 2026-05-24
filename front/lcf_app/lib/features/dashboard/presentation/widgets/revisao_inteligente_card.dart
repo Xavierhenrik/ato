@@ -48,19 +48,21 @@ class _RevisaoContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(right: AppSpacing.lg),
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.lg),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('Revisão inteligente', style: AppTextStyles.h3),
-                Text('Ver todas >', style: AppTextStyles.accentMedium),
+                _VerTodasButton(
+                  onTap: () => context.push('/simulados'),
+                ),
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          const Padding(
-            padding: EdgeInsets.only(right: AppSpacing.lg),
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.lg),
             child: Text(
               'Com base no algoritmo de repetição espaçada',
               style: AppTextStyles.bodySmall,
@@ -68,8 +70,8 @@ class _RevisaoContent extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           if (cards.isEmpty)
-            const Padding(
-              padding: EdgeInsets.only(right: AppSpacing.lg),
+            Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.lg),
               child: Center(
                 child: Text(
                   'Nenhuma revisão pendente',
@@ -98,67 +100,102 @@ class _RevisaoContent extends StatelessWidget {
 
 class _RevisionTile extends StatelessWidget {
   const _RevisionTile({required this.card, required this.isFirst});
+
+  static final TextStyle _revisarLabel = AppTextStyles.labelSmall.copyWith(
+    color: Colors.white,
+    fontWeight: FontWeight.w600,
+  );
+
   final RevisionCard card;
   final bool isFirst;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      // Navega para o manual filtrado por lawCode — F4 implementará o filtro.
-      onTap: () => context.push('/manual'),
-      child: Container(
-        width: 160,
-        padding: AppSpacing.cardPadding,
-        decoration: BoxDecoration(
-          color: isFirst
-              ? AppColors.accent.withValues(alpha: 0.12)
-              : AppColors.backgroundSheet,
-          borderRadius: AppRadius.card,
-          border: Border.all(
-            color: isFirst ? AppColors.borderAccent : AppColors.border,
-          ),
+    return Container(
+      width: 160,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: isFirst
+            ? AppColors.accent.withValues(alpha: 0.12)
+            : AppColors.backgroundSheet,
+        borderRadius: AppRadius.card,
+        border: Border.all(
+          color: isFirst ? AppColors.borderAccent : AppColors.border,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CategoryTag(label: card.subject),
-            const SizedBox(height: AppSpacing.sm),
-            Expanded(
-              child: Text(
-                card.subject,
-                style: AppTextStyles.labelLarge,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          // Navega para o manual filtrado por lawCode — F4 implementará o filtro.
+          onTap: () => context.push('/manual'),
+          borderRadius: AppRadius.card,
+          splashColor: AppColors.accent.withValues(alpha: 0.12),
+          highlightColor: AppColors.accent.withValues(alpha: 0.06),
+          child: Padding(
+            padding: AppSpacing.cardPadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '${card.totalAnswered} questões',
-                  style: AppTextStyles.labelSmall,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    borderRadius: AppRadius.chip,
-                  ),
+                CategoryTag(label: card.subject),
+                const SizedBox(height: AppSpacing.sm),
+                Expanded(
                   child: Text(
-                    'Revisar',
-                    style: AppTextStyles.labelSmall.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    card.subject,
+                    style: AppTextStyles.labelLarge,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${card.totalAnswered} questões',
+                      style: AppTextStyles.labelSmall,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent,
+                        borderRadius: AppRadius.chip,
+                      ),
+                      child: Text('Revisar', style: _revisarLabel),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VerTodasButton extends StatelessWidget {
+  const _VerTodasButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        splashColor: AppColors.accent.withValues(alpha: 0.12),
+        highlightColor: AppColors.accent.withValues(alpha: 0.06),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          ),
+          child: Text('Ver todas >', style: AppTextStyles.accentMedium),
         ),
       ),
     );

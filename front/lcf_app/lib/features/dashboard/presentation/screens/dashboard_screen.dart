@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -34,19 +36,30 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(dashboardDataProvider, (_, state) {
+      if (state is AsyncError) {
+        final e = state.error;
+        if (e is DioException && e.response?.statusCode == 401) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => context.go('/login'),
+          );
+        }
+      }
+    });
+
     return SafeArea(
       bottom: false,
       child: RefreshIndicator(
         color: AppColors.accent,
         backgroundColor: AppColors.backgroundCard,
         onRefresh: _onRefresh,
-        child: const SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: AppSpacing.screenPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.sm),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -54,17 +67,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   Text('Início', style: AppTextStyles.labelMedium),
                 ],
               ),
-              SizedBox(height: AppSpacing.lg),
-              GreetingCard(),
-              SizedBox(height: AppSpacing.sectionGap),
-              MetasDiariasCard(),
-              SizedBox(height: AppSpacing.sectionGap),
-              RevisaoInteligenteCard(),
-              SizedBox(height: AppSpacing.sectionGap),
-              TarefasRapidasCard(),
-              SizedBox(height: AppSpacing.sectionGap),
-              CardsMateriaCard(),
-              SizedBox(height: AppSpacing.xxxl),
+              const SizedBox(height: AppSpacing.lg),
+              const GreetingCard(),
+              const SizedBox(height: AppSpacing.sectionGap),
+              const MetasDiariasCard(),
+              const SizedBox(height: AppSpacing.sectionGap),
+              const RevisaoInteligenteCard(),
+              const SizedBox(height: AppSpacing.sectionGap),
+              const TarefasRapidasCard(),
+              const SizedBox(height: AppSpacing.sectionGap),
+              const CardsMateriaCard(),
+              const SizedBox(height: AppSpacing.xxxl),
             ],
           ),
         ),

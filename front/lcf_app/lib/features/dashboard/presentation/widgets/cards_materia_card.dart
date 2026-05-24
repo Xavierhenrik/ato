@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -55,15 +56,15 @@ class _CardsMateriaContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Cards de matérias', style: AppTextStyles.h3),
-              Text('Ver todas >', style: AppTextStyles.accentMedium),
+              _VerTodasButton(onTap: () => context.push('/manual')),
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
-          const Text(
+          Text(
             'Prioridades definidas para o seu estudo',
             style: AppTextStyles.bodySmall,
           ),
@@ -106,6 +107,32 @@ class _CardsMateriaContent extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _VerTodasButton extends StatelessWidget {
+  const _VerTodasButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        splashColor: AppColors.accent.withValues(alpha: 0.12),
+        highlightColor: AppColors.accent.withValues(alpha: 0.06),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          ),
+          child: Text('Ver todas >', style: AppTextStyles.accentMedium),
+        ),
       ),
     );
   }

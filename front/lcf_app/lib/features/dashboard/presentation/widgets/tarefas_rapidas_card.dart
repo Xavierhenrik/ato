@@ -20,7 +20,7 @@ class TarefasRapidasCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Tarefas rápidas', style: AppTextStyles.h3),
+          Text('Tarefas rápidas', style: AppTextStyles.h3),
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
