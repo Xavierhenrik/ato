@@ -1,6 +1,8 @@
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string | ToolResultBlock[];
+  /** Populated on assistant messages that triggered a tool_use stop — used by adapters to reconstruct the correct API format (OpenAI needs tool_calls in the assistant turn, Anthropic needs tool_use content blocks). */
+  tool_calls?: ToolCall[];
 }
 
 export interface ToolResultBlock {
@@ -35,6 +37,8 @@ export interface LLMResponse {
   tool_calls?: ToolCall[];
   inputTokens: number;
   outputTokens: number;
+  cacheReadTokens?: number;
+  cacheCreationTokens?: number;
 }
 
 export interface LLMAdapter {

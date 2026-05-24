@@ -1,10 +1,12 @@
 // Maritaca AI — Sabiá-4
 // API compatível com OpenAI: usa parâmetros tools e tool_choice nativamente.
-import { LLMAdapter, LLMRequest, LLMResponse, ToolCall } from './llm.interface';
+import { LLMAdapter, LLMRequest, LLMResponse, ToolCall, ChatMessage, ToolResultBlock } from './llm.interface';
 
 interface MaritacaMessage {
   role: string;
-  content: string | unknown[];
+  content: string | null;
+  tool_calls?: Array<{ id: string; type: 'function'; function: { name: string; arguments: string } }>;
+  tool_call_id?: string;
 }
 
 interface MaritacaChoice {
@@ -35,10 +37,7 @@ export class SabiaAdapter implements LLMAdapter {
       model: 'sabia-4',
       max_tokens: req.maxTokens ?? 1024,
       temperature: req.temperature ?? 0.2,
-      messages: [
-        { role: 'system', content: req.systemPrompt },
-        ...(req.messages as MaritacaMessage[]),
-      ],
+      messages: this.mapToOpenAI(req),
     };
 
     if (req.tools?.length) {
@@ -50,6 +49,56 @@ export class SabiaAdapter implements LLMAdapter {
     }
 
     return this.fetchWithRetry(body);
+  }
+
+  /**
+   * Translates the shared Anthropic-inspired ChatMessage[] to OpenAI-compatible messages.
+   *
+   * Mappings:
+   *   assistant + tool_calls  →  { role: 'assistant', content: null, tool_calls: [...] }
+   *   user + ToolResultBlock[] →  one { role: 'tool', content, tool_call_id } per block
+   *   everything else         →  pass-through
+   */
+  private mapToOpenAI(req: LLMRequest): MaritacaMessage[] {
+    const result: MaritacaMessage[] = [{ role: 'system', content: req.systemPrompt }];
+
+    for (const msg of req.messages as ChatMessage[]) {
+      // assistant turn that triggered tool calls
+      if (msg.role === 'assistant' && msg.tool_calls?.length) {
+        result.push({
+          role: 'assistant',
+          content: (msg.content as string) || null,
+          tool_calls: msg.tool_calls.map((tc: ToolCall) => ({
+            id: tc.id,
+            type: 'function',
+            function: {
+              name: tc.name,
+              arguments: JSON.stringify(tc.input),
+            },
+          })),
+        });
+        continue;
+      }
+
+      // user turn carrying tool results (Anthropic format → OpenAI tool messages)
+      if (msg.role === 'user' && Array.isArray(msg.content)) {
+        for (const block of msg.content as ToolResultBlock[]) {
+          if (block.type === 'tool_result') {
+            result.push({
+              role: 'tool',
+              content: block.content,
+              tool_call_id: block.tool_use_id,
+            });
+          }
+        }
+        continue;
+      }
+
+      // regular user / assistant text message
+      result.push({ role: msg.role, content: msg.content as string });
+    }
+
+    return result;
   }
 
   private async fetchWithRetry(

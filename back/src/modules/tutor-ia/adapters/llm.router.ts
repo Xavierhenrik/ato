@@ -13,11 +13,21 @@ export interface TutorContext {
 const claudeAdapter = new ClaudeAdapter();
 const sabiaAdapter = new SabiaAdapter();
 
-// Roteamento por modo e complexidade (spec LCF_ArquiteturaIA_MVP seção 4.2):
-// simulado + high complexity → Claude Sonnet (~25% das queries)
-// resto → Sabiá-4 (~75% das queries)
-export function selectLLM(ctx: TutorContext): LLMAdapter {
-  if (ctx.mode === 'simulado') return claudeAdapter;
+function assessComplexity(message: string, mode: TutorMode): QueryComplexity {
+  if (mode !== 'simulado') return 'normal';
+  const isComplex =
+    message.length > 150 ||
+    /\b(explique|analise|justifique|discorra|compare|diferencie)\b/i.test(message);
+  return isComplex ? 'high' : 'normal';
+}
+
+// simulado + query complexa (>150 chars ou verbo analítico) → Claude Sonnet (~25% das queries)
+// simulado simples + outros modos → Sabiá-4 (~75% das queries)
+export function selectLLM(ctx: TutorContext & { message?: string }): LLMAdapter {
+  if (ctx.mode === 'simulado') {
+    const complexity = assessComplexity(ctx.message ?? '', ctx.mode);
+    return complexity === 'high' ? claudeAdapter : sabiaAdapter;
+  }
   if (ctx.complexity === 'high') return claudeAdapter;
   return sabiaAdapter;
 }

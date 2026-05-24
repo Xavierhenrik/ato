@@ -24,6 +24,7 @@ export interface TutorRequest {
     topic_title?: string;
     question_bundle?: QuestionBundle;
   };
+  logger?: { info(obj: Record<string, unknown>, msg: string): void };
 }
 
 export class TutorService {
@@ -45,13 +46,21 @@ export class TutorService {
       questionBundle: req.context?.question_bundle,
     };
 
-    const adapter = selectLLM({ mode: req.mode });
+    const maxTokens = req.mode === 'simulado' ? 1024 : req.mode === 'reading' ? 768 : 512;
+    const adapter = selectLLM({ mode: req.mode, message: req.message });
     const systemPrompt = this.contextSvc.build(ctx);
     const history = await this.sessionSvc.getHistory(req.sessionId);
     const messages: ChatMessage[] = [...history, { role: 'user', content: req.message }];
 
     // Loop agêntico — Claude chama tools até ter resposta final
-    let res = await adapter.complete({ systemPrompt, messages, tools: TOOLS });
+    let res = await adapter.complete({ systemPrompt, messages, tools: TOOLS, maxTokens });
+
+    if (res.cacheReadTokens !== undefined || res.cacheCreationTokens !== undefined) {
+      req.logger?.info(
+        { cacheRead: res.cacheReadTokens ?? 0, cacheCreation: res.cacheCreationTokens ?? 0 },
+        'claude:prompt_cache',
+      );
+    }
 
     while (res.stop_reason === 'tool_use' && res.tool_calls?.length) {
       const results = await Promise.all(res.tool_calls.map((tc) => this.citationSvc.handle(tc)));
@@ -62,10 +71,10 @@ export class TutorService {
         content: r.content,
       }));
 
-      messages.push({ role: 'assistant', content: res.content });
+      messages.push({ role: 'assistant', content: res.content, tool_calls: res.tool_calls });
       messages.push({ role: 'user', content: toolResultBlocks });
 
-      res = await adapter.complete({ systemPrompt, messages, tools: TOOLS });
+      res = await adapter.complete({ systemPrompt, messages, tools: TOOLS, maxTokens });
     }
 
     // Persiste histórico (últimas 8 mensagens)

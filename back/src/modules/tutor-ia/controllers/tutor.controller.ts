@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { TutorService } from '../services/tutor.service';
 import { SessionService } from '../services/session.service';
 import { db } from '../../../shared/db';
+import { redis, keys } from '../../../shared/redis';
 import { FOLLOW_UP_CHIPS } from '../prompts/chips.config';
 
 const MessageBodySchema = z.object({
@@ -33,6 +34,17 @@ export class TutorController {
   private tutorSvc = new TutorService();
   private sessionSvc = new SessionService();
 
+  private async _getIsPro(userId: string): Promise<boolean> {
+    const cacheKey = keys.subPro(userId);
+    const cached = await redis.get<string>(cacheKey);
+    if (cached !== null) return cached === 'true';
+
+    const sub = await db.subscription.findUnique({ where: { userId } });
+    const isPro = sub?.plan === 'pro' && sub?.status === 'active';
+    await redis.set(cacheKey, isPro ? 'true' : 'false', { ex: 300 });
+    return isPro;
+  }
+
   async newSession(_req: FastifyRequest, reply: FastifyReply) {
     const sessionId = crypto.randomUUID();
     return reply.send({ session_id: sessionId });
@@ -42,8 +54,7 @@ export class TutorController {
     const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
     const body = MessageBodySchema.parse(req.body);
 
-    const sub = await db.subscription.findUnique({ where: { userId: user.id } });
-    const isPro = sub?.plan === 'pro' && sub?.status === 'active';
+    const isPro = await this._getIsPro(user.id);
 
     const response = await this.tutorSvc.chat({
       sessionId: body.session_id,
@@ -52,6 +63,7 @@ export class TutorController {
       mode: body.mode,
       isPro,
       context: body.context,
+      logger: req.log,
     });
 
     return reply.send({ ...response, chips: FOLLOW_UP_CHIPS });
