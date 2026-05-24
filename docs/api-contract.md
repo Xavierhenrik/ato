@@ -63,6 +63,20 @@
 | GET | `/dashboard` | JWT | Home: streak, progresso, tentativas recentes |
 | GET | `/dashboard/streak` | JWT | Detalhes do streak atual e maior |
 | POST | `/dashboard/study-session` | JWT | Registra sessão de estudo (atualiza streak) |
+| GET | `/dashboard/revision-cards` | JWT | Cards de revisão para a sessão atual |
+| GET | `/dashboard/performance` | JWT | Desempenho geral e por matéria |
+
+### GET /dashboard/revision-cards
+```json
+// Response 200
+{ "cards": [ { "id": "string", "question": "string", "subject": "string" } ] }
+```
+
+### GET /dashboard/performance
+```json
+// Response 200
+{ "bySubject": { "Constitucional": 0.75, "Penal": 0.60 }, "overall": 0.68 }
+```
 
 ---
 
@@ -125,6 +139,14 @@
 | POST | `/simulados/:id/complete` | JWT | Finaliza simulado |
 | GET | `/simulados/:id/results` | JWT | Resultado completo com questões |
 | GET | `/simulados/history` | JWT | Últimas 20 tentativas completadas |
+| GET | `/simulados/in-progress` | JWT | Tentativa em andamento (404 se não houver) |
+
+### GET /simulados/in-progress
+```json
+// Response 200: SimuladoAttempt (mesmo schema de POST /simulados/start)
+// Response 404
+{ "error": "NOT_FOUND" }
+```
 
 ### Modos: `custom`, `oab_phase1`, `oab_phase2`, `weak_areas`
 

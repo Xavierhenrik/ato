@@ -11,6 +11,7 @@ export const keys = {
   tutorRateLimit: (userId: string) => `tutor:rate:${userId}`,
   tutorTokenBudget: (sessionId: string) => `tutor:tokens:${sessionId}`,
   simuladoDaily: (userId: string) => `simulado:daily:${userId}`,
+  subPro: (userId: string) => `sub:pro:${userId}`,
 };
 
 export const TTL = {

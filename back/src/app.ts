@@ -37,11 +37,21 @@ export async function buildApp() {
 
   await app.register(cors, { origin: corsOrigin });
   await app.register(jwt, {
-    secret: process.env.SUPABASE_JWT_SECRET!,
+    secret: {
+      public: process.env.SUPABASE_JWT_PUBLIC_KEY!,
+    },
   });
   await app.register(rateLimit, {
     max: 200,
     timeWindow: '1 minute',
+  });
+
+  // Allow POST/PUT requests with Content-Type: application/json but no body
+  // (e.g. POST /tutor/session/new). Fastify rejects empty bodies by default.
+  app.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body: string, done) => {
+    if (!body || body.trim() === '') { done(null, null); return; }
+    try { done(null, JSON.parse(body)); }
+    catch (e) { (e as Error & { statusCode?: number }).statusCode = 400; done(e as Error); }
   });
 
   app.setErrorHandler((error, _req, reply) => {
