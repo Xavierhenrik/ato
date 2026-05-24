@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -18,41 +19,53 @@ class TopicCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: AppSpacing.cardPadding,
-        decoration: BoxDecoration(
-          color: AppColors.backgroundCard,
-          borderRadius: AppRadius.card,
-          border: Border.all(
-            color: topic.isRead ? AppColors.borderAccent : AppColors.border,
-            width: topic.isRead ? 1.5 : 1,
-          ),
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: AppColors.backgroundCard,
+        borderRadius: AppRadius.card,
+        border: Border.all(
+          color: topic.isRead ? AppColors.borderAccent : AppColors.border,
+          width: topic.isRead ? 1.5 : 1,
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CategoryTag(label: topic.lawLabel),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    topic.title,
-                    style: AppTextStyles.bodyLarge,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            onTap();
+          },
+          borderRadius: AppRadius.card,
+          splashColor: AppColors.accent.withValues(alpha: 0.12),
+          highlightColor: AppColors.accent.withValues(alpha: 0.06),
+          child: Padding(
+            padding: AppSpacing.cardPadding,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CategoryTag(label: topic.lawLabel),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        topic.title,
+                        style: AppTextStyles.bodyLarge,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      _MetaRow(topic: topic),
+                    ],
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  _MetaRow(topic: topic),
-                ],
-              ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                _ReadIndicator(isRead: topic.isRead),
+              ],
             ),
-            const SizedBox(width: AppSpacing.md),
-            _ReadIndicator(isRead: topic.isRead),
-          ],
+          ),
         ),
       ),
     );

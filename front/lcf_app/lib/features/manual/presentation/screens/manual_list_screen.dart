@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -113,10 +114,18 @@ class _TopicsListView extends ConsumerWidget {
         padding: EdgeInsets.all(AppSpacing.lg),
         child: LcfListShimmer(itemCount: 8, itemHeight: 88),
       ),
-      error: (e, _) => LcfErrorState(
-        message: 'Erro ao carregar tópicos. Tente novamente.',
-        onRetry: () => ref.invalidate(filteredTopicsProvider),
-      ),
+      error: (e, _) {
+        if (e is DioException && e.response?.statusCode == 401) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => context.go('/login'),
+          );
+          return const SizedBox.shrink();
+        }
+        return LcfErrorState(
+          message: 'Erro ao carregar tópicos. Tente novamente.',
+          onRetry: () => ref.invalidate(filteredTopicsProvider),
+        );
+      },
       data: (topics) {
         if (topics.isEmpty) {
           return const LcfEmptyState(

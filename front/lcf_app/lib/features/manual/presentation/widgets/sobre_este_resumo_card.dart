@@ -19,14 +19,14 @@ class SobreEsteResumoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.auto_awesome,
                 color: AppColors.accent,
                 size: 16,
               ),
-              SizedBox(width: AppSpacing.xs),
+              const SizedBox(width: AppSpacing.xs),
               Text('Sobre este resumo', style: AppTextStyles.labelLarge),
             ],
           ),

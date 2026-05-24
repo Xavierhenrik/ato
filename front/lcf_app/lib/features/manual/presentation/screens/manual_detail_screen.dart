@@ -183,8 +183,8 @@ class _SectionDivider extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: Container(height: 1, color: AppColors.border)),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Text('Resumo', style: AppTextStyles.labelMedium),
         ),
         Expanded(child: Container(height: 1, color: AppColors.border)),
