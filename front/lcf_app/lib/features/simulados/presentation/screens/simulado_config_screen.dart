@@ -272,7 +272,8 @@ class _HistoryTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pct = (item.score * 100).round();
+    // Backend returns score as percentage (0-100), not fraction (0-1).
+    final pct = item.score.round();
     final label = _modeLabel(item.mode);
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),

@@ -20,8 +20,9 @@ class ScoreHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pct = (result.score * 100).round();
-    final passed = result.score >= 0.6;
+    // Backend returns score as percentage (0-100), not fraction (0-1).
+    final pct = result.score.round();
+    final passed = result.score >= 60;
     final accent = passed ? _kGreen : AppColors.error;
     final bg = passed ? _kGreenBg : AppColors.errorBg;
 

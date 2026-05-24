@@ -155,8 +155,11 @@ class SimuladoResult {
       total: total,
       correct: correct,
       wrong: json['wrong'] as int? ?? (total - correct),
+      // Score is percentage (0-100) per API contract.
+      // Fallback computes locally if backend omits it.
       score: (json['score'] as num?)?.toDouble() ??
-          (total > 0 ? correct / total : 0.0),
+          (total > 0 ? (correct / total) * 100 : 0.0),
+      // bySubject values are accuracy percentages (0-100) per API contract.
       bySubject: rawBy.map((k, v) => MapEntry(k, (v as num).toDouble())),
       questions: rawQ
           .map((q) => QuestionReview.fromJson(q as Map<String, dynamic>))

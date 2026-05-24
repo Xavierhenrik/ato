@@ -36,7 +36,8 @@ class SubjectPerformanceCard extends StatelessWidget {
                     children: [
                       Text(e.key, style: AppTextStyles.bodyMedium),
                       Text(
-                        '${(e.value * 100).round()}%',
+                        // Backend returns accuracy as percentage (0-100).
+                        '${e.value.round()}%',
                         style: AppTextStyles.accentMedium,
                       ),
                     ],
@@ -45,7 +46,8 @@ class SubjectPerformanceCard extends StatelessWidget {
                   ClipRRect(
                     borderRadius: AppRadius.chip,
                     child: LinearProgressIndicator(
-                      value: e.value.clamp(0.0, 1.0),
+                      // LinearProgressIndicator expects 0.0-1.0, backend sends 0-100.
+                      value: (e.value / 100).clamp(0.0, 1.0),
                       minHeight: 6,
                       backgroundColor: AppColors.border,
                       color: AppColors.accent,
