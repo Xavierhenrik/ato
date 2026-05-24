@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -17,10 +18,19 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  static const _rememberMeKey = 'auth_remember_me';
+  static const _rememberedEmailKey = 'auth_remembered_email';
+
   final _formKey = GlobalKey<FormState>();
   final _emailCtrl = TextEditingController();
   final _senhaCtrl = TextEditingController();
   bool _lembrarMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberedCredentials();
+  }
 
   @override
   void dispose() {
@@ -29,16 +39,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  Future<void> _loadRememberedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final remember = prefs.getBool(_rememberMeKey) ?? false;
+    final savedEmail = prefs.getString(_rememberedEmailKey);
+    if (!mounted) return;
+    setState(() {
+      _lembrarMe = remember;
+      if (remember && savedEmail != null && savedEmail.isNotEmpty) {
+        _emailCtrl.text = savedEmail;
+      }
+    });
+  }
+
+  Future<void> _persistRememberMe(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_lembrarMe) {
+      await prefs.setBool(_rememberMeKey, true);
+      await prefs.setString(_rememberedEmailKey, email);
+    } else {
+      await prefs.setBool(_rememberMeKey, false);
+      await prefs.remove(_rememberedEmailKey);
+    }
+  }
+
   Future<void> _onLogin() async {
     if (!_formKey.currentState!.validate()) return;
+    final email = _emailCtrl.text.trim();
     await ref.read(authNotifierProvider.notifier).signInWithEmailPassword(
-          email: _emailCtrl.text.trim(),
+          email: email,
           password: _senhaCtrl.text,
         );
 
     if (!mounted) return;
     final auth = ref.read(authNotifierProvider);
     if (auth is AsyncData && auth.value != null) {
+      await _persistRememberMe(email);
+      if (!mounted) return;
       context.go('/dashboard');
     } else if (auth is AsyncError) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -67,7 +104,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppSpacing.xxxl),
-                _LcfLogo(),
+                const _LcfLogo(),
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   'Sua aprovação para OAB começa aqui',
@@ -189,6 +226,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 }
 
 class _LcfLogo extends StatelessWidget {
+  const _LcfLogo();
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -201,7 +240,7 @@ class _LcfLogo extends StatelessWidget {
           color: AppColors.backgroundCard,
         ),
         alignment: Alignment.center,
-        child: const Text('LCF', style: AppTextStyles.logoTitle),
+        child: Text('LCF', style: AppTextStyles.logoTitle),
       ),
     );
   }
@@ -210,14 +249,26 @@ class _LcfLogo extends StatelessWidget {
 class _GoogleIcon extends StatelessWidget {
   const _GoogleIcon();
 
+  static const _googleBlue = Color(0xFF4285F4);
+
   @override
   Widget build(BuildContext context) {
-    return const Text(
-      'G',
-      style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+    return Container(
+      width: 20,
+      height: 20,
+      decoration: const BoxDecoration(
+        color: _googleBlue,
+        shape: BoxShape.circle,
+      ),
+      alignment: Alignment.center,
+      child: const Text(
+        'G',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          height: 1.0,
+        ),
       ),
     );
   }

@@ -5,6 +5,21 @@ import '../data/auth_repository.dart';
 
 part 'auth_provider.g.dart';
 
+// ── Onboarding done state — lido de metadata Supabase, persiste entre restarts ─
+
+@Riverpod(keepAlive: true)
+class OnboardingDone extends _$OnboardingDone {
+  @override
+  bool build() {
+    return Supabase.instance.client.auth.currentUser
+            ?.userMetadata?['onboarding_done'] as bool? ??
+        false;
+  }
+
+  void markDone() => state = true;
+  void reset() => state = false;
+}
+
 // ── Usuário atual (reativo) ───────────────────────────────────────────────────
 
 @riverpod
@@ -69,7 +84,7 @@ class AuthNotifier extends _$AuthNotifier {
       );
       if (response.user != null) {
         final result = await ref.read(authRepositoryProvider).verify();
-        isNew = result.response.statusCode == 201;
+        isNew = result.statusCode == 201;
       }
       return response.user;
     });

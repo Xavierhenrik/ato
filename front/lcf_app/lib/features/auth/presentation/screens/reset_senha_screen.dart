@@ -56,7 +56,7 @@ class _ResetSenhaScreenState extends ConsumerState<ResetSenhaScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: AppSpacing.screenPadding,
-          child: _sent ? _SentState() : _InputState(
+          child: _sent ? const _SentState() : _InputState(
             formKey: _formKey,
             emailCtrl: _emailCtrl,
             loading: _loading,
@@ -106,7 +106,7 @@ class _InputState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-          const Text('Recuperar senha', style: AppTextStyles.h2, textAlign: TextAlign.center),
+          Text('Recuperar senha', style: AppTextStyles.h2, textAlign: TextAlign.center),
           const SizedBox(height: AppSpacing.sm),
           Text(
             'Digite seu e-mail e enviaremos um link de recuperação',
@@ -140,6 +140,8 @@ class _InputState extends StatelessWidget {
 }
 
 class _SentState extends StatelessWidget {
+  const _SentState();
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -159,7 +161,7 @@ class _SentState extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
-        const Text('E-mail enviado!', style: AppTextStyles.h2, textAlign: TextAlign.center),
+        Text('E-mail enviado!', style: AppTextStyles.h2, textAlign: TextAlign.center),
         const SizedBox(height: AppSpacing.sm),
         Text(
           'Verifique sua caixa de entrada e siga as instruções',

@@ -80,7 +80,7 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                       color: AppColors.backgroundCard,
                     ),
                     alignment: Alignment.center,
-                    child: const Text('LCF', style: AppTextStyles.logoTitle),
+                    child: Text('LCF', style: AppTextStyles.logoTitle),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -99,7 +99,7 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
             maxChildSize: 0.92,
             builder: (context, scrollCtrl) {
               return Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.backgroundSheet,
                   borderRadius: AppRadius.sheet,
                 ),

@@ -1,19 +1,19 @@
 import 'package:dio/dio.dart';
-import 'package:retrofit/retrofit.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/network/api_client.dart';
 
 part 'auth_repository.g.dart';
 
-@RestApi()
-abstract class AuthRepository {
-  factory AuthRepository(Dio dio, {String? baseUrl}) = _AuthRepository;
+class AuthRepository {
+  const AuthRepository(this._dio);
+  final Dio _dio;
 
   /// Sincroniza sessão Supabase com o backend LCF. Cria usuário se novo.
   /// 201 → novo usuário; 200 → usuário existente.
-  @POST('/auth/verify')
-  Future<HttpResponse<void>> verify();
+  Future<Response<void>> verify() {
+    return _dio.post<void>('/auth/verify');
+  }
 }
 
 @riverpod
