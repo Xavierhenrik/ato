@@ -27,6 +27,10 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
   final _inputController = TextEditingController();
   final _scrollController = ScrollController();
 
+  bool _pendingScroll = false;
+  String? _lastNewAssistantId;
+  String? _previousLastAssistantId;
+
   @override
   void dispose() {
     // Fire-and-forget — capture notifier before dispose chain starts
@@ -67,15 +71,24 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
           ),
         );
       }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sem conexão. Tente novamente.')),
+      );
     }
   }
 
   void _scrollToBottom() {
+    if (_pendingScroll) return;
+    _pendingScroll = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pendingScroll = false;
+      if (!mounted) return;
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 220),
           curve: Curves.easeOut,
         );
       }
@@ -88,8 +101,8 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.backgroundCard,
         shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
-        title: const Text('Encerrar conversa?', style: AppTextStyles.h3),
-        content: const Text(
+        title: Text('Encerrar conversa?', style: AppTextStyles.h3),
+        content: Text(
           'O histórico desta sessão será apagado.',
           style: AppTextStyles.bodyMedium,
         ),
@@ -124,7 +137,32 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(tutorNotifierProvider);
-    final hasMessages = chatState.messages.isNotEmpty;
+    final hasMessages =
+        chatState.messages.isNotEmpty || chatState.streamingContent != null;
+
+    // Track latest assistant message id to drive typewriter animation only on
+    // messages received after the screen mounted (not on history load).
+    String? latestAssistantId;
+    for (var i = chatState.messages.length - 1; i >= 0; i--) {
+      if (chatState.messages[i].role == 'assistant') {
+        latestAssistantId = chatState.messages[i].id;
+        break;
+      }
+    }
+    if (latestAssistantId != null &&
+        latestAssistantId != _previousLastAssistantId) {
+      // Only mark as "new" when the previous tracked id was non-null
+      // (skip initial history load — those should not animate).
+      if (_previousLastAssistantId != null) {
+        _lastNewAssistantId = latestAssistantId;
+      }
+      _previousLastAssistantId = latestAssistantId;
+    }
+
+    // Scroll to bottom on every streaming tick so text stays in view.
+    ref.listen<TutorChatState>(tutorNotifierProvider, (prev, next) {
+      if (next.streamingContent != null) _scrollToBottom();
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -147,15 +185,18 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
                 ? _ChatListView(
                     messages: chatState.messages,
                     isLoading: chatState.isLoading,
+                    streamingContent: chatState.streamingContent,
                     scrollController: _scrollController,
                     onChipTap: _onSend,
+                    animatedMessageId: _lastNewAssistantId,
                   )
                 : TutorEmptyState(onChipTap: _onSend),
           ),
           ChatInputBar(
             controller: _inputController,
             onSend: _onSend,
-            enabled: !chatState.isLoading,
+            // Disable input while loading OR streaming to avoid overlapping messages.
+            enabled: !chatState.isLoading && chatState.streamingContent == null,
           ),
         ],
       ),
@@ -169,39 +210,63 @@ class _ChatListView extends StatelessWidget {
     required this.isLoading,
     required this.scrollController,
     required this.onChipTap,
+    this.streamingContent,
+    this.animatedMessageId,
   });
 
   final List<TutorMessage> messages;
   final bool isLoading;
   final ScrollController scrollController;
   final ValueChanged<String> onChipTap;
+  final String? streamingContent;
+  final String? animatedMessageId;
 
   @override
   Widget build(BuildContext context) {
     // Find last assistant message to show continuation chips there only
     final lastAiIndex =
         messages.lastIndexWhere((m) => m.role == 'assistant');
+    final isStreaming = streamingContent != null;
 
     return ListView.builder(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-      // Extra item slot for TypingIndicator while loading
-      itemCount: messages.length + (isLoading ? 1 : 0),
+      // One extra slot: TypingIndicator while loading OR streaming bubble.
+      itemCount: messages.length + ((isLoading || isStreaming) ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == messages.length) {
-          return const TypingIndicator();
+          if (isLoading) return const TypingIndicator();
+          if (isStreaming) {
+            return ChatBubble(
+              message: TutorMessage(
+                id: 'streaming',
+                role: 'assistant',
+                content: streamingContent!,
+                createdAt: DateTime.now(),
+              ),
+            );
+          }
+          return const SizedBox.shrink();
         }
 
         final msg = messages[index];
+        // Hide chips while a response is still streaming to avoid layout jump.
         final showChips = msg.role == 'assistant' &&
             index == lastAiIndex &&
             msg.continuationChips.isNotEmpty &&
-            !isLoading;
+            !isLoading &&
+            !isStreaming;
+        final shouldAnimate = animatedMessageId != null &&
+            msg.id == animatedMessageId;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ChatBubble(message: msg),
+            ChatBubble(
+              key: ValueKey(msg.id),
+              message: msg,
+              animate: shouldAnimate,
+            ),
             if (showChips)
               ChipsRow(chips: msg.continuationChips, onTap: onChipTap),
           ],

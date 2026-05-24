@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../data/models/tutor_models.dart';
@@ -9,27 +11,39 @@ class TutorChatState {
   const TutorChatState({
     this.messages = const [],
     this.isLoading = false,
+    this.streamingContent,
   });
 
   final List<TutorMessage> messages;
   final bool isLoading;
+  // Non-null while fake-streaming an AI response character by character.
+  final String? streamingContent;
 
   TutorChatState copyWith({
     List<TutorMessage>? messages,
     bool? isLoading,
+    String? streamingContent,
+    bool clearStreamingContent = false,
   }) =>
       TutorChatState(
         messages: messages ?? this.messages,
         isLoading: isLoading ?? this.isLoading,
+        streamingContent: clearStreamingContent
+            ? null
+            : (streamingContent ?? this.streamingContent),
       );
 }
 
 @riverpod
 class TutorNotifier extends _$TutorNotifier {
   String? _sessionId;
+  Timer? _streamingTimer;
 
   @override
-  TutorChatState build() => const TutorChatState();
+  TutorChatState build() {
+    ref.onDispose(() => _streamingTimer?.cancel());
+    return const TutorChatState();
+  }
 
   /// Sends a message and returns autoSavedAnnotationId if present (PRO only).
   /// Throws DioException on HTTP errors — screen handles 429, 401, 5xx.
@@ -56,10 +70,7 @@ class TutorNotifier extends _$TutorNotifier {
           .read(tutorRepositoryProvider)
           .sendMessage(_sessionId!, content);
 
-      state = state.copyWith(
-        messages: [...state.messages, response.message],
-        isLoading: false,
-      );
+      _startStreaming(response);
 
       return response.autoSavedAnnotationId;
     } catch (_) {
@@ -72,8 +83,50 @@ class TutorNotifier extends _$TutorNotifier {
     }
   }
 
+  // Reveals the AI response progressively, character by character.
+  // Faster for long responses so the UX doesn't feel slow.
+  void _startStreaming(SendMessageResponse response) {
+    final fullText = response.message.content;
+
+    if (fullText.isEmpty) {
+      state = TutorChatState(messages: [...state.messages, response.message]);
+      return;
+    }
+
+    final intervalMs = fullText.length > 300 ? 8 : 12;
+    var revealedCount = 1;
+
+    // Show first character immediately — avoids an empty-bubble flash.
+    state = state.copyWith(
+      isLoading: false,
+      streamingContent: fullText.substring(0, 1),
+    );
+
+    _streamingTimer?.cancel();
+    _streamingTimer = Timer.periodic(
+      Duration(milliseconds: intervalMs),
+      (timer) {
+        revealedCount++;
+        if (revealedCount >= fullText.length) {
+          timer.cancel();
+          _streamingTimer = null;
+          // Replace streaming bubble with the final, persisted message.
+          state = TutorChatState(
+            messages: [...state.messages, response.message],
+          );
+        } else {
+          state = state.copyWith(
+            streamingContent: fullText.substring(0, revealedCount),
+          );
+        }
+      },
+    );
+  }
+
   /// Clears messages and fires DELETE /tutor/session/:id (fire-and-forget).
   Future<void> endSession() async {
+    _streamingTimer?.cancel();
+    _streamingTimer = null;
     final sid = _sessionId;
     _sessionId = null;
     state = const TutorChatState();

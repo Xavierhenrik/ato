@@ -66,7 +66,7 @@ class ChatInputBar extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.xs),
-            const Text(
+            Text(
               '🔒 Respostas geradas por IA, sempre confira as fontes e a legislação vigente',
               style: AppTextStyles.labelSmall,
               textAlign: TextAlign.center,
