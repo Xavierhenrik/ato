@@ -13,10 +13,20 @@ class ChatBubble extends StatefulWidget {
     super.key,
     required this.message,
     this.animate = false,
+    this.streaming = false,
   });
 
   final TutorMessage message;
+
+  /// Run typewriter animation on this bubble. Used for the first render of a
+  /// freshly received assistant message.
   final bool animate;
+
+  /// This bubble is showing live chunks coming from the backend (SSE).
+  /// While true, content is rendered as plain text to avoid markdown parser
+  /// flicker on partial input (e.g. unclosed **bold** or incomplete bullets).
+  /// Render switches to full markdown once streaming finishes.
+  final bool streaming;
 
   @override
   State<ChatBubble> createState() => _ChatBubbleState();
@@ -89,6 +99,27 @@ class _ChatBubbleState extends State<ChatBubble> {
     super.dispose();
   }
 
+  /// Decides whether to render plain text (during streaming/animation, to avoid
+  /// markdown parser flicker on partial content) or full markdown.
+  Widget _buildContent(String content) {
+    if (_isUser) {
+      return SelectableText(content, style: AppTextStyles.bodyMedium);
+    }
+    final stillTyping =
+        _shouldAnimate && _visibleLength < widget.message.content.length;
+    if (widget.streaming || stillTyping) {
+      // Plain text while content is incoming or being revealed.
+      return Text(content, style: AppTextStyles.bodyMedium);
+    }
+    // Final render: markdown (bold, headers, bullets, code) + selectable.
+    return MarkdownBody(
+      data: content,
+      shrinkWrap: true,
+      selectable: true,
+      styleSheet: _markdownStyleSheet,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final displayContent = _shouldAnimate
@@ -135,14 +166,7 @@ class _ChatBubbleState extends State<ChatBubble> {
                       : AppColors.border,
                 ),
               ),
-              child: _isUser
-                  ? Text(displayContent, style: AppTextStyles.bodyMedium)
-                  : MarkdownBody(
-                      data: displayContent,
-                      shrinkWrap: true,
-                      selectable: false,
-                      styleSheet: _markdownStyleSheet,
-                    ),
+              child: _buildContent(displayContent),
             ),
           ),
         ],

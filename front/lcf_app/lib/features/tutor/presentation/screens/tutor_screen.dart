@@ -238,6 +238,7 @@ class _ChatListView extends StatelessWidget {
           if (isLoading) return const TypingIndicator();
           if (isStreaming) {
             return ChatBubble(
+              streaming: true,
               message: TutorMessage(
                 id: 'streaming',
                 role: 'assistant',
