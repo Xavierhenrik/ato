@@ -28,8 +28,6 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
   final _scrollController = ScrollController();
 
   bool _pendingScroll = false;
-  String? _lastNewAssistantId;
-  String? _previousLastAssistantId;
 
   @override
   void dispose() {
@@ -140,25 +138,6 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
     final hasMessages =
         chatState.messages.isNotEmpty || chatState.streamingContent != null;
 
-    // Track latest assistant message id to drive typewriter animation only on
-    // messages received after the screen mounted (not on history load).
-    String? latestAssistantId;
-    for (var i = chatState.messages.length - 1; i >= 0; i--) {
-      if (chatState.messages[i].role == 'assistant') {
-        latestAssistantId = chatState.messages[i].id;
-        break;
-      }
-    }
-    if (latestAssistantId != null &&
-        latestAssistantId != _previousLastAssistantId) {
-      // Only mark as "new" when the previous tracked id was non-null
-      // (skip initial history load — those should not animate).
-      if (_previousLastAssistantId != null) {
-        _lastNewAssistantId = latestAssistantId;
-      }
-      _previousLastAssistantId = latestAssistantId;
-    }
-
     // Scroll to bottom on every streaming tick so text stays in view.
     ref.listen<TutorChatState>(tutorNotifierProvider, (prev, next) {
       if (next.streamingContent != null) _scrollToBottom();
@@ -188,7 +167,6 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
                     streamingContent: chatState.streamingContent,
                     scrollController: _scrollController,
                     onChipTap: _onSend,
-                    animatedMessageId: _lastNewAssistantId,
                   )
                 : TutorEmptyState(onChipTap: _onSend),
           ),
@@ -211,7 +189,6 @@ class _ChatListView extends StatelessWidget {
     required this.scrollController,
     required this.onChipTap,
     this.streamingContent,
-    this.animatedMessageId,
   });
 
   final List<TutorMessage> messages;
@@ -219,7 +196,6 @@ class _ChatListView extends StatelessWidget {
   final ScrollController scrollController;
   final ValueChanged<String> onChipTap;
   final String? streamingContent;
-  final String? animatedMessageId;
 
   @override
   Widget build(BuildContext context) {
@@ -237,8 +213,9 @@ class _ChatListView extends StatelessWidget {
         if (index == messages.length) {
           if (isLoading) return const TypingIndicator();
           if (isStreaming) {
+            // The provider feeds streamingContent char-by-char. ChatBubble
+            // renders Markdown live — bold and lists form as the text grows.
             return ChatBubble(
-              streaming: true,
               message: TutorMessage(
                 id: 'streaming',
                 role: 'assistant',
@@ -257,17 +234,11 @@ class _ChatListView extends StatelessWidget {
             msg.continuationChips.isNotEmpty &&
             !isLoading &&
             !isStreaming;
-        final shouldAnimate = animatedMessageId != null &&
-            msg.id == animatedMessageId;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ChatBubble(
-              key: ValueKey(msg.id),
-              message: msg,
-              animate: shouldAnimate,
-            ),
+            ChatBubble(key: ValueKey(msg.id), message: msg),
             if (showChips)
               ChipsRow(chips: msg.continuationChips, onTap: onChipTap),
           ],

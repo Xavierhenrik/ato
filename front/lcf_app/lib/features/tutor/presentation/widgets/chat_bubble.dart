@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -8,124 +6,27 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../data/models/tutor_models.dart';
 
-class ChatBubble extends StatefulWidget {
-  const ChatBubble({
-    super.key,
-    required this.message,
-    this.animate = false,
-    this.streaming = false,
-  });
+/// Renders one chat message bubble.
+///
+/// For assistant messages we always render Markdown (bold, lists, blockquotes,
+/// italics, links). The widget is intentionally stateless: the typewriter
+/// reveal during streaming is driven by [TutorNotifier], which updates
+/// `streamingContent` char by char — each tick rebuilds this widget with a
+/// new `message.content`. We accept the small parser cost in exchange for
+/// progressively-formatted text (the ChatGPT/Claude pattern), instead of a
+/// jarring plain-text → markdown swap at the end.
+///
+/// For user messages we use a plain SelectableText (no markdown — user inputs
+/// shouldn't render formatting).
+class ChatBubble extends StatelessWidget {
+  const ChatBubble({super.key, required this.message});
 
   final TutorMessage message;
 
-  /// Run typewriter animation on this bubble. Used for the first render of a
-  /// freshly received assistant message.
-  final bool animate;
-
-  /// This bubble is showing live chunks coming from the backend (SSE).
-  /// While true, content is rendered as plain text to avoid markdown parser
-  /// flicker on partial input (e.g. unclosed **bold** or incomplete bullets).
-  /// Render switches to full markdown once streaming finishes.
-  final bool streaming;
-
-  @override
-  State<ChatBubble> createState() => _ChatBubbleState();
-}
-
-class _ChatBubbleState extends State<ChatBubble> {
-  static const Duration _tickInterval = Duration(milliseconds: 18);
-
-  Timer? _timer;
-  int _visibleLength = 0;
-
-  bool get _isUser => widget.message.role == 'user';
-  bool get _shouldAnimate => widget.animate && !_isUser;
-
-  @override
-  void initState() {
-    super.initState();
-    if (_shouldAnimate) {
-      _startAnimation();
-    } else {
-      _visibleLength = widget.message.content.length;
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant ChatBubble oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.message.content != widget.message.content) {
-      if (_shouldAnimate) {
-        _restartAnimation();
-      } else {
-        _timer?.cancel();
-        _visibleLength = widget.message.content.length;
-      }
-    } else if (oldWidget.animate != widget.animate) {
-      if (_shouldAnimate) {
-        _restartAnimation();
-      } else {
-        _timer?.cancel();
-        setState(() => _visibleLength = widget.message.content.length);
-      }
-    }
-  }
-
-  void _restartAnimation() {
-    _timer?.cancel();
-    _visibleLength = 0;
-    _startAnimation();
-  }
-
-  void _startAnimation() {
-    final totalLength = widget.message.content.length;
-    if (totalLength == 0) return;
-    _timer = Timer.periodic(_tickInterval, (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      if (_visibleLength >= totalLength) {
-        timer.cancel();
-        return;
-      }
-      setState(() => _visibleLength++);
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  /// Decides whether to render plain text (during streaming/animation, to avoid
-  /// markdown parser flicker on partial content) or full markdown.
-  Widget _buildContent(String content) {
-    if (_isUser) {
-      return SelectableText(content, style: AppTextStyles.bodyMedium);
-    }
-    final stillTyping =
-        _shouldAnimate && _visibleLength < widget.message.content.length;
-    if (widget.streaming || stillTyping) {
-      // Plain text while content is incoming or being revealed.
-      return Text(content, style: AppTextStyles.bodyMedium);
-    }
-    // Final render: markdown (bold, headers, bullets, code) + selectable.
-    return MarkdownBody(
-      data: content,
-      shrinkWrap: true,
-      selectable: true,
-      styleSheet: _markdownStyleSheet,
-    );
-  }
+  bool get _isUser => message.role == 'user';
 
   @override
   Widget build(BuildContext context) {
-    final displayContent = _shouldAnimate
-        ? widget.message.content.substring(0, _visibleLength)
-        : widget.message.content;
-
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -166,7 +67,18 @@ class _ChatBubbleState extends State<ChatBubble> {
                       : AppColors.border,
                 ),
               ),
-              child: _buildContent(displayContent),
+              child: _isUser
+                  ? SelectableText(
+                      message.content,
+                      style: AppTextStyles.bodyMedium,
+                    )
+                  : MarkdownBody(
+                      data: message.content,
+                      shrinkWrap: true,
+                      selectable: true,
+                      softLineBreak: true,
+                      styleSheet: _markdownStyleSheet,
+                    ),
             ),
           ),
         ],
@@ -175,14 +87,17 @@ class _ChatBubbleState extends State<ChatBubble> {
   }
 
   static final MarkdownStyleSheet _markdownStyleSheet = MarkdownStyleSheet(
-    p: AppTextStyles.bodyMedium,
-    h1: AppTextStyles.h1,
-    h2: AppTextStyles.h2,
+    p: AppTextStyles.bodyMedium.copyWith(height: 1.5),
+    h1: AppTextStyles.h2,
+    h2: AppTextStyles.h3,
     h3: AppTextStyles.h3Gold,
     h4: AppTextStyles.labelLarge,
     h5: AppTextStyles.labelLarge,
     h6: AppTextStyles.labelLarge,
-    strong: AppTextStyles.bodyMedium.copyWith(fontWeight: FontWeight.w700),
+    strong: AppTextStyles.bodyMedium.copyWith(
+      fontWeight: FontWeight.w700,
+      color: AppColors.accentLight,
+    ),
     em: AppTextStyles.bodyMedium.copyWith(fontStyle: FontStyle.italic),
     code: AppTextStyles.bodyMedium.copyWith(
       fontFamily: 'monospace',
@@ -190,7 +105,7 @@ class _ChatBubbleState extends State<ChatBubble> {
       backgroundColor: AppColors.backgroundCard,
     ),
     codeblockDecoration: BoxDecoration(
-      color: AppColors.backgroundCard,
+      color: AppColors.background,
       borderRadius: BorderRadius.circular(AppRadius.sm),
       border: Border.all(color: AppColors.border),
     ),
@@ -200,7 +115,7 @@ class _ChatBubbleState extends State<ChatBubble> {
       fontStyle: FontStyle.italic,
     ),
     blockquoteDecoration: BoxDecoration(
-      color: AppColors.backgroundCard,
+      color: AppColors.background,
       borderRadius: BorderRadius.circular(AppRadius.sm),
       border: const Border(
         left: BorderSide(color: AppColors.accent, width: 3),
@@ -211,6 +126,7 @@ class _ChatBubbleState extends State<ChatBubble> {
       vertical: AppSpacing.sm,
     ),
     listBullet: AppTextStyles.bodyMedium.copyWith(color: AppColors.accent),
+    listIndent: AppSpacing.lg,
     a: AppTextStyles.link,
     tableHead: AppTextStyles.labelLarge,
     tableBody: AppTextStyles.bodyMedium,
@@ -224,6 +140,7 @@ class _ChatBubbleState extends State<ChatBubble> {
         top: BorderSide(color: AppColors.border, width: 1),
       ),
     ),
+    pPadding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
   );
 }
 
