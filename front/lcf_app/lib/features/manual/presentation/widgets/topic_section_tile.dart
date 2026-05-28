@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/widgets/lcf_markdown_body.dart';
 import '../../data/models/manual_models.dart';
 
 class TopicSectionTile extends StatelessWidget {
@@ -32,13 +33,7 @@ class TopicSectionTile extends StatelessWidget {
         ),
         if (section.content.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            section.content,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-              height: 1.6,
-            ),
-          ),
+          LcfMarkdownBody(data: section.content),
         ],
         const SizedBox(height: AppSpacing.lg),
         const Divider(color: AppColors.border, thickness: 1),

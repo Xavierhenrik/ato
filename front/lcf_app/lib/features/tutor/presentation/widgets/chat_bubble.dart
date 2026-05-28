@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/widgets/lcf_markdown_body.dart';
 import '../../data/models/tutor_models.dart';
 
 /// Renders one chat message bubble.
@@ -72,13 +72,7 @@ class ChatBubble extends StatelessWidget {
                       message.content,
                       style: AppTextStyles.bodyMedium,
                     )
-                  : MarkdownBody(
-                      data: message.content,
-                      shrinkWrap: true,
-                      selectable: true,
-                      softLineBreak: true,
-                      styleSheet: _markdownStyleSheet,
-                    ),
+                  : LcfMarkdownBody(data: message.content),
             ),
           ),
         ],
@@ -86,62 +80,6 @@ class ChatBubble extends StatelessWidget {
     );
   }
 
-  static final MarkdownStyleSheet _markdownStyleSheet = MarkdownStyleSheet(
-    p: AppTextStyles.bodyMedium.copyWith(height: 1.5),
-    h1: AppTextStyles.h2,
-    h2: AppTextStyles.h3,
-    h3: AppTextStyles.h3Gold,
-    h4: AppTextStyles.labelLarge,
-    h5: AppTextStyles.labelLarge,
-    h6: AppTextStyles.labelLarge,
-    strong: AppTextStyles.bodyMedium.copyWith(
-      fontWeight: FontWeight.w700,
-      color: AppColors.accentLight,
-    ),
-    em: AppTextStyles.bodyMedium.copyWith(fontStyle: FontStyle.italic),
-    code: AppTextStyles.bodyMedium.copyWith(
-      fontFamily: 'monospace',
-      color: AppColors.accentLight,
-      backgroundColor: AppColors.backgroundCard,
-    ),
-    codeblockDecoration: BoxDecoration(
-      color: AppColors.background,
-      borderRadius: BorderRadius.circular(AppRadius.sm),
-      border: Border.all(color: AppColors.border),
-    ),
-    codeblockPadding: const EdgeInsets.all(AppSpacing.md),
-    blockquote: AppTextStyles.bodyMedium.copyWith(
-      color: AppColors.textSecondary,
-      fontStyle: FontStyle.italic,
-    ),
-    blockquoteDecoration: BoxDecoration(
-      color: AppColors.background,
-      borderRadius: BorderRadius.circular(AppRadius.sm),
-      border: const Border(
-        left: BorderSide(color: AppColors.accent, width: 3),
-      ),
-    ),
-    blockquotePadding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.md,
-      vertical: AppSpacing.sm,
-    ),
-    listBullet: AppTextStyles.bodyMedium.copyWith(color: AppColors.accent),
-    listIndent: AppSpacing.lg,
-    a: AppTextStyles.link,
-    tableHead: AppTextStyles.labelLarge,
-    tableBody: AppTextStyles.bodyMedium,
-    tableBorder: TableBorder.all(color: AppColors.border),
-    tableCellsPadding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.sm,
-      vertical: AppSpacing.xs,
-    ),
-    horizontalRuleDecoration: const BoxDecoration(
-      border: Border(
-        top: BorderSide(color: AppColors.border, width: 1),
-      ),
-    ),
-    pPadding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-  );
 }
 
 class _RobotAvatar extends StatelessWidget {
