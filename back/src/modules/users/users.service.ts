@@ -1,5 +1,6 @@
 import { db } from '../../shared/db';
 import { Errors } from '../../shared/errors';
+import { notificationsService } from '../../shared/notifications.service';
 
 type AcademicPhase = 'graduation_start' | 'graduation_mid' | 'graduation_end' | 'oab_prep';
 
@@ -40,8 +41,22 @@ export class UsersService {
 
   async updateNotifications(
     userId: string,
-    data: { notifEnabled: boolean; notifTime?: string; oneSignalPlayerId?: string },
+    data: { notifEnabled?: boolean; notifTime?: string; oneSignalPlayerId?: string },
   ) {
+    if (data.oneSignalPlayerId !== undefined) {
+      const valid = await notificationsService.validatePlayer(data.oneSignalPlayerId);
+      if (!valid) throw Errors.badRequest('Player ID inválido');
+    }
     return db.profile.update({ where: { userId }, data });
+  }
+
+  /**
+   * Sprint 3 · Push Notifications — stores a validated OneSignal player ID.
+   * Validates the player via OneSignal API before persisting.
+   */
+  async updateNotificationsPlayer(userId: string, oneSignalPlayerId: string): Promise<void> {
+    const valid = await notificationsService.validatePlayer(oneSignalPlayerId);
+    if (!valid) throw Errors.badRequest('Player ID inválido');
+    await db.profile.update({ where: { userId }, data: { oneSignalPlayerId } });
   }
 }

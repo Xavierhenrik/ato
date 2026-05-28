@@ -31,7 +31,7 @@ sprint: "Quiz Diagnóstico end-to-end — backend GET /diagnostic/questions + Fl
 | **M6 — Anotações** | ✅ Completo | — | 1 |
 | **Users** | ✅ Completo | — | 1 |
 | **M5 — Simulados** | ✅ Completo (bug response field names — FIXED) | — | 2 |
-| **Push Notifications** | ⏳ Bloqueado | Aguardando ONESIGNAL_APP_ID + API_KEY | 3 |
+| **Push Notifications** | ✅ Completo (aguardando credenciais) | NotificationsService implementado com graceful degradation. Credenciais OneSignal pendentes. | 3 |
 | **Sprint 4 — Hardening** | ✅ Completo | — | 4 |
 
 ---
@@ -148,6 +148,8 @@ Nenhuma pendente.
 | 2026-05-27 | TutorRepository.sendMessage aceita parâmetro `mode` (default: 'direct') | Prepara extensão de contexto topico/questão sem quebrar comportamento atual |
 | 2026-05-28 | Dio interceptor 401 retry removido em `api_client.dart` | Loop infinito: staging JWT rejeitado pela produção causava refresh→retry→401→refresh indefinido. Supabase Flutter SDK já gerencia refresh de token automaticamente. |
 | 2026-05-28 | `LcfMarkdownBody` widget compartilhado — `shared/widgets/lcf_markdown_body.dart` | Elimina ~60 linhas de MarkdownStyleSheet duplicado entre ChatBubble e TopicSectionTile |
+| 2026-05-28 | NotificationsService implementado com graceful degradation | Sem ONESIGNAL_APP_ID: sendPush retorna {success:false}, validatePlayer retorna false → PUT /notifications/player lança 400. Credenciais OneSignal ainda pendentes. |
+| 2026-05-28 | Rota PUT /users/notifications/player separada de PUT /users/notifications | Evita quebrar contrato Flutter das preferências gerais; player ID tem validação UUID + OneSignal API |
 
 ---
 

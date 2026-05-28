@@ -10,9 +10,13 @@ const UpdateProfileSchema = z.object({
 });
 
 const UpdateNotifSchema = z.object({
-  notifEnabled:       z.boolean(),
+  notifEnabled:       z.boolean().optional(),
   notifTime:          z.string().regex(/^\d{2}:\d{2}$/).optional(),
   oneSignalPlayerId:  z.string().optional(),
+});
+
+const UpdateNotifPlayerSchema = z.object({
+  oneSignalPlayerId: z.string().uuid(),
 });
 
 export class UsersController {
@@ -33,5 +37,13 @@ export class UsersController {
     const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
     const body = UpdateNotifSchema.parse(req.body);
     return reply.send(await this.svc.updateNotifications(user.id, body));
+  }
+
+  /** Sprint 3 · Push Notifications — PUT /users/notifications/player */
+  async updateNotificationsPlayer(req: FastifyRequest, reply: FastifyReply) {
+    const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
+    const { oneSignalPlayerId } = UpdateNotifPlayerSchema.parse(req.body);
+    await this.svc.updateNotificationsPlayer(user.id, oneSignalPlayerId);
+    return reply.status(204).send();
   }
 }

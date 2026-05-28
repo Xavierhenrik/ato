@@ -67,18 +67,10 @@ export class OnboardingService {
     const profile = await db.profile.findUnique({ where: { userId } });
     if (!profile) throw Errors.notFound('Perfil');
 
-    // Idempotência: se já concluído, não sobrescreve nivelamentoConcluido: true
-    if (!profile.nivelamentoConcluido) {
-      await db.profile.update({
-        where: { userId },
-        data: { nivelamentoPendente: false },
-      });
-    } else {
-      await db.profile.update({
-        where: { userId },
-        data: { nivelamentoPendente: false },
-      });
-    }
+    await db.profile.update({
+      where: { userId },
+      data: { nivelamentoPendente: false },
+    });
 
     return {
       nivelamentoPendente: false,
