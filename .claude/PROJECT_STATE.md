@@ -104,12 +104,10 @@ sprint: "Quiz Diagnóstico end-to-end — backend GET /diagnostic/questions + Fl
 
 ## Migrations Prisma Pendentes
 
-| Migration | Módulo | Sprint |
-|-----------|--------|--------|
-| Índices compostos em `SimuladoQuestion` + `@db.Uuid` em `Question.id` | Sprint 4 Hardening | 4 — aplicar com `npx prisma migrate dev --name sprint4_simulado_indexes` |
+Nenhuma pendente.
 
-> Migrations do Sprint 1 aplicadas em 2026-05-03 via `prisma/migrations/sprint1_manual.sql`
-> (staging + live). Detalhes em `.claude/sessions/2026-05-03_sprint1.md`.
+> Migrations do Sprint 1 aplicadas em 2026-05-03 via `prisma/migrations/sprint1_manual.sql` (staging + live).
+> Índices Sprint 4 (`simulado_questions_is_correct_idx`, `simulado_questions_answered_at_idx`, `simulado_questions_attempt_id_is_correct_idx`) aplicados em 2026-05-28 via `prisma/migrations/apply_sprint4.js` (staging + live).
 
 ## Débito Técnico Registrado
 
@@ -148,6 +146,8 @@ sprint: "Quiz Diagnóstico end-to-end — backend GET /diagnostic/questions + Fl
 | 2026-05-27 | `GET /simulados/in-progress` retorna 204 sem corpo quando vazio | Fix crash null em Flutter ao abrir app sem simulado em andamento |
 | 2026-05-27 | Quantidade máxima de questões em SimuladoConfig: 100→80 | Backend valida totalQ max(80); opção 100 causava 400 sempre |
 | 2026-05-27 | TutorRepository.sendMessage aceita parâmetro `mode` (default: 'direct') | Prepara extensão de contexto topico/questão sem quebrar comportamento atual |
+| 2026-05-28 | Dio interceptor 401 retry removido em `api_client.dart` | Loop infinito: staging JWT rejeitado pela produção causava refresh→retry→401→refresh indefinido. Supabase Flutter SDK já gerencia refresh de token automaticamente. |
+| 2026-05-28 | `LcfMarkdownBody` widget compartilhado — `shared/widgets/lcf_markdown_body.dart` | Elimina ~60 linhas de MarkdownStyleSheet duplicado entre ChatBubble e TopicSectionTile |
 
 ---
 

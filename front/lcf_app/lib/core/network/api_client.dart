@@ -23,26 +23,15 @@ Dio dio(DioRef ref) {
   instance.interceptors.add(
     InterceptorsWrapper(
       onRequest: (options, handler) async {
+        // Supabase SDK keeps the session fresh automatically — just attach the
+        // current token.  No manual refresh needed here; doing so would cause
+        // an infinite retry loop when the backend rejects the JWT for any
+        // reason other than expiry (e.g. wrong JWT secret in dev/staging).
         final session = Supabase.instance.client.auth.currentSession;
         if (session != null) {
           options.headers['Authorization'] = 'Bearer ${session.accessToken}';
         }
         handler.next(options);
-      },
-      onError: (error, handler) async {
-        if (error.response?.statusCode == 401) {
-          try {
-            final refreshed =
-                await Supabase.instance.client.auth.refreshSession();
-            final token = refreshed.session?.accessToken;
-            if (token != null) {
-              error.requestOptions.headers['Authorization'] = 'Bearer $token';
-              final response = await instance.fetch(error.requestOptions);
-              return handler.resolve(response);
-            }
-          } catch (_) {}
-        }
-        handler.next(error);
       },
     ),
   );
