@@ -108,7 +108,7 @@ class OnboardingNotifier extends _$OnboardingNotifier {
   }
 }
 
-// ── Diagnóstico ───────────────────────────────────────────────────────────────
+// ── Diagnóstico — step ────────────────────────────────────────────────────────
 
 enum DiagnosticoStep { intro, answering, done }
 
@@ -120,11 +120,79 @@ class DiagnosticoNotifier extends _$DiagnosticoNotifier {
   void startAnswering() => state = DiagnosticoStep.answering;
 
   Future<void> complete() async {
-    await ref.read(onboardingRepositoryProvider).diagnosticComplete();
+    try {
+      await ref.read(onboardingRepositoryProvider).diagnosticComplete();
+    } catch (_) {}
     state = DiagnosticoStep.done;
   }
 
   Future<void> dismiss() async {
     await ref.read(onboardingRepositoryProvider).diagnosticDismiss();
+  }
+}
+
+// ── Diagnóstico — estado do quiz ──────────────────────────────────────────────
+
+class DiagnosticoQuizState {
+  const DiagnosticoQuizState({
+    this.isLoading = true,
+    this.questions = const [],
+    this.currentIndex = 0,
+    this.selectedAnswer,
+    this.error,
+  });
+
+  final bool isLoading;
+  final List<DiagnosticoQuestion> questions;
+  final int currentIndex;
+  final String? selectedAnswer;
+  final Object? error;
+
+  bool get canAdvance => selectedAnswer != null;
+  bool get isLastQuestion =>
+      questions.isNotEmpty && currentIndex >= questions.length - 1;
+  DiagnosticoQuestion? get currentQuestion =>
+      questions.isEmpty ? null : questions[currentIndex];
+}
+
+@riverpod
+class DiagnosticoQuizNotifier extends _$DiagnosticoQuizNotifier {
+  @override
+  DiagnosticoQuizState build() => const DiagnosticoQuizState();
+
+  Future<void> loadQuestions() async {
+    state = const DiagnosticoQuizState();
+    try {
+      final response = await ref
+          .read(onboardingRepositoryProvider)
+          .getDiagnosticQuestions();
+      state = DiagnosticoQuizState(
+        isLoading: false,
+        questions: response.questions,
+      );
+    } catch (e) {
+      state = DiagnosticoQuizState(isLoading: false, error: e);
+    }
+  }
+
+  void selectAnswer(String answer) {
+    state = DiagnosticoQuizState(
+      isLoading: false,
+      questions: state.questions,
+      currentIndex: state.currentIndex,
+      selectedAnswer: answer,
+    );
+  }
+
+  Future<void> advance() async {
+    if (state.isLastQuestion) {
+      await ref.read(diagnosticoNotifierProvider.notifier).complete();
+    } else {
+      state = DiagnosticoQuizState(
+        isLoading: false,
+        questions: state.questions,
+        currentIndex: state.currentIndex + 1,
+      );
+    }
   }
 }

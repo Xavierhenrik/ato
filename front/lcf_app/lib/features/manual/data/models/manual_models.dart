@@ -48,6 +48,15 @@ class Topic {
             : null,
       );
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'lawCode': lawCode,
+        'readTimeMinutes': readTimeMinutes,
+        'isRead': isRead,
+        if (updatedAt != null) 'updatedAt': updatedAt!.toIso8601String(),
+      };
+
   Topic copyWith({bool? isRead}) => Topic(
         id: id,
         title: title,

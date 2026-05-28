@@ -6,7 +6,7 @@ part of 'manual_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$manualTopicsHash() => r'616d875a8d8419de6025c6a7b3000500165bf4ce';
+String _$manualTopicsHash() => r'e87ecc7076f2cd3f83ff31bd3adee4e344aa4863';
 
 /// Copied from Dart SDK
 class _SystemHash {
@@ -29,24 +29,16 @@ class _SystemHash {
   }
 }
 
-/// All topics, optionally filtered by lawCode (server-side).
-///
-/// Copied from [manualTopics].
+/// See also [manualTopics].
 @ProviderFor(manualTopics)
 const manualTopicsProvider = ManualTopicsFamily();
 
-/// All topics, optionally filtered by lawCode (server-side).
-///
-/// Copied from [manualTopics].
+/// See also [manualTopics].
 class ManualTopicsFamily extends Family<AsyncValue<List<Topic>>> {
-  /// All topics, optionally filtered by lawCode (server-side).
-  ///
-  /// Copied from [manualTopics].
+  /// See also [manualTopics].
   const ManualTopicsFamily();
 
-  /// All topics, optionally filtered by lawCode (server-side).
-  ///
-  /// Copied from [manualTopics].
+  /// See also [manualTopics].
   ManualTopicsProvider call({
     String? lawCode,
   }) {
@@ -79,13 +71,9 @@ class ManualTopicsFamily extends Family<AsyncValue<List<Topic>>> {
   String? get name => r'manualTopicsProvider';
 }
 
-/// All topics, optionally filtered by lawCode (server-side).
-///
-/// Copied from [manualTopics].
+/// See also [manualTopics].
 class ManualTopicsProvider extends AutoDisposeFutureProvider<List<Topic>> {
-  /// All topics, optionally filtered by lawCode (server-side).
-  ///
-  /// Copied from [manualTopics].
+  /// See also [manualTopics].
   ManualTopicsProvider({
     String? lawCode,
   }) : this._internal(
@@ -167,26 +155,18 @@ class _ManualTopicsProviderElement
   String? get lawCode => (origin as ManualTopicsProvider).lawCode;
 }
 
-String _$manualTopicDetailHash() => r'64e40526566d8ff24669c4fda48a7590fa9b19e6';
+String _$manualTopicDetailHash() => r'd34bcac684e1d37bceb6b695592fba76d4b1f767';
 
-/// Full detail for a single topic.
-///
-/// Copied from [manualTopicDetail].
+/// See also [manualTopicDetail].
 @ProviderFor(manualTopicDetail)
 const manualTopicDetailProvider = ManualTopicDetailFamily();
 
-/// Full detail for a single topic.
-///
-/// Copied from [manualTopicDetail].
+/// See also [manualTopicDetail].
 class ManualTopicDetailFamily extends Family<AsyncValue<TopicDetail>> {
-  /// Full detail for a single topic.
-  ///
-  /// Copied from [manualTopicDetail].
+  /// See also [manualTopicDetail].
   const ManualTopicDetailFamily();
 
-  /// Full detail for a single topic.
-  ///
-  /// Copied from [manualTopicDetail].
+  /// See also [manualTopicDetail].
   ManualTopicDetailProvider call(
     String id,
   ) {
@@ -219,13 +199,9 @@ class ManualTopicDetailFamily extends Family<AsyncValue<TopicDetail>> {
   String? get name => r'manualTopicDetailProvider';
 }
 
-/// Full detail for a single topic.
-///
-/// Copied from [manualTopicDetail].
+/// See also [manualTopicDetail].
 class ManualTopicDetailProvider extends AutoDisposeFutureProvider<TopicDetail> {
-  /// Full detail for a single topic.
-  ///
-  /// Copied from [manualTopicDetail].
+  /// See also [manualTopicDetail].
   ManualTopicDetailProvider(
     String id,
   ) : this._internal(
@@ -308,26 +284,18 @@ class _ManualTopicDetailProviderElement
   String get id => (origin as ManualTopicDetailProvider).id;
 }
 
-String _$manualSearchHash() => r'1f5e0243450a851781f45973fd2224b1af77d667';
+String _$manualSearchHash() => r'df867acf6f62cb478f7f3eacbfb26ffe0a22c84f';
 
-/// Full-text search results. Returns empty list if query is blank.
-///
-/// Copied from [manualSearch].
+/// See also [manualSearch].
 @ProviderFor(manualSearch)
 const manualSearchProvider = ManualSearchFamily();
 
-/// Full-text search results. Returns empty list if query is blank.
-///
-/// Copied from [manualSearch].
+/// See also [manualSearch].
 class ManualSearchFamily extends Family<AsyncValue<List<ManualSearchResult>>> {
-  /// Full-text search results. Returns empty list if query is blank.
-  ///
-  /// Copied from [manualSearch].
+  /// See also [manualSearch].
   const ManualSearchFamily();
 
-  /// Full-text search results. Returns empty list if query is blank.
-  ///
-  /// Copied from [manualSearch].
+  /// See also [manualSearch].
   ManualSearchProvider call(
     String q,
   ) {
@@ -360,14 +328,10 @@ class ManualSearchFamily extends Family<AsyncValue<List<ManualSearchResult>>> {
   String? get name => r'manualSearchProvider';
 }
 
-/// Full-text search results. Returns empty list if query is blank.
-///
-/// Copied from [manualSearch].
+/// See also [manualSearch].
 class ManualSearchProvider
     extends AutoDisposeFutureProvider<List<ManualSearchResult>> {
-  /// Full-text search results. Returns empty list if query is blank.
-  ///
-  /// Copied from [manualSearch].
+  /// See also [manualSearch].
   ManualSearchProvider(
     String q,
   ) : this._internal(
@@ -454,10 +418,7 @@ class _ManualSearchProviderElement
 
 String _$filteredTopicsHash() => r'13d627fca7e12a1b26d340ce02932c0d9b496710';
 
-/// Topics filtered by the currently selected lawCode.
-/// Automatically rebuilds when selectedLawCode changes.
-///
-/// Copied from [filteredTopics].
+/// See also [filteredTopics].
 @ProviderFor(filteredTopics)
 final filteredTopicsProvider = AutoDisposeFutureProvider<List<Topic>>.internal(
   filteredTopics,
@@ -472,9 +433,7 @@ final filteredTopicsProvider = AutoDisposeFutureProvider<List<Topic>>.internal(
 typedef FilteredTopicsRef = AutoDisposeFutureProviderRef<List<Topic>>;
 String _$selectedLawCodeHash() => r'be9ebb770cada7210b1ec4f4e91f459dc3f635d0';
 
-/// Currently selected lawCode for filter chips (null = "Todos").
-///
-/// Copied from [SelectedLawCode].
+/// See also [SelectedLawCode].
 @ProviderFor(SelectedLawCode)
 final selectedLawCodeProvider =
     AutoDisposeNotifierProvider<SelectedLawCode, String?>.internal(

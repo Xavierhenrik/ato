@@ -39,7 +39,7 @@ class TutorWelcomeCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -47,7 +47,7 @@ class TutorWelcomeCard extends StatelessWidget {
                       'Olá, eu sou o tutor LCF ⚖️',
                       style: AppTextStyles.h3,
                     ),
-                    SizedBox(height: AppSpacing.xs),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       'Estou aqui para te ajudar a entender o Direito com base legal verificada.',
                       style: AppTextStyles.bodySmall,

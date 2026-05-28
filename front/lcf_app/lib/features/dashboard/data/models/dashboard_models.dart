@@ -2,16 +2,17 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'dashboard_models.g.dart';
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class StreakInfo {
   const StreakInfo({required this.current, required this.longest});
   final int current;
   final int longest;
   factory StreakInfo.fromJson(Map<String, dynamic> json) =>
       _$StreakInfoFromJson(json);
+  Map<String, dynamic> toJson() => _$StreakInfoToJson(this);
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class DailyProgress {
   const DailyProgress({
     required this.questionsAnsweredToday,
@@ -23,9 +24,10 @@ class DailyProgress {
   final int dailyGoalMins;
   factory DailyProgress.fromJson(Map<String, dynamic> json) =>
       _$DailyProgressFromJson(json);
+  Map<String, dynamic> toJson() => _$DailyProgressToJson(this);
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class DashboardData {
   const DashboardData({
     required this.name,
@@ -43,9 +45,10 @@ class DashboardData {
   final DailyProgress dailyProgress;
   factory DashboardData.fromJson(Map<String, dynamic> json) =>
       _$DashboardDataFromJson(json);
+  Map<String, dynamic> toJson() => _$DashboardDataToJson(this);
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class RevisionCard {
   const RevisionCard({
     required this.subject,
@@ -61,9 +64,10 @@ class RevisionCard {
   final String priority;
   factory RevisionCard.fromJson(Map<String, dynamic> json) =>
       _$RevisionCardFromJson(json);
+  Map<String, dynamic> toJson() => _$RevisionCardToJson(this);
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class SubjectPerformance {
   const SubjectPerformance({
     required this.subject,
@@ -77,9 +81,10 @@ class SubjectPerformance {
   final double accuracyRate;
   factory SubjectPerformance.fromJson(Map<String, dynamic> json) =>
       _$SubjectPerformanceFromJson(json);
+  Map<String, dynamic> toJson() => _$SubjectPerformanceToJson(this);
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 class PerformanceData {
   const PerformanceData({
     required this.totalAnswered,
@@ -93,4 +98,5 @@ class PerformanceData {
   final List<SubjectPerformance> bySubject;
   factory PerformanceData.fromJson(Map<String, dynamic> json) =>
       _$PerformanceDataFromJson(json);
+  Map<String, dynamic> toJson() => _$PerformanceDataToJson(this);
 }

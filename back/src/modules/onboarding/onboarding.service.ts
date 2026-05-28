@@ -1,5 +1,15 @@
+import { Prisma } from '@prisma/client';
 import { db } from '../../shared/db';
 import { Errors } from '../../shared/errors';
+
+type QuestionRow = {
+  id: string;
+  statement: string;
+  options: Record<string, string>;
+  subject: string;
+  year: number | null;
+  lawCode: string | null;
+};
 
 type AcademicPhase = 'graduation_start' | 'graduation_mid' | 'graduation_end' | 'oab_prep';
 
@@ -73,6 +83,36 @@ export class OnboardingService {
     return {
       nivelamentoPendente: false,
       nivelamentoConcluido: profile.nivelamentoConcluido,
+    };
+  }
+
+  async getQuestions(userId: string) {
+    const profile = await db.profile.findUnique({ where: { userId } });
+    if (!profile) throw Errors.notFound('Perfil');
+    if (!profile.nivelamentoPath) throw Errors.notFound('Caminho de nivelamento');
+
+    const type = profile.nivelamentoPath === 'oab' ? 'simulado' : 'review';
+
+    const rows = await db.$queryRaw<QuestionRow[]>(
+      Prisma.sql`
+        SELECT id, statement, options, subject, year, law_code AS "lawCode"
+        FROM questions
+        WHERE type = ${type} AND status = 'active'
+        ORDER BY RANDOM()
+        LIMIT 10
+      `,
+    );
+
+    return {
+      nivelamentoPath: profile.nivelamentoPath,
+      questions: rows.map((q) => ({
+        id: q.id,
+        enunciado: q.statement,
+        opcoes: q.options as Record<string, string>,
+        subject: q.subject,
+        year: q.year,
+        lawCode: q.lawCode,
+      })),
     };
   }
 

@@ -156,7 +156,7 @@ model TutorMessage {
 // ── Simulados — banco de questões (M5) ───────────────────────────────────────
 
 model Question {
-  id            String  @id @default(uuid())
+  id            String  @id @default(uuid()) @db.Uuid
   externalId    String? @unique @map("external_id")  // ID do banco externo
   statement     String  @db.Text
   options       Json                                  // {A, B, C, D: string}
@@ -219,6 +219,9 @@ model SimuladoQuestion {
   question Question        @relation(fields: [questionId], references: [id])
 
   @@unique([attemptId, questionId])
+  @@index([isCorrect])
+  @@index([answeredAt])
+  @@index([attemptId, isCorrect])
   @@map("simulado_questions")
 }
 

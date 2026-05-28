@@ -10,7 +10,13 @@
 
 | Method | Route | Auth | Descrição |
 |--------|-------|------|-----------|
-| GET | `/health` | — | Status da API |
+| GET | `/health` | — | Status da API com conectividade DB e Redis |
+
+### GET /health
+```json
+// Response 200 (sempre 200 — nunca 500)
+{ "status": "ok" | "degraded", "ts": "2026-05-24T12:00:00.000Z", "db": "ok" | "error", "redis": "ok" | "error" }
+```
 
 ---
 
@@ -86,8 +92,15 @@
 |--------|-------|------|-------------|-----------|
 | GET | `/manual/topics` | JWT | `lawCode?` | Lista tópicos (todos ou por diploma) |
 | GET | `/manual/topics/:id` | JWT | — | Conteúdo completo do tópico |
+| POST | `/manual/topics/:id/read` | JWT | — | Marca tópico como lido (idempotente) |
 | GET | `/manual/search` | JWT | `q`, `lawCode?` | Busca BM25 no corpus legal_articles |
 | GET | `/manual/articles` | JWT | `lawCode`, `article`, `paragraph?`, `inciso?` | Artigo exato do corpus |
+
+### POST /manual/topics/:id/read
+```json
+// Response 200
+{ "topicId": "uuid", "readAt": "2026-05-24T12:00:00.000Z" }
+```
 
 ---
 
@@ -124,8 +137,9 @@
 ```
 
 ### Rate limits:
-- Free: 20 msgs/dia → HTTP 429 com mensagem de upgrade
+- Free: 20 msgs/dia → HTTP 429 (Redis, rate limit de negócio)
 - PRO: 200 msgs/dia
+- Infra: 60 req/min por usuário (independente do plano)
 
 ---
 
@@ -134,21 +148,69 @@
 | Method | Route | Auth | Descrição |
 |--------|-------|------|-----------|
 | GET | `/simulados/questions` | JWT | Banco de questões. Query: `subject?`, `lawCode?`, `difficulty?`, `limit?` |
-| POST | `/simulados/start` | JWT | Inicia simulado. Body: `{ mode, subject?, totalQ }` |
+| POST | `/simulados/start` | JWT | Inicia simulado. Body: `{ mode, subject?, subjects?, totalQ, excludeAnswered? }` |
 | POST | `/simulados/:id/answer` | JWT | Responde questão. Body: `{ questionId, answer, timeSpentSecs? }` |
 | POST | `/simulados/:id/complete` | JWT | Finaliza simulado |
+| POST | `/simulados/:id/abandon` | JWT | Abandona simulado em andamento |
 | GET | `/simulados/:id/results` | JWT | Resultado completo com questões |
 | GET | `/simulados/history` | JWT | Últimas 20 tentativas completadas |
-| GET | `/simulados/in-progress` | JWT | Tentativa em andamento (404 se não houver) |
+| GET | `/simulados/in-progress` | JWT | Tentativa em andamento (204 se não houver) |
+
+### POST /simulados/start
+```json
+// Body
+{ "mode": "custom" | "oab_phase1" | "oab_phase2" | "weak_areas",
+  "subject": "Constitucional",
+  "subjects": ["Constitucional", "Civil"],
+  "totalQ": 30,
+  "excludeAnswered": true }
+
+// Response 200
+{ "id": "uuid", "mode": "custom", "status": "in_progress", "totalQ": 30, "totalQuestions": 30,
+  "subjects": ["Constitucional"], "startedAt": "...",
+  "questions": [{ "id": "uuid", "order": 1, "enunciado": "...", "opcoes": { "A": "...", "B": "...", "C": "...", "D": "..." }, "subject": "...", "difficulty": "medium" }] }
+
+// Errors: 400 Free>20q, 403 PRO_REQUIRED (weak_areas/excludeAnswered), 409 SIMULADO_IN_PROGRESS
+```
+
+### POST /simulados/:id/answer
+```json
+// Body
+{ "questionId": "uuid", "answer": "A" | "B" | "C" | "D", "timeSpentSecs": 45 }
+
+// Response 200
+{ "correct": true, "correctAnswer": "A", "explanation": "..." }
+// Free: explanation omitido
+```
+
+### POST /simulados/:id/abandon
+```json
+// Response 200
+{ "id": "uuid", "status": "abandoned" }
+```
 
 ### GET /simulados/in-progress
 ```json
-// Response 200: SimuladoAttempt (mesmo schema de POST /simulados/start)
-// Response 404
-{ "error": "NOT_FOUND" }
+// Response 200: mesmo schema de POST /simulados/start
+// Response 204: nenhum simulado em andamento
+```
+
+### GET /simulados/:id/results
+```json
+// Response 200
+{ "id": "uuid", "score": 75.0, "total": 30, "correct": 22, "wrong": 8,
+  "completedAt": "...", "bySubject": { "Constitucional": 80.0 },
+  "questions": [{ "id": "uuid", "order": 1, "enunciado": "...", "opcoes": {...},
+    "correctAnswer": "A", "userAnswer": "B", "isCorrect": false, "subject": "...",
+    "explanation": "..." }] }
+// Free: explanation omitido em cada questão
 ```
 
 ### Modos: `custom`, `oab_phase1`, `oab_phase2`, `weak_areas`
+### PRO-only: `mode: "weak_areas"`, `excludeAnswered: true`, campo `explanation` nos resultados
+
+### Rate limits (infra):
+- `POST /simulados/start`: 5 req/min por usuário
 
 ---
 
@@ -156,10 +218,30 @@
 
 | Method | Route | Auth | Descrição |
 |--------|-------|------|-----------|
-| GET | `/annotations` | JWT | Lista anotações do usuário. Query: `topicId?` |
-| POST | `/annotations` | JWT | Cria anotação. Body: `{ topicId?, lawCode?, articleRef?, content, highlight? }` |
-| PUT | `/annotations/:id` | JWT | Atualiza conteúdo. Body: `{ content }` |
+| GET | `/annotations` | JWT | Lista anotações. Query: `topicId?`, `subject?`, `tag?`, `q?` |
+| POST | `/annotations` | JWT | Cria anotação |
+| PUT | `/annotations/:id` | JWT | Atualiza anotação |
 | DELETE | `/annotations/:id` | JWT | Remove anotação |
+
+### POST /annotations
+```json
+// Body
+{ "topicId": "uuid", "lawCode": "CC", "articleRef": "Art. 186",
+  "content": "...", "highlight": "...", "title": "...",
+  "tags": ["prova", "importante"], "subject": "Civil" }
+
+// Response 201
+{ "id": "uuid", "userId": "...", "content": "...", "title": "...", "tags": [...], "subject": "...", "createdAt": "..." }
+```
+
+### GET /annotations query params:
+- `topicId`: filtra por tópico do Manual
+- `subject`: filtra por matéria (ex: `"Constitucional"`)
+- `tag`: filtra por tag no array JSON
+- `q`: busca full-text em `title` e `content`
+
+### Rate limits (infra):
+- `POST /annotations`: 30 req/min por usuário
 
 ---
 

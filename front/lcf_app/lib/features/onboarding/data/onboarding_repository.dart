@@ -57,6 +57,50 @@ class OnboardingResponse {
       _$OnboardingResponseFromJson(json);
 }
 
+class DiagnosticoQuestion {
+  const DiagnosticoQuestion({
+    required this.id,
+    required this.enunciado,
+    required this.opcoes,
+    this.subject,
+  });
+
+  final String id;
+  final String enunciado;
+  final Map<String, String> opcoes;
+  final String? subject;
+
+  factory DiagnosticoQuestion.fromJson(Map<String, dynamic> json) {
+    final raw = json['opcoes'] as Map<String, dynamic>? ?? {};
+    return DiagnosticoQuestion(
+      id: json['id'] as String? ?? '',
+      enunciado: json['enunciado'] as String? ?? '',
+      opcoes: raw.map((k, v) => MapEntry(k, v.toString())),
+      subject: json['subject'] as String?,
+    );
+  }
+}
+
+class DiagnosticoQuestionsResponse {
+  const DiagnosticoQuestionsResponse({
+    required this.nivelamentoPath,
+    required this.questions,
+  });
+
+  final String nivelamentoPath;
+  final List<DiagnosticoQuestion> questions;
+
+  factory DiagnosticoQuestionsResponse.fromJson(Map<String, dynamic> json) {
+    final raw = json['questions'] as List<dynamic>? ?? [];
+    return DiagnosticoQuestionsResponse(
+      nivelamentoPath: json['nivelamentoPath'] as String? ?? 'oab',
+      questions: raw
+          .map((q) => DiagnosticoQuestion.fromJson(q as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
+
 // ── Repository ────────────────────────────────────────────────────────────────
 
 class OnboardingRepository {
@@ -69,6 +113,13 @@ class OnboardingRepository {
       data: body.toJson(),
     );
     return OnboardingResponse.fromJson(resp.data!);
+  }
+
+  Future<DiagnosticoQuestionsResponse> getDiagnosticQuestions() async {
+    final resp = await _dio.get<Map<String, dynamic>>(
+      '/onboarding/diagnostic/questions',
+    );
+    return DiagnosticoQuestionsResponse.fromJson(resp.data!);
   }
 
   Future<void> diagnosticComplete() {

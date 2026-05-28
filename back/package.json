@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "dev:staging": "dotenv -e .env.staging -- tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/server.js",
     "start:staging": "dotenv -e .env.staging -- node dist/server.js",
     "lint": "eslint src --ext .ts",

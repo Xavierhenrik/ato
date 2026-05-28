@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../data/dashboard_repository.dart';
 import '../../providers/dashboard_provider.dart';
 import '../widgets/cards_materia_card.dart';
 import '../widgets/greeting_card.dart';
@@ -22,6 +23,10 @@ class DashboardScreen extends ConsumerStatefulWidget {
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Future<void> _onRefresh() async {
+    try {
+      final repo = await ref.read(dashboardRepositoryProvider.future);
+      await repo.invalidateCache();
+    } catch (_) {}
     ref.invalidate(dashboardDataProvider);
     ref.invalidate(revisionCardsProvider);
     ref.invalidate(performanceProvider);

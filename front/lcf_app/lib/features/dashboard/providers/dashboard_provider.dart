@@ -6,16 +6,19 @@ import '../data/models/dashboard_models.dart';
 part 'dashboard_provider.g.dart';
 
 @riverpod
-Future<DashboardData> dashboardData(DashboardDataRef ref) {
-  return ref.watch(dashboardRepositoryProvider).getHomeData();
+Future<DashboardData> dashboardData(DashboardDataRef ref) async {
+  final repo = await ref.watch(dashboardRepositoryProvider.future);
+  return repo.getHomeData();
 }
 
 @riverpod
-Future<List<RevisionCard>> revisionCards(RevisionCardsRef ref) {
-  return ref.watch(dashboardRepositoryProvider).getRevisionCards();
+Future<List<RevisionCard>> revisionCards(RevisionCardsRef ref) async {
+  final repo = await ref.watch(dashboardRepositoryProvider.future);
+  return repo.getRevisionCards();
 }
 
 @riverpod
-Future<PerformanceData> performance(PerformanceRef ref) {
-  return ref.watch(dashboardRepositoryProvider).getPerformance();
+Future<PerformanceData> performance(PerformanceRef ref) async {
+  final repo = await ref.watch(dashboardRepositoryProvider.future);
+  return repo.getPerformance();
 }

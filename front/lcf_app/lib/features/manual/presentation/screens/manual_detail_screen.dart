@@ -36,11 +36,10 @@ class _ManualDetailScreenState extends ConsumerState<ManualDetailScreen> {
 
   void _fireMarkAsRead() {
     ref
-        .read(manualRepositoryProvider)
-        .markAsRead(widget.topicId)
+        .read(manualRepositoryProvider.future)
+        .then((repo) => repo.markAsRead(widget.topicId))
         .then((_) {
           if (!mounted) return;
-          // Invalidate the currently shown topics list to reflect isRead: true
           final selectedCode = ref.read(selectedLawCodeProvider);
           ref.invalidate(manualTopicsProvider(lawCode: selectedCode));
           ref.invalidate(filteredTopicsProvider);

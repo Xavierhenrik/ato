@@ -30,15 +30,15 @@ class TutorSuggestionsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.lightbulb_outline, color: AppColors.accent, size: 18),
-              SizedBox(width: AppSpacing.sm),
+              const Icon(Icons.lightbulb_outline, color: AppColors.accent, size: 18),
+              const SizedBox(width: AppSpacing.sm),
               Text('Sugestões para começar', style: AppTextStyles.h3),
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
-          const Text(
+          Text(
             'Clique em um tema abaixo ou digite sua pergunta',
             style: AppTextStyles.bodySmall,
           ),

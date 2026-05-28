@@ -12,6 +12,7 @@ import '../../../../shared/widgets/lcf_app_bar.dart';
 import '../../../../shared/widgets/lcf_empty_state.dart';
 import '../../../../shared/widgets/lcf_error_state.dart';
 import '../../../../shared/widgets/lcf_loading_shimmer.dart';
+import '../../data/manual_repository.dart';
 import '../../data/models/manual_models.dart';
 import '../../providers/manual_provider.dart';
 import '../widgets/filter_chips_row.dart';
@@ -56,6 +57,17 @@ class _ManualListScreenState extends ConsumerState<ManualListScreen> {
     _debounce?.cancel();
   }
 
+  Future<void> _onRefresh() async {
+    try {
+      final repo = await ref.read(manualRepositoryProvider.future);
+      await repo.invalidateCache();
+    } catch (_) {}
+    ref.invalidate(manualTopicsProvider);
+    try {
+      await ref.read(filteredTopicsProvider.future);
+    } catch (_) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,7 +102,12 @@ class _ManualListScreenState extends ConsumerState<ManualListScreen> {
           Expanded(
             child: _isSearching
                 ? _SearchResultsView(query: _searchQuery)
-                : const _TopicsListView(),
+                : RefreshIndicator(
+                    color: AppColors.accent,
+                    backgroundColor: AppColors.backgroundCard,
+                    onRefresh: _onRefresh,
+                    child: const _TopicsListView(),
+                  ),
           ),
         ],
       ),

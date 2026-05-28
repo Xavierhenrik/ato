@@ -20,20 +20,29 @@ dependencies:
 
   # HTTP
   dio: ^5.4.1
-  retrofit: ^4.1.0
 
   # Auth + Backend
   supabase_flutter: ^2.3.2
 
+  # Fonte Inter via Google Fonts (C5 — offline bundling no Sprint F8)
+  google_fonts: ^6.2.1
+
+  # Offline-first cache (Sprint F8)
+  isar: ^3.1.0
+  isar_flutter_libs: ^3.1.0
+
   # Local storage
-  isar: ^3.1.0+1
-  isar_flutter_libs: ^3.1.0+1
   path_provider: ^2.1.2
+
+  # Deep links / URLs externas
+  url_launcher: ^6.2.0
 
   # UI
   flutter_svg: ^2.0.10+1
   cached_network_image: ^3.3.1
   shimmer: ^3.0.0
+  flutter_markdown: ^0.6.22
+  shared_preferences: ^2.2.2
 
   # Models
   json_annotation: ^4.8.1
@@ -45,8 +54,8 @@ dev_dependencies:
   build_runner: ^2.4.8
   riverpod_generator: ^2.3.9
   json_serializable: ^6.7.1
-  retrofit_generator: ^8.1.0
-  isar_generator: ^3.1.0+1
+  # retrofit_generator removido — repositórios usam Dio puro (Sprint F1)
+  isar_generator: ^3.1.0
 
 flutter:
   uses-material-design: true

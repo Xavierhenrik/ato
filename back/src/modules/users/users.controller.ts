@@ -3,9 +3,10 @@ import { z } from 'zod';
 import { UsersService } from './users.service';
 
 const UpdateProfileSchema = z.object({
-  name:          z.string().min(1).optional(),
-  avatarUrl:     z.string().url().optional(),
-  academicPhase: z.enum(['graduation_start', 'graduation_mid', 'graduation_end', 'oab_prep']).optional(),
+  name:           z.string().min(1).optional(),
+  avatarUrl:      z.string().url().optional(),
+  academicPhase:  z.enum(['graduation_start', 'graduation_mid', 'graduation_end', 'oab_prep']).optional(),
+  dailyStudyMins: z.number().int().min(15).max(480).optional(),
 });
 
 const UpdateNotifSchema = z.object({

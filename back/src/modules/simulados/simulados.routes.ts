@@ -14,8 +14,20 @@ export async function simuladosRoutes(app: FastifyInstance) {
   // Histórico de simulados concluídos
   app.get('/history', { preHandler: [requireAuth] }, ctrl.getHistory.bind(ctrl));
 
-  // Inicia simulado
-  app.post('/start', { preHandler: [requireAuth] }, ctrl.start.bind(ctrl));
+  // Inicia simulado — rate limit: 5 req/min por usuário
+  app.post('/start', {
+    preHandler: [requireAuth],
+    config: {
+      rateLimit: {
+        max: 5,
+        timeWindow: '1 minute',
+        keyGenerator: (req) => {
+          const user = (req as unknown as Record<string, unknown>).currentUser as { id: string } | undefined;
+          return user?.id ?? req.ip;
+        },
+      },
+    },
+  }, ctrl.start.bind(ctrl));
 
   // Responde uma questão
   app.post('/:id/answer', { preHandler: [requireAuth] }, ctrl.answer.bind(ctrl));

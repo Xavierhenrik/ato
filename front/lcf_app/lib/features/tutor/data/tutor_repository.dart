@@ -11,20 +11,24 @@ class TutorRepository {
   final Dio _dio;
 
   Future<TutorSession> createSession() async {
-    final resp = await _dio.post<Map<String, dynamic>>('/tutor/session/new');
+    final resp = await _dio.post<Map<String, dynamic>>(
+      '/tutor/session/new',
+      data: <String, dynamic>{}, // explicit empty body — Fastify rejects Content-Type:json with no body
+    );
     return TutorSession(id: resp.data!['session_id'] as String);
   }
 
   Future<SendMessageResponse> sendMessage(
     String sessionId,
-    String content,
-  ) async {
+    String content, {
+    String mode = 'direct',
+  }) async {
     final resp = await _dio.post<Map<String, dynamic>>(
       '/tutor/message',
       data: {
         'session_id': sessionId,
         'message': content,
-        'mode': 'direct',
+        'mode': mode,
       },
     );
     final data = resp.data!;

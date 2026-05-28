@@ -6,6 +6,8 @@ import rateLimit from '@fastify/rate-limit';
 import * as Sentry from '@sentry/node';
 
 import { AppError } from './shared/errors';
+import { db } from './shared/db';
+import { redis } from './shared/redis';
 import { authRoutes } from './modules/auth/auth.routes';
 import { onboardingRoutes } from './modules/onboarding/onboarding.routes';
 import { dashboardRoutes } from './modules/dashboard/dashboard.routes';
@@ -81,8 +83,32 @@ export async function buildApp() {
     });
   });
 
-  // Health check
-  app.get('/health', async () => ({ status: 'ok', ts: new Date().toISOString() }));
+  // Health check — sempre retorna HTTP 200 para evitar restart loops
+  app.get('/health', async (_req, reply) => {
+    let dbStatus: 'ok' | 'error' = 'ok';
+    let redisStatus: 'ok' | 'error' = 'ok';
+
+    try {
+      await db.$queryRaw`SELECT 1`;
+    } catch {
+      dbStatus = 'error';
+    }
+
+    try {
+      await redis.ping();
+    } catch {
+      redisStatus = 'error';
+    }
+
+    const overallStatus = dbStatus === 'ok' && redisStatus === 'ok' ? 'ok' : 'degraded';
+
+    return reply.code(200).send({
+      status: overallStatus,
+      ts: new Date().toISOString(),
+      db: dbStatus,
+      redis: redisStatus,
+    });
+  });
 
   // Modules
   await app.register(authRoutes, { prefix: '/auth' });

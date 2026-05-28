@@ -173,6 +173,7 @@ class SimuladoHistoryItem {
     required this.id,
     required this.mode,
     required this.totalQuestions,
+    required this.correctAnswers,
     required this.score,
     this.completedAt,
     this.subject,
@@ -181,6 +182,7 @@ class SimuladoHistoryItem {
   final String id;
   final String mode;
   final int totalQuestions;
+  final int correctAnswers;
   final double score;
   final DateTime? completedAt;
   final String? subject;
@@ -190,6 +192,7 @@ class SimuladoHistoryItem {
         id: json['id'] as String? ?? '',
         mode: json['mode'] as String? ?? 'custom',
         totalQuestions: json['totalQuestions'] as int? ?? 0,
+        correctAnswers: json['correctAnswers'] as int? ?? 0,
         score: (json['score'] as num?)?.toDouble() ?? 0.0,
         completedAt: json['completedAt'] != null
             ? DateTime.parse(json['completedAt'] as String)

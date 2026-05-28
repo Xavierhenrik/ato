@@ -31,7 +31,7 @@ class _SimuladoConfigScreenState
   int _selectedQuantity = 15;
   bool _isStarting = false;
 
-  static const _quantities = [10, 15, 30, 50, 100];
+  static const _quantities = [10, 15, 30, 50, 80];
 
   bool _isModeLockedForFree(SimuladoMode mode) =>
       mode == SimuladoMode.oabPhase2 || mode == SimuladoMode.weakAreas;

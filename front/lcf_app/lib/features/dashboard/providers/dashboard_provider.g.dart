@@ -6,7 +6,7 @@ part of 'dashboard_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$dashboardDataHash() => r'f8a85708293d3e824f64919d050f68876e2ae661';
+String _$dashboardDataHash() => r'9890a9728d84b336f6dba45e7b019145dcabdc8e';
 
 /// See also [dashboardData].
 @ProviderFor(dashboardData)
@@ -21,7 +21,7 @@ final dashboardDataProvider = AutoDisposeFutureProvider<DashboardData>.internal(
 );
 
 typedef DashboardDataRef = AutoDisposeFutureProviderRef<DashboardData>;
-String _$revisionCardsHash() => r'0a942c165e2bf3c831d059710ba2423cfbc67b26';
+String _$revisionCardsHash() => r'e05218f20cb3c88a2ff6332d50c429fc30049f4d';
 
 /// See also [revisionCards].
 @ProviderFor(revisionCards)
@@ -37,7 +37,7 @@ final revisionCardsProvider =
 );
 
 typedef RevisionCardsRef = AutoDisposeFutureProviderRef<List<RevisionCard>>;
-String _$performanceHash() => r'97e7a53ea827f27e48b47d80646d808248905ddd';
+String _$performanceHash() => r'4d75aa07ef787628b6bf4e9f7e65499a8bd728a6';
 
 /// See also [performance].
 @ProviderFor(performance)

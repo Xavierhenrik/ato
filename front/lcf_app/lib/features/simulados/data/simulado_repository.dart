@@ -27,11 +27,9 @@ class SimuladoRepository {
   }
 
   Future<SimuladoAttempt?> getInProgress() async {
-    final resp =
-        await _dio.get<Map<String, dynamic>>('/simulados/in-progress');
-    final data = resp.data;
-    if (data == null) return null;
-    return SimuladoAttempt.fromJson(data);
+    final resp = await _dio.get<dynamic>('/simulados/in-progress');
+    if (resp.statusCode == 204 || resp.data == null) return null;
+    return SimuladoAttempt.fromJson(resp.data as Map<String, dynamic>);
   }
 
   Future<AnswerResult> answerQuestion({
@@ -67,9 +65,8 @@ class SimuladoRepository {
   }
 
   Future<List<SimuladoHistoryItem>> getHistory() async {
-    final resp =
-        await _dio.get<Map<String, dynamic>>('/simulados/history');
-    final raw = resp.data!['attempts'] as List<dynamic>? ?? [];
+    final resp = await _dio.get<dynamic>('/simulados/history');
+    final raw = (resp.data as List<dynamic>?) ?? [];
     return raw
         .map((e) =>
             SimuladoHistoryItem.fromJson(e as Map<String, dynamic>))

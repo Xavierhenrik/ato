@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -56,7 +57,7 @@ class ProGateSheet extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
 
           // Title
-          const Text('Recurso PRÓ', style: AppTextStyles.h2),
+          Text('Recurso PRÓ', style: AppTextStyles.h2),
           const SizedBox(height: AppSpacing.sm),
           Text(
             'Assine o LCF PRÓ para acessar $feature e muitos outros recursos exclusivos.',
@@ -83,7 +84,10 @@ class ProGateSheet extends StatelessWidget {
           // CTA
           LcfButton(
             label: 'Assinar PRÓ — R\$29,90/mês',
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.push('/subscription');
+            },
           ),
           const SizedBox(height: AppSpacing.sm),
           LcfButton(

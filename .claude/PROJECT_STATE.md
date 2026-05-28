@@ -1,6 +1,6 @@
 ---
-updated: 2026-05-24
-sprint: "Sprint 3 concluído · F8 Hardening: UI/UX pass concluído · flutter analyze zero issues"
+updated: 2026-05-27
+sprint: "Quiz Diagnóstico end-to-end — backend GET /diagnostic/questions + Flutter UI funcional"
 ---
 
 # LCF — Estado do Projeto
@@ -10,11 +10,11 @@ sprint: "Sprint 3 concluído · F8 Hardening: UI/UX pass concluído · flutter a
 
 ---
 
-## Sprint Atual: Sprint 3 — PRO Features & Monetização
+## Sprint Atual: Sprint 4 — Hardening & Integração ✅ Completo
 
-**Objetivo:** Tutor IA gaps PRO fechados + Subscriptions hardening. Próximo: Push Notifications (OneSignal — aguardando credenciais).
+**Objetivo:** Backend production-ready. Segurança, performance, health check, API contract sync.
 
-**Pré-requisito atendido:** Sprint 2 concluído.
+**Pré-requisito atendido:** Sprints 1–3 concluídos.
 
 ---
 
@@ -32,6 +32,7 @@ sprint: "Sprint 3 concluído · F8 Hardening: UI/UX pass concluído · flutter a
 | **Users** | ✅ Completo | — | 1 |
 | **M5 — Simulados** | ✅ Completo (bug response field names — FIXED) | — | 2 |
 | **Push Notifications** | ⏳ Bloqueado | Aguardando ONESIGNAL_APP_ID + API_KEY | 3 |
+| **Sprint 4 — Hardening** | ✅ Completo | — | 4 |
 
 ---
 
@@ -105,7 +106,7 @@ sprint: "Sprint 3 concluído · F8 Hardening: UI/UX pass concluído · flutter a
 
 | Migration | Módulo | Sprint |
 |-----------|--------|--------|
-| Índices compostos em `SimuladoQuestion` | Sprint 4 Hardening | 4 |
+| Índices compostos em `SimuladoQuestion` + `@db.Uuid` em `Question.id` | Sprint 4 Hardening | 4 — aplicar com `npx prisma migrate dev --name sprint4_simulado_indexes` |
 
 > Migrations do Sprint 1 aplicadas em 2026-05-03 via `prisma/migrations/sprint1_manual.sql`
 > (staging + live). Detalhes em `.claude/sessions/2026-05-03_sprint1.md`.
@@ -114,8 +115,7 @@ sprint: "Sprint 3 concluído · F8 Hardening: UI/UX pass concluído · flutter a
 
 | Item | Impacto | Sprint |
 |------|---------|--------|
-| FK `simulado_questions → questions` ausente (type mismatch UUID/TEXT) | Baixo — integridade garantida pela app | 4 Hardening |
-| `questions.id` é UUID no ETL mas mapeado como `String` no Prisma sem `@db.Uuid` | Baixo — PostgreSQL faz cast implícito | 4 Hardening |
+| FK `simulado_questions → questions` implícita via Prisma relation | Baixo — a FK existe via Prisma ORM; `@db.Uuid` adicionado a `questions.id` resolve o type mismatch UUID/TEXT | ✅ Resolvido Sprint 4 |
 
 ---
 
@@ -124,7 +124,7 @@ sprint: "Sprint 3 concluído · F8 Hardening: UI/UX pass concluído · flutter a
 | Decisão | Bloqueia | Status |
 |---------|---------|--------|
 | Pricing model PRO | Sprint 3 — RevenueCat config | ⏳ Pendente |
-| Banco de questões | Sprint 2 — M5 Simulados | ✅ Concluído — 2.210 questões OAB em live + staging (legal_articles 18.779 também migrados) |
+| Banco de questões | Sprint 2 — M5 Simulados | ✅ Concluído — 2.210 questões OAB + 5.791 questões review (active) em live + staging |
 | Topics (M3 Manual) | Pipeline generate_review_questions.py | ✅ Concluído — 1.883 topics em live + staging (2026-05-04) |
 | App IDs Apple/Google | Sprint 3 — IAP | ⏳ Pendente |
 | OneSignal App ID + API Key | Sprint 3 — Push | ⏳ Pendente |
@@ -140,6 +140,14 @@ sprint: "Sprint 3 concluído · F8 Hardening: UI/UX pass concluído · flutter a
 | 2026-05-02 | Quiz Diagnóstico universal: dois caminhos (oab / graduation), opcional com dismiss consciente | Personalização real > autoavaliação; dismiss ≠ skip |
 | 2026-05-02 | graduation_end adicionado como 4ª fase acadêmica (90 dias) | Design identificou lacuna entre graduation_mid e oab_prep |
 | 2026-05-02 | studyGoal e selectedSubjects removidos do onboarding | Autoavaliação é ruído; comportamento do app é sinal |
+| 2026-05-24 | Rate limits granulares por rota (`/simulados/start` 5/min, `/annotations` 30/min, `/tutor/message` 60/min) | Separar rate limit de infra (Fastify) do rate limit de negócio (Redis) | 
+| 2026-05-24 | Health check sempre retorna HTTP 200 com `status: degraded` em falha | Evitar restart loops em Railway quando DB/Redis estão lentos |
+| 2026-05-27 | `GET /users/profile` agora retorna `email` (User) e `plan` (Subscription) via Promise.all | Badge PRO e gates de feature na tela Perfil dependem desses campos |
+| 2026-05-27 | `PUT /users/profile` aceita `dailyStudyMins` (Zod min:15 max:480) | Flutter enviava o campo; backend ignorava silenciosamente |
+| 2026-05-27 | `GET /simulados/history` retorna array direto (não `{attempts:[]}`) | Alinhamento contrato real — fix crash TypeError Flutter |
+| 2026-05-27 | `GET /simulados/in-progress` retorna 204 sem corpo quando vazio | Fix crash null em Flutter ao abrir app sem simulado em andamento |
+| 2026-05-27 | Quantidade máxima de questões em SimuladoConfig: 100→80 | Backend valida totalQ max(80); opção 100 causava 400 sempre |
+| 2026-05-27 | TutorRepository.sendMessage aceita parâmetro `mode` (default: 'direct') | Prepara extensão de contexto topico/questão sem quebrar comportamento atual |
 
 ---
 
@@ -156,7 +164,8 @@ sprint: "Sprint 3 concluído · F8 Hardening: UI/UX pass concluído · flutter a
 | **F5 — Simulados** | ✅ Concluído | — |
 | **F6 — Anotações** | ✅ Concluído | — |
 | **F7 — Perfil + Assinatura** | ✅ Concluído | 12 arquivos — models, repository, provider, 5 widgets, 2 screens, router atualizado. url_launcher adicionado. `flutter analyze` zero issues |
-| **F8 — Hardening + Offline** | 🟡 Em andamento | UI/UX pass concluído (waves 1–4); offline-first (Isar) pendente |
+| **F8 — Hardening + Offline** | ✅ Concluído | UI/UX pass (waves 1–4) + offline-first Isar (fallback stale, invalidateCache, pull-to-refresh 3 telas). `flutter analyze` zero issues. |
+| **F9 — Quiz Diagnóstico** | ✅ Concluído | `GET /diagnostic/questions` backend + Flutter UI funcional (questões reais, progresso, avanço). `tsc --noEmit` + `flutter analyze` zero. |
 
 ### Para ativar o Sprint F1 (próximos passos obrigatórios)
 
@@ -208,7 +217,11 @@ flutter run \
 | 2026-05-24 | sessions/2026-05-24_sprint_f7_perfil.md | Sprint F7 Perfil + Assinatura: 12 arquivos Flutter — perfil_models, perfil_repository, perfil_provider, 5 widgets (ProfileHeader, DadosPessoaisCard, SegurancaCard, LcfProBannerCard, PreferenciasCard), 2 screens (PerfilScreen, SubscriptionScreen), router atualizado, url_launcher adicionado. build_runner + flutter analyze zero issues. |
 | 2026-05-24 | sessions/2026-05-24_contract_fix_simulados.md | Contract fix simulados: 4 blockers corrigidos em simulados.service.ts — enunciado/opcoes (startAttempt+getInProgress), total/correct/wrong/bySubject/questões achatadas (getResults), lista→objeto único 204 (getInProgress), totalQuestions/correctAnswers (getHistory). tsc --noEmit zero erros. |
 | 2026-05-24 | — | Hotfix submitAnswer: `isCorrect` → `correct` em simulados.service.ts (field name mismatch Flutter). tsc --noEmit zero erros. |
+| 2026-05-24 | sessions/2026-05-24_sprint4_hardening.md | Sprint 4 completo: rate limits granulares, índices DB, @db.Uuid, health check DB+Redis, api-contract.md atualizado. tsc zero erros. |
 | 2026-05-24 | — | F8 Hardening · UI/UX pass concluído (waves 1–4): bugs críticos (ProGateSheet→/subscription, ChatBubble markdown, AppColors.success verde), perf (ListView.builder result, TextStyle static, scroll throttle), polish (InkWell+Haptics, Material3 NavigationBar, custom transitions, fake streaming, chips ShaderMask), auth (Google icon real, Lembrar-me persistente). flutter_markdown + shared_preferences adicionados. flutter analyze zero issues. |
+| 2026-05-24 | sessions/2026-05-24_pipeline_retomada.md | Auditoria pipeline ETL: review_gen 1.874/1.874 done (5.791 questões pending_review), enrich_topics 1.883/1.883 done (1.890 resumos aprovados). Ambos pipelines concluídos — PROJECT_STATE atualizado. |
+| 2026-05-27 | sessions/2026-05-27_sprint_f8_offline.md | Sprint F8 offline-first (Isar): fallback stale cache em ManualRepository + DashboardRepository, invalidateCache(), pull-to-refresh em 3 telas (Dashboard, Manual, Anotações), bugfix markAsRead async. flutter analyze zero issues. |
+| 2026-05-27 | sessions/2026-05-27_sprint_diagnostico.md | Quiz Diagnóstico end-to-end: GET /onboarding/diagnostic/questions (backend) + DiagnosticoQuizNotifier + _AnsweringState funcional (Flutter). tsc + flutter analyze zero. |
 
 
 
@@ -222,20 +235,22 @@ flutter run \
 |------|--------|
 | **Script ETL Topics** | `corpus/etl-questions/scripts/generate_topics_from_articles.py` ✅ Criado e executado |
 | **Script Questões** | `corpus/etl-questions/scripts/generate_review_questions.py` ✅ Criado e corrigido (2026-05-07) |
-| **Script Enriquecimento** | `corpus/etl-questions/scripts/enrich_topics_llm.py` ✅ Criado (2026-05-19) — aguardando execução |
+| **Script Enriquecimento** | `corpus/etl-questions/scripts/enrich_topics_llm.py` ✅ Criado e executado — 1.883/1.883 tópicos enriquecidos, 1.890 aprovados (2026-05-19) |
 | **Runner loop** | `corpus/etl-questions/scripts/run_pipeline_loop.py` ✅ Criado — reinício automático pós-quota |
 | **Documentação** | `corpus/etl-questions/REVIEW_QUESTIONS_PIPELINE.md` ✅ Criado |
 | **Pré-requisito Topics** | ✅ 1.883 topics em staging + live (2026-05-04) |
 | **Execução parcial (2026-05-07 Gemini)** | ✅ 45/1.874 tópicos — 164 questões (Civil) — Gemini quota esgotada |
-| **Execução ativa (2026-05-07 Sabiá-4)** | 🔄 51+/1.874 tópicos — 245+ questões em staging — pipeline rodando com Sabiá-4 |
-| **Retomada** | `python run_pipeline_loop.py` — checkpoint em `data/checkpoints/review_gen_checkpoint.json` |
+| **Execução ativa (2026-05-07 Sabiá-4)** | ✅ 1.874/1.874 tópicos — 5.791 questões validadas em staging — pipeline concluído |
+| **Retomada** | ✅ Concluído — checkpoint: 1.874 done, 0 planned, 0 failed |
 
-### Estado do Checkpoint (2026-05-07)
+### Estado do Checkpoint (2026-05-24 — auditado por agente)
 
-- **Done**: 45 tópicos (todos Civil) — 164 questões em staging
-- **Generating** (killed mid-run): 3 tópicos Civil — retomados automaticamente no próximo run
-- **Planned**: 1.826 tópicos (todas as demais matérias + Civil restante)
-- **Quota Gemini**: free tier diária exaurida em 2026-05-07 — retomar no dia seguinte
+- **Done**: 1.874/1.874 tópicos — pipeline de questões de revisão 100% concluído
+- **Generated**: 5.799 questões (todas as matérias — CF, CC, CP, CPC, CPP, CLT, CTN, CDC, OAB)
+- **Validated**: 5.791 questões aprovadas (score ≥ 7/10) — promovidas para `status: active` (2026-05-24)
+- **Rejected**: 8 questões descartadas pelo Validator
+- **Failed**: 0 tópicos com falha
+- **Enrich Topics (Fase 2)**: 1.883/1.883 tópicos enriquecidos com resumos didáticos Sabiá-4 — 1.890 aprovados, 0 reprovados
 
 ### Como retomar
 

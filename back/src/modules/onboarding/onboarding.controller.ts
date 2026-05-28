@@ -25,4 +25,9 @@ export class OnboardingController {
     const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
     return reply.send(await this.svc.dismissQuiz(user.id));
   }
+
+  async getQuestions(req: FastifyRequest, reply: FastifyReply) {
+    const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
+    return reply.send(await this.svc.getQuestions(user.id));
+  }
 }
