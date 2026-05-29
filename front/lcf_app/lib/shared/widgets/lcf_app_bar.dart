@@ -63,12 +63,34 @@ class LcfAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 // AppBar variante Tutor IA — LCF box à esquerda, título alinhado à esquerda
 class LcfTutorAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const LcfTutorAppBar({super.key, this.actions});
+  const LcfTutorAppBar({
+    super.key,
+    this.actions,
+    this.showBack = false,
+    this.fallbackRoute = '/dashboard',
+  });
 
   final List<Widget>? actions;
+  final bool showBack;
+  final String fallbackRoute;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  Widget? _resolveLeading(BuildContext context) {
+    if (!showBack) return null;
+    return IconButton(
+      icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+      tooltip: 'Voltar',
+      onPressed: () {
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.go(fallbackRoute);
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +98,8 @@ class LcfTutorAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: AppColors.background,
       elevation: 0,
       automaticallyImplyLeading: false,
-      titleSpacing: AppSpacing.lg,
+      leading: _resolveLeading(context),
+      titleSpacing: showBack ? null : AppSpacing.lg,
       title: Row(
         children: [
           // LCF logo box com borda gold

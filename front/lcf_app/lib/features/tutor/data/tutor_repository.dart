@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/network/api_client.dart';
-import 'models/tutor_models.dart';
+import 'models/tutor_models.dart'; // TutorMessage, TutorTopicContext, etc.
 
 part 'tutor_repository.g.dart';
 
@@ -22,6 +22,7 @@ class TutorRepository {
     String sessionId,
     String content, {
     String mode = 'direct',
+    TutorTopicContext? topicContext,
   }) async {
     final resp = await _dio.post<Map<String, dynamic>>(
       '/tutor/message',
@@ -29,6 +30,7 @@ class TutorRepository {
         'session_id': sessionId,
         'message': content,
         'mode': mode,
+        if (topicContext != null) 'context': topicContext.toJson(),
       },
     );
     final data = resp.data!;
@@ -51,8 +53,11 @@ class TutorRepository {
     );
   }
 
-  Future<void> deleteSession(String sessionId) async {
-    await _dio.delete<void>('/tutor/session/$sessionId');
+  Future<void> deleteSession(String sessionId, {String mode = 'direct'}) async {
+    await _dio.delete<void>(
+      '/tutor/session/$sessionId',
+      queryParameters: {'mode': mode},
+    );
   }
 }
 

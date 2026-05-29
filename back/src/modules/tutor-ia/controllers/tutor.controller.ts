@@ -4,7 +4,7 @@ import { TutorService } from '../services/tutor.service';
 import { SessionService } from '../services/session.service';
 import { db } from '../../../shared/db';
 import { redis, keys } from '../../../shared/redis';
-import { FOLLOW_UP_CHIPS } from '../prompts/chips.config';
+import { FOLLOW_UP_CHIPS, READING_CHIPS } from '../prompts/chips.config';
 
 const MessageBodySchema = z.object({
   session_id: z.string().uuid(),
@@ -66,7 +66,8 @@ export class TutorController {
       logger: req.log,
     });
 
-    return reply.send({ ...response, chips: FOLLOW_UP_CHIPS });
+    const chips = body.mode === 'reading' ? READING_CHIPS : FOLLOW_UP_CHIPS;
+    return reply.send({ ...response, chips });
   }
 
   async getSession(req: FastifyRequest, reply: FastifyReply) {

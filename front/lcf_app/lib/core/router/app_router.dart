@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -23,7 +24,9 @@ import '../../features/simulados/data/models/simulado_models.dart';
 import '../../features/simulados/presentation/screens/simulado_attempt_screen.dart';
 import '../../features/simulados/presentation/screens/simulado_config_screen.dart';
 import '../../features/simulados/presentation/screens/simulado_result_screen.dart';
+import '../../features/tutor/data/models/tutor_models.dart';
 import '../../features/tutor/presentation/screens/tutor_screen.dart';
+import '../../features/tutor/providers/tutor_provider.dart';
 import '../../shared/widgets/scaffold_with_nav.dart';
 
 part 'app_router.g.dart';
@@ -144,6 +147,28 @@ GoRouter appRouter(AppRouterRef ref) {
       GoRoute(
         path: '/diagnostico',
         builder: (context, state) => const DiagnosticoScreen(),
+      ),
+
+      // ── Tutor com contexto do Manual (push, sem BottomNav) ───────────
+      // ProviderScope isolado: garante que a sessão de contexto não interfere
+      // com a sessão do Tutor tab (tutorNotifierProvider global).
+      GoRoute(
+        path: '/tutor/context',
+        pageBuilder: (context, state) {
+          final args = state.extra as TutorScreenArgs?;
+          return _fadeSlidePage(
+            state,
+            ProviderScope(
+              overrides: [
+                tutorNotifierProvider.overrideWith(TutorNotifier.new),
+              ],
+              child: TutorScreen(
+                initialMessage: args?.initialMessage,
+                topicContext: args?.topicContext,
+              ),
+            ),
+          );
+        },
       ),
 
       // ── Push routes (sem ShellRoute) ──────────────────────────────────

@@ -1,6 +1,6 @@
 ---
-updated: 2026-05-27
-sprint: "Quiz Diagnóstico end-to-end — backend GET /diagnostic/questions + Flutter UI funcional"
+updated: 2026-05-28
+sprint: "Verificação emulador Android — LcfMarkdownBody, Dio 401 fix, AGP 9+ profile build"
 ---
 
 # LCF — Estado do Projeto
@@ -150,6 +150,8 @@ Nenhuma pendente.
 | 2026-05-28 | `LcfMarkdownBody` widget compartilhado — `shared/widgets/lcf_markdown_body.dart` | Elimina ~60 linhas de MarkdownStyleSheet duplicado entre ChatBubble e TopicSectionTile |
 | 2026-05-28 | NotificationsService implementado com graceful degradation | Sem ONESIGNAL_APP_ID: sendPush retorna {success:false}, validatePlayer retorna false → PUT /notifications/player lança 400. Credenciais OneSignal ainda pendentes. |
 | 2026-05-28 | Rota PUT /users/notifications/player separada de PUT /users/notifications | Evita quebrar contrato Flutter das preferências gerais; player ID tem validação UUID + OneSignal API |
+| 2026-05-28 | Retry manual 401 removido do Dio interceptor (`api_client.dart`) | Loop infinito com Supabase staging JWT; SDK Flutter já gerencia refresh via `onAuthStateChange` |
+| 2026-05-28 | Profile APK fix: pré-criar `aar_metadata` de profile em `build/isar_flutter_libs/` | AGP 9+ desabilita `writeProfileAarMetadata` via `whenTaskAdded`; sem o arquivo pré-criado, `checkProfileAarMetadata` falha (path not found). Rebuild após `flutter clean` requer recriar. |
 
 ---
 
@@ -224,6 +226,10 @@ flutter run \
 | 2026-05-24 | sessions/2026-05-24_pipeline_retomada.md | Auditoria pipeline ETL: review_gen 1.874/1.874 done (5.791 questões pending_review), enrich_topics 1.883/1.883 done (1.890 resumos aprovados). Ambos pipelines concluídos — PROJECT_STATE atualizado. |
 | 2026-05-27 | sessions/2026-05-27_sprint_f8_offline.md | Sprint F8 offline-first (Isar): fallback stale cache em ManualRepository + DashboardRepository, invalidateCache(), pull-to-refresh em 3 telas (Dashboard, Manual, Anotações), bugfix markAsRead async. flutter analyze zero issues. |
 | 2026-05-27 | sessions/2026-05-27_sprint_diagnostico.md | Quiz Diagnóstico end-to-end: GET /onboarding/diagnostic/questions (backend) + DiagnosticoQuizNotifier + _AnsweringState funcional (Flutter). tsc + flutter analyze zero. |
+| 2026-05-28 | sessions/2026-05-28_android_fix_markdown_refactor.md | AGP 9+ fix (isar_flutter_libs namespace+AarMetadata), LcfMarkdownBody widget compartilhado, refactor ChatBubble+TopicSectionTile, emulador configurado, usuário staging criado. |
+| 2026-05-28 | sessions/2026-05-28_backend_cleanup.md | Dead code removido em dismissQuiz, nixpacks.toml deletado. tsc zero erros. |
+| 2026-05-28 | sessions/2026-05-28_notifications_service.md | NotificationsService com graceful degradation, PUT /users/notifications/player, validatePlayer OneSignal. tsc zero erros. |
+| 2026-05-28 | sessions/2026-05-28_verificacao_emulador.md | Verificação completa no emulador: Dashboard OK, LcfMarkdownBody bold dourado confirmado (Manual+Tutor), Dio 401 fix confirmado, profile APK 77.3MB gerado (fix metadados isar_flutter_libs). |
 
 
 

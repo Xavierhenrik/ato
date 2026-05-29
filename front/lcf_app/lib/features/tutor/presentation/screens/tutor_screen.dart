@@ -8,7 +8,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/lcf_app_bar.dart';
 import '../../../../shared/widgets/pro_gate_sheet.dart';
-import '../../data/models/tutor_models.dart';
+import '../../data/models/tutor_models.dart'; // TutorMessage, TutorTopicContext, TutorScreenArgs
 import '../../providers/tutor_provider.dart';
 import '../widgets/chat_bubble.dart';
 import '../widgets/chat_input_bar.dart';
@@ -17,7 +17,18 @@ import '../widgets/tutor_empty_state.dart';
 import '../widgets/typing_indicator.dart';
 
 class TutorScreen extends ConsumerStatefulWidget {
-  const TutorScreen({super.key});
+  const TutorScreen({
+    super.key,
+    this.initialMessage,
+    this.topicContext,
+  });
+
+  /// Mensagem enviada automaticamente ao abrir a tela (e.g. "Resumo para prova").
+  final String? initialMessage;
+
+  /// Contexto de leitura do Manual. Quando presente, o Tutor recebe o conteúdo
+  /// do tópico no system prompt e responde os chips de modo 'reading'.
+  final TutorTopicContext? topicContext;
 
   @override
   ConsumerState<TutorScreen> createState() => _TutorScreenState();
@@ -28,6 +39,27 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
   final _scrollController = ScrollController();
 
   bool _pendingScroll = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Se aberto com contexto (desde o Manual), inicializa o notifier e
+    // envia a mensagem inicial no próximo frame (widget já está na árvore).
+    if (widget.topicContext != null || widget.initialMessage != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (widget.topicContext != null) {
+          ref.read(tutorNotifierProvider.notifier).initWithContext(
+                mode: 'reading',
+                topicContext: widget.topicContext,
+              );
+        }
+        if (widget.initialMessage != null) {
+          _onSend(widget.initialMessage!);
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -146,6 +178,9 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: LcfTutorAppBar(
+        // Exibe botão de voltar quando aberto em modo contexto (desde o Manual).
+        showBack: widget.topicContext != null,
+        fallbackRoute: '/manual',
         actions: [
           if (hasMessages)
             IconButton(

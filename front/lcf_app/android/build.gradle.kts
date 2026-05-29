@@ -39,7 +39,12 @@ subprojects {
         } catch (_: Exception) {}
     }
 
-    // Fix 2: desabilita checkAarMetadata para isar_flutter_libs (false-positive de compileSdk)
+    // Fix 2: desabilita writeAarMetadata e checkAarMetadata para isar_flutter_libs.
+    // isar_flutter_libs 3.1.0 é pré-compilado com compileSdk=30; o checkAarMetadata do AGP
+    // 9+ falha com false-positive de "compileSdkVersion too low". O writeAarMetadata é
+    // desabilitado junto para que a task bundleXxxAar não sobrescreva os arquivos de
+    // metadados que pre-criamos manualmente em build/isar_flutter_libs/intermediates/
+    // (debug, release e profile). Veja: android/build.gradle.kts — seção Fix 2.
     if (name == "isar_flutter_libs") {
         tasks.whenTaskAdded {
             if ("AarMetadata" in name) enabled = false

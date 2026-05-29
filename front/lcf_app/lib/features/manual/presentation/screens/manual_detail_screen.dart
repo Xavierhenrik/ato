@@ -13,6 +13,7 @@ import '../../../../shared/widgets/lcf_loading_shimmer.dart';
 import '../../data/models/manual_models.dart';
 import '../../data/manual_repository.dart';
 import '../../providers/manual_provider.dart';
+import '../widgets/manual_tutor_sheet.dart';
 import '../widgets/sobre_este_resumo_card.dart';
 import '../widgets/topic_section_tile.dart';
 
@@ -118,6 +119,13 @@ class _DetailBody extends StatelessWidget {
             (i) => TopicSectionTile(
               section: topic.sections[i],
               index: i,
+              onTutorTap: topic.sections[i].content.isNotEmpty
+                  ? () => ManualTutorSheet.show(
+                        context,
+                        topic.sections[i],
+                        topic,
+                      )
+                  : null,
             ),
           ),
           const SizedBox(height: AppSpacing.xxxl),

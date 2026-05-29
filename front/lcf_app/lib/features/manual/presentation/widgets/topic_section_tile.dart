@@ -11,10 +11,14 @@ class TopicSectionTile extends StatelessWidget {
     super.key,
     required this.section,
     required this.index,
+    this.onTutorTap,
   });
 
   final TopicSection section;
   final int index;
+  /// Callback ao tocar no ícone ⚡ — abre o ManualTutorSheet.
+  /// Null = botão não é exibido (e.g. seções sem conteúdo útil).
+  final VoidCallback? onTutorTap;
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +33,18 @@ class TopicSectionTile extends StatelessWidget {
             Expanded(
               child: Text(section.title, style: AppTextStyles.labelLarge),
             ),
+            if (onTutorTap != null)
+              GestureDetector(
+                onTap: onTutorTap,
+                child: const Padding(
+                  padding: EdgeInsets.only(left: AppSpacing.xs),
+                  child: Icon(
+                    Icons.bolt_rounded,
+                    size: 20,
+                    color: AppColors.accent,
+                  ),
+                ),
+              ),
           ],
         ),
         if (section.content.isNotEmpty) ...[

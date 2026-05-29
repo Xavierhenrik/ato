@@ -5,3 +5,11 @@ export const FOLLOW_UP_CHIPS = [
   'Qual a base legal?',
   'Simplifique para mim',
 ] as const;
+
+// Chips para modo 'reading' — contexto de leitura do Manual
+export const READING_CHIPS = [
+  'Aprofunde este ponto',
+  'Como isso cai na OAB?',
+  'Dê um exemplo prático',
+  'Tenho outra dúvida',
+] as const;

@@ -1,3 +1,30 @@
+/// Contexto de leitura de tópico do Manual — injetado no system prompt do Tutor.
+class TutorTopicContext {
+  const TutorTopicContext({
+    required this.topicTitle,
+    required this.topicContent,
+  });
+
+  final String topicTitle;
+  final String topicContent;
+
+  Map<String, dynamic> toJson() => {
+        'topic_title': topicTitle,
+        'topic_content': topicContent,
+      };
+}
+
+/// Args para navegação via /tutor/context (pushed desde o Manual).
+class TutorScreenArgs {
+  const TutorScreenArgs({
+    this.initialMessage,
+    this.topicContext,
+  });
+
+  final String? initialMessage;
+  final TutorTopicContext? topicContext;
+}
+
 class TutorMessage {
   const TutorMessage({
     required this.id,
