@@ -18,7 +18,7 @@ Variáveis obrigatórias antes do primeiro deploy. Copie `.env.example` para `.e
 |----------|-----------|-------------|
 | `SUPABASE_URL` | Supabase → Settings → API → Project URL | Sim |
 | `SUPABASE_ANON_KEY` | Supabase → Settings → API → anon public | Sim |
-| `SUPABASE_JWT_SECRET` | Supabase → Settings → API → JWT Secret | Sim |
+| `SUPABASE_JWT_PUBLIC_KEY` | Supabase → Settings → API → JWT → RS256 public key (PEM) | Sim |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API → service_role | Sim (deleção de conta) |
 
 ---
