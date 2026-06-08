@@ -1,12 +1,26 @@
 ---
 updated: 2026-06-08
-sprint: "Fase 0 — Portabilidade: ambiente de IA versionado no GitHub"
+sprint: "Fase 3 — Skills 100% LCF: roster de skills padronizado e versionado"
 ---
 
 # LCF — Estado do Projeto
 
 > Atualizado pelo Claude ao fim de cada sessão de trabalho.
 > Para detalhes de implementação de cada módulo, ver `../docs/ROADMAP.md`.
+
+---
+
+## Fase 3: Skills 100% LCF ✅ Concluída (2026-06-08)
+
+**Objetivo:** Roster de skills 100% LCF-específico, sem genéricas, versionado.
+
+**Resultado:**
+- 4 skills adicionadas: `lcf-backend`, `lcf-verify`, `lcf-llm-ops`, `lcf-code-health`
+- 2 skills genéricas removidas: `senior-backend`, `llm-ops`
+- Roster final (12 entradas): `_shared`, `flutter-lcf`, `lcf-apple-compliance`, `lcf-backend`,
+  `lcf-code-health`, `lcf-data`, `lcf-forge`, `lcf-llm-ops`, `lcf-security`, `lcf-tech-lead`,
+  `lcf-verify`, `lcf-versioning`
+- Commit `6fe9a3a` — push concluído, working tree clean
 
 ---
 
