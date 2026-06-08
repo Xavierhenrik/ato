@@ -1,12 +1,28 @@
 ---
 updated: 2026-06-08
-sprint: "Apple App Store Compliance: Privacy Policy, Consent Modal, Delete Account UI, Legal Disclaimer, Sign in with Apple, RevenueCat dynamic prices"
+sprint: "Fase 0 — Portabilidade: ambiente de IA versionado no GitHub"
 ---
 
 # LCF — Estado do Projeto
 
 > Atualizado pelo Claude ao fim de cada sessão de trabalho.
 > Para detalhes de implementação de cada módulo, ver `../docs/ROADMAP.md`.
+
+---
+
+## Fase 0: Portabilidade — Ambiente de IA ✅ Concluída (2026-06-08)
+
+**Objetivo:** Versionar todo o working tree (`.claude/`, `front/`, `docs/`) no GitHub para que
+clonar no note + copiar `.env` manualmente = ambiente completo.
+
+**Resultado:**
+- `.claude/` (skills, hooks, sessions, settings.json, PROJECT_STATE.md, launch.json) rastreado no remoto
+- `front/lcf_app/` e `docs/` adicionados ao repo
+- `.gitignore` corrigido: cobre `android/build/` e `ios/build/` do Flutter
+- Nenhum `.env` nem `settings.local.json` commitado (validado com `git ls-files`)
+- 4 commits feitos, push concluído — working tree limpo
+
+**Próximo passo:** configurar Railway (Root Directory: `back`), depois Railway deploy.
 
 ---
 
