@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidade — LCF</title>
+  <style>
+    :root {
+      --bg: #1a0800;
+      --card: #2d1200;
+      --border: #3d2010;
+      --accent: #c9922a;
+      --text: #ffffff;
+      --muted: #9e8472;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.7;
+      padding: 0 16px 48px;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 32px 0 24px;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      background: var(--card);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .updated {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h2::before {
+      content: '';
+      display: block;
+      width: 3px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    p { color: #d4c4b4; margin-bottom: 10px; }
+    p:last-child { margin-bottom: 0; }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul li {
+      color: #d4c4b4;
+      padding: 4px 0 4px 16px;
+      position: relative;
+    }
+
+    ul li::before {
+      content: '·';
+      position: absolute;
+      left: 4px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    strong { color: var(--text); }
+
+    .highlight {
+      background: #3d2010;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      margin-top: 12px;
+      color: #d4c4b4;
+      font-size: 13px;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">LCF</div>
+      <h1>Política de Privacidade</h1>
+      <p class="updated">Última atualização: junho de 2026</p>
+    </header>
+
+    <section>
+      <h2>Sobre o LCF</h2>
+      <p>
+        O LCF é uma plataforma educacional mobile-first para estudantes de Direito e
+        candidatos ao Exame da OAB. O app não presta consultoria jurídica — é uma
+        ferramenta de estudo.
+      </p>
+    </section>
+
+    <section>
+      <h2>Dados coletados</h2>
+      <ul>
+        <li>Endereço de e-mail (cadastro e login)</li>
+        <li>Nome e fase acadêmica (perfil de estudo)</li>
+        <li>Histórico de estudo, questões respondidas e desempenho em simulados</li>
+        <li>Mensagens enviadas ao Tutor IA</li>
+        <li>Anotações pessoais criadas dentro do app</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Inteligência Artificial de Terceiros</h2>
+      <p>
+        Suas mensagens ao Tutor IA são processadas por <strong>Maritaca AI</strong>
+        (modelo Sabiá-4) e <strong>Anthropic</strong> (modelo Claude Sonnet) como
+        fornecedores de inteligência artificial. Essas empresas podem processar os
+        dados conforme suas próprias políticas de privacidade:
+      </p>
+      <ul>
+        <li><a href="https://maritaca.ai/politica-de-privacidade" target="_blank">Maritaca AI — Política de Privacidade</a></li>
+        <li><a href="https://www.anthropic.com/privacy" target="_blank">Anthropic — Privacy Policy</a></li>
+      </ul>
+      <div class="highlight">
+        Não envie informações pessoais sensíveis (CPF, dados financeiros,
+        dados médicos) nas mensagens ao Tutor.
+      </div>
+    </section>
+
+    <section>
+      <h2>Compartilhamento de dados</h2>
+      <p>
+        Não vendemos nem compartilhamos seus dados pessoais com terceiros, exceto
+        com os fornecedores de IA mencionados acima e com os provedores de
+        infraestrutura necessários para o funcionamento do app (Supabase, Railway).
+      </p>
+    </section>
+
+    <section>
+      <h2>Pagamentos</h2>
+      <p>
+        Assinaturas PRO são processadas exclusivamente pela App Store (Apple) via
+        RevenueCat. O LCF não armazena dados de cartão de crédito.
+      </p>
+    </section>
+
+    <section>
+      <h2>Seus direitos (LGPD)</h2>
+      <p>
+        Conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você tem
+        direito a acessar, corrigir e excluir seus dados.
+      </p>
+      <div class="highlight">
+        A exclusão de conta está disponível diretamente no app em
+        <strong>Perfil → Segurança → Excluir conta</strong>.
+        Todos os seus dados serão permanentemente removidos.
+      </div>
+    </section>
+
+    <section>
+      <h2>Contato</h2>
+      <p>
+        Para dúvidas sobre privacidade ou exercício de direitos LGPD:
+        <a href="mailto:dev.henriquexavier@gmail.com">dev.henriquexavier@gmail.com</a>
+      </p>
+    </section>
+
+    <footer>
+      LCF — Plataforma Jurídica Inteligente<br />
+      © 2026 · Todos os direitos reservados
+    </footer>
+  </div>
+</body>
+</html>

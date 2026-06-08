@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -13,6 +14,7 @@ import '../../providers/tutor_provider.dart';
 import '../widgets/chat_bubble.dart';
 import '../widgets/chat_input_bar.dart';
 import '../widgets/chips_row.dart';
+import '../widgets/tutor_consent_modal.dart';
 import '../widgets/tutor_empty_state.dart';
 import '../widgets/typing_indicator.dart';
 
@@ -43,22 +45,37 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
   @override
   void initState() {
     super.initState();
-    // Se aberto com contexto (desde o Manual), inicializa o notifier e
-    // envia a mensagem inicial no próximo frame (widget já está na árvore).
-    if (widget.topicContext != null || widget.initialMessage != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+
+      // Consentimento obrigatório (Guideline 5.1.2.i) antes de qualquer envio
+      final prefs = await SharedPreferences.getInstance();
+      final accepted = prefs.getBool('tutor_ai_consent_accepted') ?? false;
+      if (!accepted) {
         if (!mounted) return;
-        if (widget.topicContext != null) {
-          ref.read(tutorNotifierProvider.notifier).initWithContext(
-                mode: 'reading',
-                topicContext: widget.topicContext,
-              );
+        final result = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const TutorConsentModal(),
+        );
+        if (result != true) {
+          if (mounted) context.go('/dashboard');
+          return;
         }
-        if (widget.initialMessage != null) {
-          _onSend(widget.initialMessage!);
-        }
-      });
-    }
+        await prefs.setBool('tutor_ai_consent_accepted', true);
+      }
+
+      if (!mounted) return;
+      if (widget.topicContext != null) {
+        ref.read(tutorNotifierProvider.notifier).initWithContext(
+              mode: 'reading',
+              topicContext: widget.topicContext,
+            );
+      }
+      if (widget.initialMessage != null) {
+        _onSend(widget.initialMessage!);
+      }
+    });
   }
 
   @override

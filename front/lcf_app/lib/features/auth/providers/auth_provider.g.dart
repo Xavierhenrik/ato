@@ -36,7 +36,7 @@ final onboardingDoneProvider = NotifierProvider<OnboardingDone, bool>.internal(
 );
 
 typedef _$OnboardingDone = Notifier<bool>;
-String _$authNotifierHash() => r'af2768c162b491a642c7d86aa7bca0198aab02fc';
+String _$authNotifierHash() => r'b6f8a7aefc3a0114dc7834be65ba4779d9e9b010';
 
 /// Estado: null = idle | data(null) = signed-out | data(User) = signed-in
 /// Mutations atualizam `state` para refletir loading/error na UI.

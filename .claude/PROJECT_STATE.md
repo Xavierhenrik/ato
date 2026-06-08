@@ -1,6 +1,6 @@
 ---
-updated: 2026-05-28
-sprint: "Verificação emulador Android — LcfMarkdownBody, Dio 401 fix, AGP 9+ profile build"
+updated: 2026-06-07
+sprint: "Apple App Store Compliance: Privacy Policy, Consent Modal, Delete Account UI, Legal Disclaimer, Sign in with Apple, RevenueCat dynamic prices"
 ---
 
 # LCF — Estado do Projeto
@@ -124,14 +124,25 @@ Nenhuma pendente.
 | Pricing model PRO | Sprint 3 — RevenueCat config | ⏳ Pendente |
 | Banco de questões | Sprint 2 — M5 Simulados | ✅ Concluído — 2.210 questões OAB + 5.791 questões review (active) em live + staging |
 | Topics (M3 Manual) | Pipeline generate_review_questions.py | ✅ Concluído — 1.883 topics em live + staging (2026-05-04) |
-| App IDs Apple/Google | Sprint 3 — IAP | ⏳ Pendente |
+| App IDs Apple/Google | Sprint 3 — IAP + Sign in with Apple | ⏳ Pendente — **bloqueia RevenueCat (preços dinâmicos) e Apple Sign In em produção** |
 | OneSignal App ID + API Key | Sprint 3 — Push | ⏳ Pendente |
+| URL pública Privacy Policy | Compliance 5.1.1.i — App Store Connect | ⏳ Pendente — publicar `assets/privacy_policy.md` em GitHub Pages (https://xavierhenrik.github.io/LCF/privacy) |
+| REVENUECAT_APPLE_API_KEY | Compliance 3.1.1 — preços dinâmicos | ⏳ Pendente — sem esta key, preços exibem '—' |
+| Sign in with Apple ativado no Identifier (App Store Connect) | Compliance 4.8 | ⏳ Pendente — necessário ativar Signing & Capabilities no Xcode + App Store Connect |
 
 ---
 
 ## Decisões Arquiteturais Registradas
 
 | Data | Decisão | Motivo |
+|------|---------|--------|
+| 2026-06-07 | JWT: `@fastify/jwt` usa `secret: SUPABASE_JWT_SECRET` (HS256 simétrico) | `SUPABASE_JWT_PUBLIC_KEY` não existe; Supabase usa HS256, não RS256. Undefined behavior se var ausente. |
+| 2026-06-07 | DELETE /auth/me chama `supabaseAdmin.auth.admin.deleteUser` antes de `db.user.delete` | Sem essa chamada, JWT do usuário deletado ainda passava no `requireAuth` e o auto-provisioning recriava a conta — violação LGPD |
+| 2026-06-07 | Sign in with Apple revertido — obrigatório pela Guideline 4.8 | Decisão "removido do escopo" foi revogada; app usa Google OAuth, portanto Apple Sign In é mandatório |
+| 2026-06-07 | Apple Sign In usa Supabase `signInWithIdToken` (não endpoint customizado) | Supabase já valida tokens Apple natively; reusa o fluxo `/auth/verify` existente sem migration Prisma |
+| 2026-06-07 | RevenueCat inicializado com guard (`if (_revenueCatAppleKey.isNotEmpty)`) | API key bloqueante externa; sem ela preços exibem '—' sem crash |
+| 2026-06-02 | Sabiázinho-4 para queries direct simples | ~5× mais barato; heurístico: >200 chars, verbos analíticos, art. N, nome de lei → Sabiá-4; demais → Sabiázinho-4 |
+| 2026-06-02 | KB estática com 1.883 tópicos no modo direct | Feature de UX (resposta instantânea) + custo zero LLM para ~30% das queries; usa BM25 nativo PostgreSQL (`content_tsv`); fallback silencioso se coluna não existir |
 |------|---------|--------|
 | 2026-05-01 | Setup de memória Claude Code (CLAUDE.md + hooks) | Continuidade entre sessões de IA |
 | 2026-05-02 | Onboarding simplificado: 1 tela, 2 perguntas (academicPhase + dailyStudyMins) | Reduz fricção; dados reais vêm do Quiz Diagnóstico e comportamento |
@@ -230,6 +241,9 @@ flutter run \
 | 2026-05-28 | sessions/2026-05-28_backend_cleanup.md | Dead code removido em dismissQuiz, nixpacks.toml deletado. tsc zero erros. |
 | 2026-05-28 | sessions/2026-05-28_notifications_service.md | NotificationsService com graceful degradation, PUT /users/notifications/player, validatePlayer OneSignal. tsc zero erros. |
 | 2026-05-28 | sessions/2026-05-28_verificacao_emulador.md | Verificação completa no emulador: Dashboard OK, LcfMarkdownBody bold dourado confirmado (Manual+Tutor), Dio 401 fix confirmado, profile APK 77.3MB gerado (fix metadados isar_flutter_libs). |
+| 2026-06-03 | sessions/2026-06-03_llmops.md | LLM-Ops Fase 1+2: Sabiázinho-4 para direct simples + KB estática 1.883 tópicos. `tsc --noEmit` zero erros. Pendente: executar `apply_topics_fts.sql` no Supabase. |
+| 2026-06-07 | sessions/2026-06-07_security_jwt_delete.md | CRÍTICO: JWT fixado para HS256 simétrico (`SUPABASE_JWT_SECRET`); DELETE /auth/me passa a invalidar sessão Supabase via `admin.deleteUser` antes de deletar do banco (LGPD). `SUPABASE_SERVICE_ROLE_KEY` adicionado ao `.env.example` e checklist. |
+| 2026-06-07 | sessions/2026-06-07_compliance_apple.md | Apple App Store Compliance: 6 itens implementados — Privacy Policy, Consent Modal IA, Delete Account UI, Disclaimer jurídico, Sign in with Apple, RevenueCat dynamic prices. flutter analyze zero issues. |
 
 
 

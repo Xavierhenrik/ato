@@ -37,6 +37,13 @@ dependencies:
   # Deep links / URLs externas
   url_launcher: ^6.2.0
 
+  # Auth — Sign in with Apple (Guideline 4.8)
+  sign_in_with_apple: ^6.0.0
+  crypto: ^3.0.3
+
+  # IAP — RevenueCat (Guideline 3.1.1 — sem preço hardcoded)
+  purchases_flutter: ^7.0.0
+
   # UI
   flutter_svg: ^2.0.10+1
   cached_network_image: ^3.3.1

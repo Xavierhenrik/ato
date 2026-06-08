@@ -76,6 +76,35 @@ class TutorWelcomeCard extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: AppSpacing.md),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              border: Border.all(color: AppColors.border),
+              borderRadius: AppRadius.chip,
+            ),
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline, color: AppColors.textMuted, size: 14),
+                SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    'O Tutor LCF tem fins educacionais e não substitui consultoria jurídica profissional.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textMuted,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

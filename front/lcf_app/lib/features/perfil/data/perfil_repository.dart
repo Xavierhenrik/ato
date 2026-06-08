@@ -31,6 +31,10 @@ class PerfilRepository {
     );
     return UserProfile.fromJson(resp.data!);
   }
+
+  Future<void> deleteAccount() async {
+    await _dio.delete<void>('/auth/me');
+  }
 }
 
 @riverpod

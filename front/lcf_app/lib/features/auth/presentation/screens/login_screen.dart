@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -86,6 +87,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _onGoogle() async {
     await ref.read(authNotifierProvider.notifier).signInWithGoogle();
+  }
+
+  Future<void> _onApple() async {
+    await ref.read(authNotifierProvider.notifier).signInWithApple();
+    if (!mounted) return;
+    final auth = ref.read(authNotifierProvider);
+    if (auth is AsyncData && auth.value != null) context.go('/dashboard');
+    if (auth is AsyncError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(auth.error.toString())),
+      );
+    }
   }
 
   @override
@@ -202,6 +215,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onPressed: _onGoogle,
                   isLoading: isLoading,
                 ),
+                const SizedBox(height: AppSpacing.sm),
+
+                // Apple
+                LcfButton(
+                  label: 'Entrar com Apple',
+                  variant: LcfButtonVariant.social,
+                  prefixIcon: const Icon(
+                    Icons.apple,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  onPressed: _onApple,
+                  isLoading: isLoading,
+                ),
                 const SizedBox(height: AppSpacing.xxxl),
 
                 // Criar conta
@@ -214,6 +241,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: Text('Criar conta', style: AppTextStyles.link),
                     ),
                   ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+
+                // Privacy Policy
+                Center(
+                  child: GestureDetector(
+                    onTap: () => launchUrl(
+                      Uri.parse(
+                        'https://xavierhenrik.github.io/LCF/privacy/',
+                      ),
+                      mode: LaunchMode.externalApplication,
+                    ),
+                    child: Text(
+                      'Política de Privacidade',
+                      style: AppTextStyles.link.copyWith(fontSize: 12),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
               ],

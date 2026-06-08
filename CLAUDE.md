@@ -3,6 +3,18 @@
 > Leia este arquivo e `.claude/PROJECT_STATE.md` antes de começar qualquer trabalho.
 > Se existir um log recente em `.claude/sessions/`, leia também.
 
+## Skills Disponíveis
+
+Skills especializadas em `.claude/skills/` — use com `/skill <nome>`:
+
+| Skill | Quando usar |
+|-------|------------|
+| `lcf-tech-lead` | Análise técnica, decisões de arquitetura, prompts de implementação para agentes dev |
+| `lcf-apple-compliance` | Auditoria de conformidade App Store, checklist de submissão, Sign in with Apple, privacy policy |
+| `lcf-security` | Auditoria de segurança por camada (auth, injeção, rate limit, mobile, infra), prompts de correção |
+
+---
+
 ---
 
 ## O Projeto
@@ -96,7 +108,7 @@ Para convenções de código obrigatórias (Errors factory, Zod, requireAuth, Re
 | Sem pgvector no MVP | Entra na v1.1 como camada adicional após validação |
 | Sem memória entre sessões do Tutor | Roadmap v2.0 |
 | RevenueCat, sem Stripe in-app | Removido do escopo |
-| Sem Apple Sign In | Removido do escopo |
+| Sign in with Apple obrigatório | Guideline 4.8 — exigido pois Google OAuth está presente |
 | Monolito modular | Simples para 2 devs; migração para microserviços apenas se escalar |
 | LLM Routing — Sonnet só para análise de perfil | Sabiá-4 cobre Tutor IA (Free+PRO), pipelines e validações; Sonnet reservado para nivelamento, study plan e weak areas — chamadas raras com impacto na personalização persistida |
 | Free generoso sem trial separado | Conversão por bloqueio contextual (15 questões/dia) supera timer artificial; Free usa Sabiá-4, PRO usa Sonnet nas análises de perfil |

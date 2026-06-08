@@ -20,5 +20,19 @@ final perfilDataProvider = AutoDisposeFutureProvider<UserProfile>.internal(
 );
 
 typedef PerfilDataRef = AutoDisposeFutureProviderRef<UserProfile>;
+String _$offeringsHash() => r'54016abce4abf17e276fb3096fd57270f0f76ed2';
+
+/// See also [offerings].
+@ProviderFor(offerings)
+final offeringsProvider = AutoDisposeFutureProvider<Offerings?>.internal(
+  offerings,
+  name: r'offeringsProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$offeringsHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef OfferingsRef = AutoDisposeFutureProviderRef<Offerings?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

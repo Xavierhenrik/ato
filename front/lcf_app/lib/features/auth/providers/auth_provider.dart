@@ -1,9 +1,30 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/auth_repository.dart';
 
 part 'auth_provider.g.dart';
+
+String _generateNonce([int length = 32]) {
+  const charset =
+      '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+  final random = Random.secure();
+  return List.generate(
+    length,
+    (_) => charset[random.nextInt(charset.length)],
+  ).join();
+}
+
+String _sha256(String input) {
+  final bytes = utf8.encode(input);
+  return sha256.convert(bytes).toString();
+}
 
 // ── Onboarding done state — lido de metadata Supabase, persiste entre restarts ─
 
@@ -91,7 +112,34 @@ class AuthNotifier extends _$AuthNotifier {
     return isNew;
   }
 
+  Future<void> signInWithApple() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      final rawNonce = _generateNonce();
+      final hashedNonce = _sha256(rawNonce);
+
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: hashedNonce,
+      );
+
+      final response = await Supabase.instance.client.auth.signInWithIdToken(
+        provider: OAuthProvider.apple,
+        idToken: credential.identityToken!,
+        nonce: rawNonce,
+      );
+
+      await ref.read(authRepositoryProvider).verify();
+      return response.user;
+    });
+  }
+
   Future<void> signOut() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('tutor_ai_consent_accepted');
     await Supabase.instance.client.auth.signOut();
     state = const AsyncData(null);
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -29,15 +30,22 @@ class SubscriptionScreen extends ConsumerStatefulWidget {
 class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   _PlanType _selected = _PlanType.annual;
 
-  void _handlePurchase() {
-    // TODO(F8): integrate RevenueCat SDK
-    // Call Purchases.purchasePackage(_selected == _PlanType.annual ? annualPackage : monthlyPackage)
-    // The native store sheet will open automatically after this call
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Em breve: integração com loja disponível na F8'),
-      ),
-    );
+  Future<void> _handlePurchase(Package? package) async {
+    if (package == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Loja indisponível. Tente novamente.')),
+      );
+      return;
+    }
+    try {
+      await Purchases.purchasePackage(package);
+    } on PurchasesError catch (e) {
+      if (e.code != PurchasesErrorCode.purchaseCancelledError && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro na compra. Tente novamente.')),
+        );
+      }
+    }
   }
 
   @override
@@ -89,45 +97,43 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
   }
 
   Widget _buildSubscriptionContent() {
+    final offeringsAsync = ref.watch(offeringsProvider);
+    final annual = offeringsAsync.valueOrNull?.current?.annual;
+    final monthly = offeringsAsync.valueOrNull?.current?.monthly;
+
     return SingleChildScrollView(
       padding: AppSpacing.screenPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: AppSpacing.lg),
-
-          // Header
           const _SubscriptionHeader(),
           const SizedBox(height: AppSpacing.xl),
-
-          // Feature grid 2×2
           const _FeatureGrid(),
           const SizedBox(height: AppSpacing.xl),
-
-          // Plan cards
           Text('Escolha seu plano', style: AppTextStyles.h3),
           const SizedBox(height: AppSpacing.md),
           _PlanCard(
             type: _PlanType.monthly,
             isSelected: _selected == _PlanType.monthly,
+            package: monthly,
             onTap: () => setState(() => _selected = _PlanType.monthly),
           ),
           const SizedBox(height: AppSpacing.sm),
           _PlanCard(
             type: _PlanType.annual,
             isSelected: _selected == _PlanType.annual,
+            package: annual,
             onTap: () => setState(() => _selected = _PlanType.annual),
           ),
           const SizedBox(height: AppSpacing.xxl),
-
-          // CTA button
           LcfButton(
             label: 'Assinar e ativar plano PRÓ',
-            onPressed: _handlePurchase,
+            onPressed: () => _handlePurchase(
+              _selected == _PlanType.annual ? annual : monthly,
+            ),
           ),
           const SizedBox(height: AppSpacing.lg),
-
-          // Footer
           const _SecureFooter(),
           const SizedBox(height: AppSpacing.lg),
         ],
@@ -152,13 +158,17 @@ class _SubscriptionHeader extends StatelessWidget {
               size: 28,
             ),
             const SizedBox(width: AppSpacing.sm),
-            Text('LCF PRÓ', style: AppTextStyles.h1.copyWith(color: AppColors.accent)),
+            Text(
+              'LCF PRÓ',
+              style: AppTextStyles.h1.copyWith(color: AppColors.accent),
+            ),
           ],
         ),
         const SizedBox(height: AppSpacing.xs),
         Text(
           'Tudo que você precisa para passar na OAB',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+          style: AppTextStyles.bodyMedium
+              .copyWith(color: AppColors.textSecondary),
         ),
       ],
     );
@@ -223,15 +233,18 @@ class _PlanCard extends StatelessWidget {
     required this.type,
     required this.isSelected,
     required this.onTap,
+    this.package,
   });
 
   final _PlanType type;
   final bool isSelected;
   final VoidCallback onTap;
+  final Package? package;
 
   @override
   Widget build(BuildContext context) {
     final isAnnual = type == _PlanType.annual;
+    final priceString = package?.storeProduct.priceString ?? '—';
 
     return GestureDetector(
       onTap: onTap,
@@ -247,7 +260,6 @@ class _PlanCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Selection indicator
             Container(
               width: 20,
               height: 20,
@@ -260,16 +272,10 @@ class _PlanCard extends StatelessWidget {
                 color: isSelected ? AppColors.accent : Colors.transparent,
               ),
               child: isSelected
-                  ? const Icon(
-                      Icons.check,
-                      size: 12,
-                      color: Colors.white,
-                    )
+                  ? const Icon(Icons.check, size: 12, color: Colors.white)
                   : null,
             ),
             const SizedBox(width: AppSpacing.md),
-
-            // Plan info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,32 +294,20 @@ class _PlanCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    isAnnual
-                        ? 'melhor custo-benefício'
-                        : 'cancele quando quiser',
+                    isAnnual ? 'melhor custo-benefício' : 'cancele quando quiser',
                     style: AppTextStyles.bodySmall,
                   ),
                 ],
               ),
             ),
-
-            // Price
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  isAnnual ? 'R\$249,90' : 'R\$29,90',
-                  style: AppTextStyles.accentMedium,
-                ),
+                Text(priceString, style: AppTextStyles.accentMedium),
                 Text(
                   isAnnual ? '/ano' : '/mês',
                   style: AppTextStyles.labelSmall,
                 ),
-                if (isAnnual)
-                  Text(
-                    '≈R\$20,82/mês',
-                    style: AppTextStyles.labelSmall,
-                  ),
               ],
             ),
           ],
