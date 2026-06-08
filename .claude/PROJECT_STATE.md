@@ -126,9 +126,13 @@ Nenhuma pendente.
 | Topics (M3 Manual) | Pipeline generate_review_questions.py | ✅ Concluído — 1.883 topics em live + staging (2026-05-04) |
 | App IDs Apple/Google | Sprint 3 — IAP + Sign in with Apple | ⏳ Pendente — **bloqueia RevenueCat (preços dinâmicos) e Apple Sign In em produção** |
 | OneSignal App ID + API Key | Sprint 3 — Push | ⏳ Pendente |
-| URL pública Privacy Policy | Compliance 5.1.1.i — App Store Connect | ⏳ Pendente — publicar `assets/privacy_policy.md` em GitHub Pages (https://xavierhenrik.github.io/LCF/privacy) |
-| REVENUECAT_APPLE_API_KEY | Compliance 3.1.1 — preços dinâmicos | ⏳ Pendente — sem esta key, preços exibem '—' |
-| Sign in with Apple ativado no Identifier (App Store Connect) | Compliance 4.8 | ⏳ Pendente — necessário ativar Signing & Capabilities no Xcode + App Store Connect |
+| URL pública Privacy Policy | Compliance 5.1.1.i — App Store Connect | ⏳ **Aguarda lançamento.** HTML pronto em `docs/privacy/index.html`. Deploy junto com os outros deploys finais (repo privado — GitHub Pages requer plano pago). |
+| Licença Apple Developer ($99/ano) | **Desbloqueia todos os itens abaixo** | ⏳ **Aguarda decisão de lançamento** — pagar só quando app estiver pronto para submeter |
+| Passo 2 — Xcode: ativar capability Sign In with Apple | Compliance 4.8 | ⏳ Aguarda licença Apple + Mac |
+| Passo 3 — Apple Developer Portal: Services ID + Key .p8 | Compliance 4.8 | ⏳ Aguarda licença Apple |
+| Passo 3 — Supabase: ativar Apple Auth Provider | Compliance 4.8 | ⏳ Aguarda passo anterior |
+| Passo 4 — App Store Connect: Age Rating 17+, conta demo, URL policy | Compliance geral | ⏳ Aguarda licença Apple |
+| Passo 5 — RevenueCat: produtos IAP + REVENUECAT_APPLE_API_KEY | Compliance 3.1.1 | ⏳ Aguarda App Store Connect configurado |
 
 ---
 
