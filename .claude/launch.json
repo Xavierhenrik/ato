@@ -1,0 +1,50 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "LCF Backend — staging",
+      "cwd": "lcf/back",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:staging"],
+      "port": 3000
+    },
+    {
+      "name": "LCF Backend — live",
+      "cwd": "lcf/back",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "Prisma Studio — staging",
+      "cwd": "lcf/back",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "db:studio:staging"],
+      "port": 5555
+    },
+    {
+      "name": "Privacy Policy",
+      "cwd": "lcf/docs",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-p", "4321", "--no-clipboard"],
+      "port": 4321
+    },
+    {
+      "name": "LCF App (Flutter Web)",
+      "cwd": "lcf/front/lcf_app",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": [
+        "run",
+        "-d", "web-server",
+        "--web-port", "8080",
+        "--web-hostname", "localhost",
+        "--dart-define=API_BASE_URL=http://localhost:3000"
+      ],
+      "port": 8080
+    }
+  ],
+  "_notes": {
+    "flutter_auth": "Google OAuth no web requer http://localhost em Supabase Dashboard → Auth → URL Configuration → Redirect URLs. Adicionar SUPABASE_URL e SUPABASE_ANON_KEY nos runtimeArgs ao testar fluxo de auth.",
+    "flutter_mobile": "Para iOS/Android: flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=... --dart-define=API_BASE_URL=http://localhost:3000"
+  }
+}
