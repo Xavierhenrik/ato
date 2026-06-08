@@ -1,0 +1,285 @@
+LCF — Plataforma Jurídica Inteligente
+
+Definição de Funcionalidades por Plano: Free vs. PRO
+
+Este documento apresenta todas as funcionalidades da plataforma e define o que cada perfil de usuário pode acessar. Analise cada item e indique aprovação ou ajuste antes de avançarmos para o modelo de assinatura.
+
+Como ler este documento
+
+FUNCIONALIDADE
+
+FREE
+
+PRO
+
+Acesso completo
+
+Acesso completo
+
+Disponível para Free e PRO
+
+Visível, bloqueado
+
+Visível, bloqueado
+
+Free vê a funcionalidade mas não consegue usar. Ao tentar, é direcionado para assinar.
+
+Não disponível
+
+Não disponível
+
+Funcionalidade invisível para o usuário Free.
+
+MANUAL DO DIREITO
+
+FUNCIONALIDADE
+
+FREE
+
+PRO
+
+Biblioteca de resumos jurídicos
+
+Acesso a todas as matérias e tópicos curados com base legal vinculada.
+
+Acesso completo
+
+Acesso completo
+
+Links para base legal
+
+Artigos e normativas vinculados ao conteúdo, clicáveis.
+
+Acesso completo
+
+Acesso completo
+
+Leitura offline
+
+Conteúdo disponível sem conexão com internet.
+
+Acesso completo
+
+Acesso completo
+
+TUTOR IA
+
+FUNCIONALIDADE
+
+FREE
+
+PRO
+
+Chat com tutor IA
+
+Respostas jurídicas com fonte validada quando cita artigo ou lei específica.
+
+Acesso completo
+
+Acesso completo
+
+Acesso às anotações pessoais
+
+O tutor usa o conteúdo das anotações do aluno para contextualizar respostas. Requer consentimento LGPD.
+
+Acesso completo
+
+Acesso completo
+
+Criar card com resumo
+
+Salva automaticamente um resumo da resposta do tutor como anotação no módulo de notas.
+
+Não disponível
+
+Exclusivo PRO
+
+Gera anotação automática com resumo da resposta, salva diretamente no módulo de anotações.
+
+Análise detalhada após erro em simulado
+
+Ao errar uma questão, o tutor explica o erro com base legal e contexto jurídico.
+
+Não disponível
+
+Exclusivo PRO
+
+Explicação completa do erro com base legal após cada questão respondida errada.
+
+QUESTÕES E SIMULADOS
+
+FUNCIONALIDADE
+
+FREE
+
+PRO
+
+Banco de questões
+
+Questões reais da OAB com filtros por matéria e disciplina.
+
+15 questões/dia
+
+Limite diário
+
+15 questões/dia.
+
+Ilimitado
+
+Sem limite de questões por dia.
+
+Simulados configuráveis
+
+Escolha de quantidade de questões e disciplinas.
+
+Acesso parcial
+
+Até 20 questões por simulado.
+
+Acesso completo
+
+Até 80 questões (padrão OAB).
+
+Simulados prontos pré-configurados
+
+Simulados curados disponíveis para iniciar sem configuração.
+
+⚠ Pendente: critério de curadoria a definir com time de dados
+
+Acesso completo
+
+Acesso completo
+
+Simulados com foco em pontos fracos
+
+Simulados gerados automaticamente com base nas disciplinas com menor taxa de acerto do aluno.
+
+Não disponível
+
+Exclusivo PRO
+
+Gerado automaticamente a partir do histórico de erros do aluno.
+
+IA com foco em pontos fracos na configuração
+
+Na configuração do simulado, a IA seleciona as disciplinas com pior desempenho.
+
+Visível, bloqueado
+
+Vê a opção. Ao tentar ativar, é direcionado para assinar.
+
+Exclusivo PRO
+
+Disponível na configuração do simulado.
+
+Questões inéditas (sem repetição)
+
+O simulado nunca repete questões já respondidas pelo aluno.
+
+Visível, bloqueado
+
+Vê a opção. Ao tentar ativar, é direcionado para assinar.
+
+Exclusivo PRO
+
+Modo Hardcore
+
+Timer rigoroso sem pausas. Sem opção de pular questões.
+
+Visível, bloqueado
+
+Vê a opção. Ao tentar ativar, é direcionado para assinar.
+
+Exclusivo PRO
+
+Botão Verificar durante simulado
+
+Exibe resposta correta e explicação após responder uma questão.
+
+Visível, bloqueado
+
+Botão visível. Ao tocar, abre aviso explicando a funcionalidade PRO com opção de assinar. O simulado é pausado.
+
+Exclusivo PRO
+
+Exibe resposta correta, explicação completa e abre tutor com contexto da questão.
+
+Análise de IA no resultado do simulado
+
+Feedback personalizado gerado pela IA ao final de cada simulado.
+
+Visível, bloqueado
+
+Bloco visível na tela de resultado com prévia do conteúdo PRO e opção de assinar.
+
+Exclusivo PRO
+
+Análise completa e personalizada por simulado.
+
+Revisão de questões erradas
+
+Acesso às questões erradas após o simulado com explicações.
+
+Acesso parcial
+
+Vê quais errou e qual era a resposta correta. Exibe prévia do conteúdo PRO por questão.
+
+Acesso completo
+
+Resposta correta + explicação do motivo do erro + análise personalizada por questão.
+
+Simulado rápido com pontos fracos
+
+Gerado automaticamente no hub de desempenho, sem configuração, com base nos erros do aluno.
+
+Não disponível
+
+Exclusivo PRO
+
+ANOTAÇÕES
+
+FUNCIONALIDADE
+
+FREE
+
+PRO
+
+Criar, editar e excluir anotações
+
+Bloco de notas pessoal com tags e associação a matérias.
+
+Acesso completo
+
+Acesso completo
+
+DASHBOARD E DESEMPENHO
+
+FUNCIONALIDADE
+
+FREE
+
+PRO
+
+Dashboard com metas e revisão inteligente
+
+Progresso diário, streak, revisão espaçada e acesso rápido aos módulos.
+
+Acesso completo
+
+Acesso completo
+
+Hub de desempenho
+
+Métricas globais: taxa de acerto, questões respondidas, tempo médio e gráfico por disciplina.
+
+Acesso completo
+
+Acesso completo
+
+Itens Pendentes de Decisão
+
+· Limite diário de questões para o plano Free — definido: 15 questões/dia.
+
+· Critério de curadoria dos simulados prontos — a definir com o time de dados.
+
+· Modelo de preço, política de trial e regras de downgrade — EM ANÁLISE pelo time responsável, decisão pendente. Bloqueia T22 e integração RevenueCat. Gateway de pagamento: definido como RevenueCat.
