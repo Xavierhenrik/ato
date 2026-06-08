@@ -39,9 +39,7 @@ export async function buildApp() {
 
   await app.register(cors, { origin: corsOrigin });
   await app.register(jwt, {
-    secret: {
-      public: process.env.SUPABASE_JWT_PUBLIC_KEY!,
-    },
+    secret: process.env.SUPABASE_JWT_SECRET!,
   });
   await app.register(rateLimit, {
     max: 200,
