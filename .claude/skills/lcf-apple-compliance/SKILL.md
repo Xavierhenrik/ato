@@ -112,25 +112,16 @@ Data: [hoje]
 [lista]
 ```
 
-### Formato dos Prompts (um por item ❌ ou ⚠️):
+### Prompts de implementação (um por item ❌ ou ⚠️)
 
-```
-## [COMPLIANCE] — [nome do requisito] (Guideline X.X)
+Não monte o prompt aqui. **Delegue a `/lcf-forge`** (padrão único em `_shared/handoff-prompt.md`), fornecendo o material específico de compliance:
 
-**Por que é obrigatório:**
-[explicação direta da guideline Apple]
+- **Guideline (X.X) + por que é obrigatório** → entra no Contexto e nas Restrições
+- **O que implementar** (arquivos e funções reais do LCF) → Implementação
+- **Critérios de aceite** verificáveis → como provar conformidade
+- **Validação**: como comprovar (ex.: tela de exclusão de conta acessível, Sign in with Apple presente)
 
-**O que implementar:**
-[instrução com arquivos e funções reais do LCF]
-
-**Restrições:**
-[o que não pode mudar]
-
-**Critérios de aceite:**
-- [ ] [verificável]
-
-**Ao finalizar:** atualizar PROJECT_STATE.md e criar log de sessão.
-```
+A forja entrega no padrão FORJAR, com fechamento (estado, log, commit) obrigatório.
 
 ---
 

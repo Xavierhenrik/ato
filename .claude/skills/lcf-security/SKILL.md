@@ -171,25 +171,17 @@ Data: [hoje]
 **Score geral:** X/10 — [diagnóstico em 1 linha]
 ```
 
-### Formato dos Prompts (um por achado CRÍTICO ou ALTO):
+### Prompts de correção (um por achado CRÍTICO ou ALTO)
 
-```
-## [SECURITY] — [ID]: [nome da vulnerabilidade]
+Não monte o prompt aqui. **Delegue a `/lcf-forge`** (padrão único em `_shared/handoff-prompt.md`), fornecendo o material específico de segurança:
 
-**Severidade:** CRÍTICO | ALTO | MÉDIO
-**Vetor de ataque:** [como um atacante exploraria isso]
+- **Severidade** (CRÍTICO | ALTO | MÉDIO) → vira a Prioridade do prompt
+- **Vetor de ataque** (como um atacante exploraria) → entra no Contexto
+- **O que corrigir** (arquivo, função, código corrigido — do código real) → Implementação
+- **Teste de validação** (como comprovar a correção) → Validação com evidência
+- **Critérios de aceite** verificáveis
 
-**O que corrigir:**
-[instrução exata com arquivo, função e código corrigido]
-
-**Teste de validação:**
-[como verificar que a correção funciona]
-
-**Critérios de aceite:**
-- [ ] [verificável]
-
-**Ao finalizar:** atualizar PROJECT_STATE.md e criar log de sessão.
-```
+A forja entrega no padrão FORJAR, com fechamento (estado, log, commit) obrigatório.
 
 ---
 

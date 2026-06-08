@@ -63,35 +63,15 @@ Só então escreva o prompt.
 
 ## Passo 4 — Gerar o Prompt de Implementação
 
-O prompt deve ser **autocontido** — o agente que recebê-lo não precisa perguntar nada. Inclua:
+Não repita formato aqui. **Delegue a forja a `/lcf-forge`** (padrão único em `_shared/handoff-prompt.md`). Seu trabalho é entregar o material que a forja precisa, baseado no código real:
 
 - **Contexto**: onde estamos no projeto, o que está em torno da mudança
-- **O que fazer**: instrução precisa, com nomes de arquivos e funções reais (baseados no que você leu nos arquivos do projeto)
-- **Restrições**: o que não pode mudar, decisões fixadas que se aplicam
-- **Validação**: como o agente sabe que terminou (tsc --noEmit, flutter analyze, teste manual)
-- **Atualização obrigatória**: lembrar de atualizar PROJECT_STATE.md e criar log de sessão
+- **O que fazer**: instrução precisa, com nomes de arquivos e funções reais (lidos do projeto)
+- **Restrições**: o que não pode mudar, decisões fixadas / ADRs que se aplicam
+- **Validação**: comando que comprova sucesso (`tsc --noEmit`, `flutter analyze`, teste) + saída esperada
+- **Fechamento**: atualizar PROJECT_STATE.md, criar log de sessão, commit via `lcf-versioning`
 
-### Formato do prompt:
-
-```
-## [TIPO] — [título em 5 palavras]
-
-**Contexto:**
-[onde estamos, o que está em jogo]
-
-**O que implementar:**
-[instrução exata com caminhos de arquivo, nomes de função, lógica esperada]
-
-**Restrições (não alterar):**
-[decisões fixadas que se aplicam]
-
-**Critérios de aceite:**
-- [ ] [verificável objetivamente]
-
-**Ao finalizar:**
-- Atualizar PROJECT_STATE.md
-- Criar .claude/sessions/YYYY-MM-DD_descricao.md
-```
+A forja monta o prompt final no padrão FORJAR e entrega no chat (nunca em arquivo).
 
 ---
 
