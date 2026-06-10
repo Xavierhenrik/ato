@@ -41,10 +41,12 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
   final _scrollController = ScrollController();
 
   bool _pendingScroll = false;
+  late final TutorNotifier _tutorNotifier;
 
   @override
   void initState() {
     super.initState();
+    _tutorNotifier = ref.read(tutorNotifierProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
@@ -80,8 +82,7 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
 
   @override
   void dispose() {
-    // Fire-and-forget — capture notifier before dispose chain starts
-    ref.read(tutorNotifierProvider.notifier).endSession();
+    _tutorNotifier.endSession();
     _inputController.dispose();
     _scrollController.dispose();
     super.dispose();
