@@ -36,10 +36,11 @@ const _publicRoutes = {'/login', '/cadastro', '/esqueci-senha'};
 // Rotas acessíveis com sessão mas antes do onboarding ser concluído
 const _preOnboardingRoutes = {'/onboarding', '/diagnostico'};
 
-class _RouterNotifier extends ChangeNotifier {
+class _RouterNotifier extends ChangeNotifier with WidgetsBindingObserver {
   late final StreamSubscription<AuthState> _sub;
 
   _RouterNotifier() {
+    WidgetsBinding.instance.addObserver(this);
     _sub = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
       notifyListeners();
     });
@@ -47,8 +48,16 @@ class _RouterNotifier extends ChangeNotifier {
 
   void refresh() => notifyListeners();
 
+  // Quando o app volta ao foreground (ex.: após browser do OAuth), força
+  // re-avaliação do redirect caso a sessão já tenha sido estabelecida.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) notifyListeners();
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _sub.cancel();
     super.dispose();
   }
