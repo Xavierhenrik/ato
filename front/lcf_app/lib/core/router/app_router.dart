@@ -41,17 +41,21 @@ class _RouterNotifier extends ChangeNotifier with WidgetsBindingObserver {
 
   _RouterNotifier() {
     WidgetsBinding.instance.addObserver(this);
-    _sub = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
+    _sub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+      debugPrint('[LCF-ROUTER] onAuthStateChange: ${event.event} — user: ${event.session?.user.email}');
       notifyListeners();
     });
+    debugPrint('[LCF-ROUTER] _RouterNotifier criado, _sub ativo');
   }
 
-  void refresh() => notifyListeners();
+  void refresh() {
+    debugPrint('[LCF-ROUTER] refresh() chamado');
+    notifyListeners();
+  }
 
-  // Quando o app volta ao foreground (ex.: após browser do OAuth), força
-  // re-avaliação do redirect caso a sessão já tenha sido estabelecida.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    debugPrint('[LCF-ROUTER] lifecycle: $state');
     if (state == AppLifecycleState.resumed) notifyListeners();
   }
 
@@ -118,19 +122,29 @@ GoRouter appRouter(AppRouterRef ref) {
       final loc = state.matchedLocation;
       final onboardingDone = ref.read(onboardingDoneProvider);
 
+      debugPrint('[LCF-ROUTER] redirect: loc=$loc isLoggedIn=$isLoggedIn onboardingDone=$onboardingDone user=${user?.email}');
+
       // 1. Não autenticado + rota protegida → login
-      if (!isLoggedIn && !_publicRoutes.contains(loc)) return '/login';
+      if (!isLoggedIn && !_publicRoutes.contains(loc)) {
+        debugPrint('[LCF-ROUTER] redirect → /login');
+        return '/login';
+      }
 
       // 2. Autenticado + rota pública → dashboard
-      if (isLoggedIn && _publicRoutes.contains(loc)) return '/dashboard';
+      if (isLoggedIn && _publicRoutes.contains(loc)) {
+        debugPrint('[LCF-ROUTER] redirect → /dashboard');
+        return '/dashboard';
+      }
 
       // 3. Autenticado + onboarding pendente + fora das telas de onboarding → onboarding
       if (isLoggedIn &&
           !onboardingDone &&
           !_preOnboardingRoutes.contains(loc)) {
+        debugPrint('[LCF-ROUTER] redirect → /onboarding');
         return '/onboarding';
       }
 
+      debugPrint('[LCF-ROUTER] redirect → null (sem mudança)');
       return null;
     },
     routes: [
@@ -158,22 +172,26 @@ GoRouter appRouter(AppRouterRef ref) {
         builder: (context, state) => const DiagnosticoScreen(),
       ),
 
-      // ── Tutor com contexto do Manual (push, sem BottomNav) ───────────
+      // ── Tutor com contexto do Manual (push, com BottomNav) ───────────
       // ProviderScope isolado: garante que a sessão de contexto não interfere
       // com a sessão do Tutor tab (tutorNotifierProvider global).
+      // ScaffoldWithNav manual: a rota fica fora do ShellRoute (sessão
+      // isolada), mas o chat aberto pelo Manual deve mostrar a BottomNav.
       GoRoute(
         path: '/tutor/context',
         pageBuilder: (context, state) {
           final args = state.extra as TutorScreenArgs?;
           return _fadeSlidePage(
             state,
-            ProviderScope(
-              overrides: [
-                tutorNotifierProvider.overrideWith(TutorNotifier.new),
-              ],
-              child: TutorScreen(
-                initialMessage: args?.initialMessage,
-                topicContext: args?.topicContext,
+            ScaffoldWithNav(
+              child: ProviderScope(
+                overrides: [
+                  tutorNotifierProvider.overrideWith(TutorNotifier.new),
+                ],
+                child: TutorScreen(
+                  initialMessage: args?.initialMessage,
+                  topicContext: args?.topicContext,
+                ),
               ),
             ),
           );
