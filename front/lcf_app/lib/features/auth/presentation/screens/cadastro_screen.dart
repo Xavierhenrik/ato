@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/lcf_button.dart';
 import '../../../../shared/widgets/lcf_text_field.dart';
+import '../../../../shared/widgets/social_auth_icons.dart';
 import '../../providers/auth_provider.dart';
 
 class CadastroScreen extends ConsumerStatefulWidget {
@@ -33,7 +33,7 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
   Future<void> _onCriarConta() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final isNew = await ref.read(authNotifierProvider.notifier).signUp(
+    await ref.read(authNotifierProvider.notifier).signUp(
           email: _emailCtrl.text.trim(),
           password: _senhaCtrl.text,
           displayName: _nomeCtrl.text.trim(),
@@ -48,12 +48,25 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
       );
       return;
     }
+    // Sucesso: navegação delegada ao redirect do app_router.
+    // Redirect #3 envia para /onboarding quando onboarding_done != true.
+  }
 
-    if (isNew) {
-      context.go('/onboarding');
-    } else {
-      context.go('/dashboard');
+  Future<void> _onGoogle() async {
+    await ref.read(authNotifierProvider.notifier).signInWithGoogle();
+    // Navegação delegada ao redirect do app_router via deep link callback.
+  }
+
+  Future<void> _onApple() async {
+    await ref.read(authNotifierProvider.notifier).signInWithApple();
+    if (!mounted) return;
+    final auth = ref.read(authNotifierProvider);
+    if (auth is AsyncError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(auth.error.toString())),
+      );
     }
+    // Sucesso: navegação delegada ao redirect do app_router.
   }
 
   @override
@@ -80,7 +93,7 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                       color: AppColors.backgroundCard,
                     ),
                     alignment: Alignment.center,
-                    child: Text('LCF', style: AppTextStyles.logoTitle),
+                    child: Text('Lex', style: AppTextStyles.logoTitle),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -94,9 +107,9 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
 
           // Bottom Sheet
           DraggableScrollableSheet(
-            initialChildSize: 0.65,
-            minChildSize: 0.55,
-            maxChildSize: 0.92,
+            initialChildSize: 0.75,
+            minChildSize: 0.65,
+            maxChildSize: 0.95,
             builder: (context, scrollCtrl) {
               return Container(
                 decoration: const BoxDecoration(
@@ -117,7 +130,7 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                       children: [
                         const Spacer(),
                         GestureDetector(
-                          onTap: () => context.pop(),
+                          onTap: () => Navigator.of(context).maybePop(),
                           child: const Icon(
                             Icons.close,
                             color: AppColors.textSecondary,
@@ -127,8 +140,46 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                     ),
                     const SizedBox(height: AppSpacing.md),
 
-                    Text('Criar conta com e-mail', style: AppTextStyles.h2),
-                    const SizedBox(height: AppSpacing.xl),
+                    Text('Criar conta', style: AppTextStyles.h2),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // Google
+                    LcfButton(
+                      label: 'Cadastrar com Google',
+                      variant: LcfButtonVariant.social,
+                      prefixIcon: const GoogleAuthIcon(),
+                      onPressed: _onGoogle,
+                      isLoading: isLoading,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    // Apple
+                    LcfButton(
+                      label: 'Cadastrar com Apple',
+                      variant: LcfButtonVariant.social,
+                      prefixIcon: const AppleAuthIcon(),
+                      onPressed: _onApple,
+                      isLoading: isLoading,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // Divider
+                    Row(
+                      children: [
+                        const Expanded(child: Divider(color: AppColors.border)),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                          ),
+                          child: Text(
+                            'ou cadastre-se com e-mail',
+                            style: AppTextStyles.labelSmall,
+                          ),
+                        ),
+                        const Expanded(child: Divider(color: AppColors.border)),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
 
                     Form(
                       key: _formKey,

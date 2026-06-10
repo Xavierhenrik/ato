@@ -9,6 +9,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/lcf_button.dart';
 import '../../../../shared/widgets/lcf_text_field.dart';
+import '../../../../shared/widgets/social_auth_icons.dart';
 import '../../providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -76,8 +77,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final auth = ref.read(authNotifierProvider);
     if (auth is AsyncData && auth.value != null) {
       await _persistRememberMe(email);
-      if (!mounted) return;
-      context.go('/dashboard');
+      // Navegação delegada ao redirect do app_router (redirect #2).
     } else if (auth is AsyncError) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(auth.error.toString())),
@@ -93,12 +93,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await ref.read(authNotifierProvider.notifier).signInWithApple();
     if (!mounted) return;
     final auth = ref.read(authNotifierProvider);
-    if (auth is AsyncData && auth.value != null) context.go('/dashboard');
     if (auth is AsyncError) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(auth.error.toString())),
       );
     }
+    // Sucesso: navegação delegada ao redirect do app_router (redirect #2/#3).
   }
 
   @override
@@ -211,7 +211,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 LcfButton(
                   label: 'Entrar com Google',
                   variant: LcfButtonVariant.social,
-                  prefixIcon: const _GoogleIcon(),
+                  prefixIcon: const GoogleAuthIcon(),
                   onPressed: _onGoogle,
                   isLoading: isLoading,
                 ),
@@ -221,11 +221,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 LcfButton(
                   label: 'Entrar com Apple',
                   variant: LcfButtonVariant.social,
-                  prefixIcon: const Icon(
-                    Icons.apple,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  prefixIcon: const AppleAuthIcon(),
                   onPressed: _onApple,
                   isLoading: isLoading,
                 ),
@@ -284,36 +280,9 @@ class _LcfLogo extends StatelessWidget {
           color: AppColors.backgroundCard,
         ),
         alignment: Alignment.center,
-        child: Text('LCF', style: AppTextStyles.logoTitle),
+        child: Text('Lex', style: AppTextStyles.logoTitle),
       ),
     );
   }
 }
 
-class _GoogleIcon extends StatelessWidget {
-  const _GoogleIcon();
-
-  static const _googleBlue = Color(0xFF4285F4);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 20,
-      height: 20,
-      decoration: const BoxDecoration(
-        color: _googleBlue,
-        shape: BoxShape.circle,
-      ),
-      alignment: Alignment.center,
-      child: const Text(
-        'G',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          height: 1.0,
-        ),
-      ),
-    );
-  }
-}

@@ -9,8 +9,8 @@ class AuthRepository {
   const AuthRepository(this._dio);
   final Dio _dio;
 
-  /// Sincroniza sessão Supabase com o backend LCF. Cria usuário se novo.
-  /// 201 → novo usuário; 200 → usuário existente.
+  /// Sincroniza sessão Supabase com o backend LCF.
+  /// O auto-provisioning ocorre no middleware requireAuth do backend.
   Future<Response<void>> verify() {
     return _dio.post<void>('/auth/verify');
   }

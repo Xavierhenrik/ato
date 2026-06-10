@@ -6,7 +6,7 @@ export class AuthController {
 
   async verify(req: FastifyRequest, reply: FastifyReply) {
     const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
-    const result = await this.svc.getOrCreateUser(user.id);
+    const result = await this.svc.getUser(user.id);
     return reply.send(result);
   }
 

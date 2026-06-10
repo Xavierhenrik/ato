@@ -1,6 +1,6 @@
 ---
-updated: 2026-06-08
-sprint: "Fase 3 — Skills 100% LCF: roster de skills padronizado e versionado"
+updated: 2026-06-10
+sprint: "Auth Signup Unificado — Google+Apple no cadastro, verify centralizado, deep links"
 ---
 
 # LCF — Estado do Projeto
@@ -174,7 +174,9 @@ Nenhuma pendente.
 | 2026-06-07 | [SECURITY] Session ownership: `tutor:session:owner:{sessionId}` vincula sessão ao userId no Redis com TTL 4h | IDOR: qualquer JWT válido conseguia ler/injetar/deletar sessão alheia via UUID. `validateOwnership` lança 403 antes de qualquer operação. |
 | 2026-06-07 | JWT: `@fastify/jwt` usa `secret: SUPABASE_JWT_SECRET` (HS256 simétrico) | `SUPABASE_JWT_PUBLIC_KEY` não existe; Supabase usa HS256, não RS256. Undefined behavior se var ausente. |
 | 2026-06-07 | DELETE /auth/me chama `supabaseAdmin.auth.admin.deleteUser` antes de `db.user.delete` | Sem essa chamada, JWT do usuário deletado ainda passava no `requireAuth` e o auto-provisioning recriava a conta — violação LGPD |
-| 2026-06-07 | Sign in with Apple revertido — obrigatório pela Guideline 4.8 | Decisão "removido do escopo" foi revogada; app usa Google OAuth, portanto Apple Sign In é mandatório |
+| 2026-06-10 | `onboarding_done` (metadata Supabase) é fonte de verdade do roteamento — sem `isNew`/`statusCode == 201` | Backend sempre retorna 200 em `/auth/verify`; redirect #3 do app_router decide onboarding vs dashboard |
+| 2026-06-10 | `signInWithGoogle` usa flag `_pendingGoogleVerify` + listener `onAuthStateChange.signedIn` para chamar `verify()` | Fluxo redirect: `signInWithOAuth` retorna imediatamente, sessão estabelecida apenas quando deep link `com.lcf.app://auth-callback` retorna |
+| 2026-06-10 | Sign in with Apple revertido — obrigatório pela Guideline 4.8 | Decisão "removido do escopo" foi revogada; app usa Google OAuth, portanto Apple Sign In é mandatório |
 | 2026-06-07 | Apple Sign In usa Supabase `signInWithIdToken` (não endpoint customizado) | Supabase já valida tokens Apple natively; reusa o fluxo `/auth/verify` existente sem migration Prisma |
 | 2026-06-07 | RevenueCat inicializado com guard (`if (_revenueCatAppleKey.isNotEmpty)`) | API key bloqueante externa; sem ela preços exibem '—' sem crash |
 | 2026-06-02 | Sabiázinho-4 para queries direct simples | ~5× mais barato; heurístico: >200 chars, verbos analíticos, art. N, nome de lei → Sabiá-4; demais → Sabiázinho-4 |
@@ -282,6 +284,7 @@ flutter run \
 | 2026-06-07 | sessions/2026-06-07_compliance_apple.md | Apple App Store Compliance: 6 itens implementados — Privacy Policy, Consent Modal IA, Delete Account UI, Disclaimer jurídico, Sign in with Apple, RevenueCat dynamic prices. flutter analyze zero issues. |
 | 2026-06-07 | sessions/2026-06-07_security_session_ownership.md | [SECURITY] AUTH-SESSION-OWN: Session ownership validation no Tutor IA — `create`, `validateOwnership`, `clear` atualizados; controller protege newSession/sendMessage/getSession/deleteSession. tsc zero erros. |
 | 2026-06-07 | — | [INFRA] 61 arquivos do `back/` commitados e pusheados para origin/main (commit dcca01f). Railway agora consegue detectar Node.js e executar `npm run build`. |
+| 2026-06-09 | sessions/2026-06-09_dashboard_bug_fix.md | [BUG] Dashboard 3 erros: causa raiz = `API_BASE_URL=http://localhost:3000` no emulador Android (localhost = o próprio emulador). Railway healthy (`/health` ok). Fix: PEM normalization `\n` em `app.ts`; URL Railway + instruções Flutter em `env-checklist.md`. |
 
 
 

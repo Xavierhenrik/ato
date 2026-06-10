@@ -8,7 +8,7 @@ const supabaseAdmin = createClient(
 );
 
 export class AuthService {
-  async getOrCreateUser(userId: string) {
+  async getUser(userId: string) {
     const user = await db.user.findUnique({
       where: { id: userId },
       include: { profile: true, subscription: true },

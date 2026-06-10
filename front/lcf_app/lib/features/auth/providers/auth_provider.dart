@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -55,9 +56,30 @@ Stream<User?> authUserStream(AuthUserStreamRef ref) {
 /// Mutations atualizam `state` para refletir loading/error na UI.
 @riverpod
 class AuthNotifier extends _$AuthNotifier {
+  // Sinaliza que estamos aguardando o callback de redirect do Google OAuth.
+  // Usado pelo listener de onAuthStateChange para chamar verify() exatamente
+  // uma vez, sem interferir nos fluxos de email/Apple que já chamam verify().
+  bool _pendingGoogleVerify = false;
+
   @override
   AsyncValue<User?> build() {
+    final sub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
+      if (event.event == AuthChangeEvent.signedIn && _pendingGoogleVerify) {
+        _pendingGoogleVerify = false;
+        _verifyAndSetState(event.session?.user);
+      }
+    });
+    ref.onDispose(sub.cancel);
     return AsyncData(Supabase.instance.client.auth.currentUser);
+  }
+
+  Future<void> _verifyAndSetState(User? user) async {
+    try {
+      if (user != null) await ref.read(authRepositoryProvider).verify();
+      state = AsyncData(user);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
   }
 
   Future<void> signInWithEmailPassword({
@@ -77,26 +99,26 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> signInWithGoogle() async {
     state = const AsyncLoading();
+    _pendingGoogleVerify = true;
     try {
       await Supabase.instance.client.auth.signInWithOAuth(
         OAuthProvider.google,
         redirectTo: 'com.lcf.app://auth-callback',
       );
-      // Auth state listener no GoRouter atualiza o estado automaticamente
-      state = AsyncData(Supabase.instance.client.auth.currentUser);
+      // Browser aberto — state permanece AsyncLoading até o deep link retornar.
+      // O listener em build() chama verify() e atualiza state ao receber signedIn.
     } catch (e, st) {
+      _pendingGoogleVerify = false;
       state = AsyncError(e, st);
     }
   }
 
-  /// Retorna true se o usuário é novo (201), false se já existia (200).
-  Future<bool> signUp({
+  Future<void> signUp({
     required String email,
     required String password,
     required String displayName,
   }) async {
     state = const AsyncLoading();
-    bool isNew = false;
     state = await AsyncValue.guard(() async {
       final response = await Supabase.instance.client.auth.signUp(
         email: email,
@@ -104,12 +126,10 @@ class AuthNotifier extends _$AuthNotifier {
         data: {'display_name': displayName},
       );
       if (response.user != null) {
-        final result = await ref.read(authRepositoryProvider).verify();
-        isNew = result.statusCode == 201;
+        await ref.read(authRepositoryProvider).verify();
       }
       return response.user;
     });
-    return isNew;
   }
 
   Future<void> signInWithApple() async {

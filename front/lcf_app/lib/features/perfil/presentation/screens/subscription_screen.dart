@@ -38,7 +38,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
       return;
     }
     try {
-      await Purchases.purchasePackage(package);
+      await Purchases.purchase(PurchaseParams.package(package));
     } on PurchasesError catch (e) {
       if (e.code != PurchasesErrorCode.purchaseCancelledError && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
