@@ -4,13 +4,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 
-// Semantic colors for correct/wrong states — not in AppColors since they are
-// standard green/red feedback, distinct from the brand palette.
-const Color _kCorrectGreen = Color(0xFF4CAF50);
-const Color _kCorrectBg = Color(0xFF1A3A1A);
-const Color _kCorrectLetterBg = Color(0xFF2A5A2A);
-const Color _kWrongBg = Color(0xFF3A1A1A);
-const Color _kWrongLetterBg = Color(0xFF5A2A2A);
 
 enum AnswerState { idle, selected, correct, wrong }
 
@@ -74,7 +67,7 @@ class AnswerOption extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   const Icon(
                     Icons.check_circle,
-                    color: _kCorrectGreen,
+                    color: AppColors.quizCorrect,
                     size: 20,
                   ),
                 ] else if (state == AnswerState.wrong) ...[
@@ -93,14 +86,14 @@ class AnswerOption extends StatelessWidget {
         AnswerState.idle => AppColors.backgroundCard,
         AnswerState.selected =>
           AppColors.accent.withValues(alpha: 0.1),
-        AnswerState.correct => _kCorrectBg,
-        AnswerState.wrong => _kWrongBg,
+        AnswerState.correct => AppColors.quizCorrectBg,
+        AnswerState.wrong => AppColors.quizWrongBg,
       };
 
   Color get _border => switch (state) {
         AnswerState.idle => AppColors.border,
         AnswerState.selected => AppColors.borderAccent,
-        AnswerState.correct => _kCorrectGreen,
+        AnswerState.correct => AppColors.quizCorrect,
         AnswerState.wrong => AppColors.error,
       };
 
@@ -108,7 +101,7 @@ class AnswerOption extends StatelessWidget {
         AnswerState.idle => AppColors.backgroundSheet,
         AnswerState.selected =>
           AppColors.accent.withValues(alpha: 0.2),
-        AnswerState.correct => _kCorrectLetterBg,
-        AnswerState.wrong => _kWrongLetterBg,
+        AnswerState.correct => AppColors.quizCorrectLetterBg,
+        AnswerState.wrong => AppColors.quizWrongLetterBg,
       };
 }

@@ -4,16 +4,6 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_theme.dart';
 
-/// Paleta de background por matéria (conforme SCREENS.md §10).
-const Map<String, Color> _subjectColors = {
-  'Constitucional':  Color(0xFF1A3A5C),
-  'Civil':           Color(0xFF1A3A2A),
-  'Penal':           Color(0xFF5C1A1A),
-  'Trabalho':        Color(0xFF3A2A1A),
-  'Proc. Civil':     Color(0xFF2A1A5C),
-  'Administrativo':  Color(0xFF1A3A3A),
-  'OAB':             Color(0xFF3A3A1A),
-};
 
 /// Pill colorido de categoria/matéria.
 ///
@@ -37,7 +27,7 @@ class CategoryTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bg = color ??
-        _subjectColors.entries
+        AppColors.subjectTagColors.entries
             .firstWhere(
               (e) => label.contains(e.key),
               orElse: () =>

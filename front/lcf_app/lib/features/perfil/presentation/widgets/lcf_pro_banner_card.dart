@@ -110,7 +110,7 @@ class _BannerHeader extends StatelessWidget {
           size: 20,
         ),
         const SizedBox(width: AppSpacing.sm),
-        Text('LCF PRÓ', style: AppTextStyles.h3Gold),
+        Text('Lex PRÓ', style: AppTextStyles.h3Gold),
       ],
     );
   }

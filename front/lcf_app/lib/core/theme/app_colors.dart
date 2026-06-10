@@ -40,6 +40,24 @@ class AppColors {
   // Avatares / Status
   static const Color onlineDot = Color(0xFF4CAF50);
 
+  // Quiz — feedback correto/errado
+  static const Color quizCorrect         = Color(0xFF4CAF50);
+  static const Color quizCorrectBg       = Color(0xFF1A3A1A);
+  static const Color quizCorrectLetterBg = Color(0xFF2A5A2A);
+  static const Color quizWrongBg         = Color(0xFF3A1A1A);
+  static const Color quizWrongLetterBg   = Color(0xFF5A2A2A);
+
+  // Tags de matéria
+  static const Map<String, Color> subjectTagColors = {
+    'Constitucional': Color(0xFF1A3A5C),
+    'Civil':          Color(0xFF1A3A2A),
+    'Penal':          Color(0xFF5C1A1A),
+    'Trabalho':       Color(0xFF3A2A1A),
+    'Proc. Civil':    Color(0xFF2A1A5C),
+    'Administrativo': Color(0xFF1A3A3A),
+    'OAB':            Color(0xFF3A3A1A),
+  };
+
   // Gradientes
   static const LinearGradient progressGradient = LinearGradient(
     colors: [Color(0xFFC9922A), Color(0xFFE8B84B)],

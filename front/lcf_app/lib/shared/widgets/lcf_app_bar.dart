@@ -56,7 +56,7 @@ class LcfAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       leading: _resolveLeading(context),
       actions: actions,
-      title: Text('LCF', style: AppTextStyles.logoTitle),
+      title: Text('Lex', style: AppTextStyles.logoTitle),
     );
   }
 }
@@ -111,7 +111,7 @@ class LcfTutorAppBar extends StatelessWidget implements PreferredSizeWidget {
               borderRadius: BorderRadius.circular(AppRadius.xs),
             ),
             alignment: Alignment.center,
-            child: Text('LCF', style: AppTextStyles.accentMedium),
+            child: Text('Lex', style: AppTextStyles.accentMedium),
           ),
           const SizedBox(width: AppSpacing.md),
           Column(

@@ -68,7 +68,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('LCF', style: AppTextStyles.logoTitle),
+                  Text('Lex', style: AppTextStyles.logoTitle),
                   Text('Início', style: AppTextStyles.labelMedium),
                 ],
               ),

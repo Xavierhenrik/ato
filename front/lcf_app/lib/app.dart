@@ -12,7 +12,7 @@ class App extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
-      title: 'LCF',
+      title: 'Lex',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       routerConfig: router,

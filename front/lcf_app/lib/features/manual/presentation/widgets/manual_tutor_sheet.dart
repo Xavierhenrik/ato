@@ -92,7 +92,7 @@ class ManualTutorSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadius.xs),
                   ),
                   alignment: Alignment.center,
-                  child: Text('LCF', style: AppTextStyles.accentMedium),
+                  child: Text('Lex', style: AppTextStyles.accentMedium),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(

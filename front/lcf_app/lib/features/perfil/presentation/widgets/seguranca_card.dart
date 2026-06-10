@@ -8,8 +8,6 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../data/perfil_repository.dart';
 
-// Faint gold background for success feedback (no withOpacity)
-const Color _kSuccessBg = Color(0xFF231D0A);
 
 class SegurancaCard extends ConsumerStatefulWidget {
   const SegurancaCard({super.key});
@@ -226,7 +224,7 @@ class _SegurancaCardState extends ConsumerState<SegurancaCard> {
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
-                color: _isError ? AppColors.errorBg : _kSuccessBg,
+                color: _isError ? AppColors.errorBg : AppColors.info,
                 borderRadius: AppRadius.button,
               ),
               child: Text(

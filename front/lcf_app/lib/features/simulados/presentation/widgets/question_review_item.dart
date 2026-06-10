@@ -6,8 +6,6 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/category_tag.dart';
 import '../../data/models/simulado_models.dart';
 
-const Color _kGreen = Color(0xFF4CAF50);
-const Color _kGreenBg = Color(0xFF1A3A1A);
 
 class QuestionReviewItem extends StatelessWidget {
   const QuestionReviewItem({
@@ -26,7 +24,7 @@ class QuestionReviewItem extends StatelessWidget {
     color: AppColors.textMuted,
   );
   static final TextStyle _correctAnswerStyle = AppTextStyles.labelMedium
-      .copyWith(color: _kGreen);
+      .copyWith(color: AppColors.quizCorrect);
 
   final QuestionReview review;
   final int index;
@@ -34,7 +32,7 @@ class QuestionReviewItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = review.isCorrect ? _kGreen : AppColors.error;
+    final accent = review.isCorrect ? AppColors.quizCorrect : AppColors.error;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -54,7 +52,7 @@ class QuestionReviewItem extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: review.isCorrect ? _kGreenBg : AppColors.errorBg,
+                  color: review.isCorrect ? AppColors.quizCorrectBg : AppColors.errorBg,
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 alignment: Alignment.center,

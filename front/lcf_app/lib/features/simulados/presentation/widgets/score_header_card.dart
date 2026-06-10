@@ -5,8 +5,6 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../data/models/simulado_models.dart';
 
-const Color _kGreen = Color(0xFF4CAF50);
-const Color _kGreenBg = Color(0xFF1A3A1A);
 
 class ScoreHeaderCard extends StatelessWidget {
   const ScoreHeaderCard({super.key, required this.result});
@@ -23,8 +21,8 @@ class ScoreHeaderCard extends StatelessWidget {
     // Backend returns score as percentage (0-100), not fraction (0-1).
     final pct = result.score.round();
     final passed = result.score >= 60;
-    final accent = passed ? _kGreen : AppColors.error;
-    final bg = passed ? _kGreenBg : AppColors.errorBg;
+    final accent = passed ? AppColors.quizCorrect : AppColors.error;
+    final bg = passed ? AppColors.quizCorrectBg : AppColors.errorBg;
 
     return Container(
       width: double.infinity,
@@ -60,7 +58,7 @@ class ScoreHeaderCard extends StatelessWidget {
               _Stat(
                 label: 'Corretas',
                 value: '${result.correct}',
-                valueColor: _kGreen,
+                valueColor: AppColors.quizCorrect,
               ),
               _Stat(
                 label: 'Erradas',

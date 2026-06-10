@@ -1,6 +1,6 @@
 # LCF — Design Tokens
 
-> Extraído das telas enviadas em 2026-05-21.
+> Extraído das telas enviadas em 2026-05-21. Paleta migrada para dark azul-marinho em 2026-06-09.
 > Implementar em `lib/core/theme/app_colors.dart` e `app_text_styles.dart`.
 > Esta é a fonte de verdade de design. Nunca usar valores hardcoded no código.
 
@@ -14,41 +14,48 @@
 // lib/core/theme/app_colors.dart
 
 class AppColors {
-  // Backgrounds
-  static const Color background     = Color(0xFF1A0800); // tela principal
-  static const Color backgroundCard = Color(0xFF2D1200); // cards e containers
-  static const Color backgroundSheet= Color(0xFF3D1200); // bottom sheets, modais
-  static const Color backgroundNav  = Color(0xFF140600); // bottom navigation bar
+  // Backgrounds (escuro → médio → claro)
+  static const Color background      = Color(0xFF050D1A); // azul-marinho profundo
+  static const Color backgroundCard  = Color(0xFF0D1E33); // cards e containers
+  static const Color backgroundSheet = Color(0xFF122640); // bottom sheets, modais
+  static const Color backgroundNav   = Color(0xFF030A14); // bottom navigation bar
 
-  // Gold / Accent
-  static const Color accent         = Color(0xFFC9922A); // gold primário
-  static const Color accentDark     = Color(0xFF9A6B1A); // gold hover/pressed
-  static const Color accentLight    = Color(0xFFE8B84B); // gold highlight
+  // Blue / Accent
+  static const Color accent      = Color(0xFF2D7DD2); // azul primário
+  static const Color accentDark  = Color(0xFF1A5CA0); // hover/pressed
+  static const Color accentLight = Color(0xFF5BA3E8); // highlight
+
+  // Amber / Highlight (terceira cor — identidade de marca, PRÓ, conquistas, streaks)
+  static const Color amber      = Color(0xFFE8963A); // âmbar primário
+  static const Color amberDark  = Color(0xFFBF7020); // hover/pressed
+  static const Color amberLight = Color(0xFFF5BC72); // highlight suave
+  static const Color amberGlow  = Color(0x33E8963A); // âmbar 20% opacidade — glows e tints
 
   // Bordas
-  static const Color border         = Color(0xFF3D2010); // border padrão
-  static const Color borderAccent   = Color(0xFFC9922A); // border selecionado/gold
-  static const Color borderMuted    = Color(0xFF2A1508); // border sutil
+  static const Color border       = Color(0xFF1A3352); // border padrão
+  static const Color borderAccent = Color(0xFF2D7DD2); // border selecionado
+  static const Color borderMuted  = Color(0xFF0F2035); // border sutil
 
   // Textos
-  static const Color textPrimary    = Color(0xFFFFFFFF); // texto principal
-  static const Color textSecondary  = Color(0xFF9E8472); // labels, subtítulos
-  static const Color textMuted      = Color(0xFF6B5240); // placeholders, disabled
-  static const Color textAccent     = Color(0xFFC9922A); // links, destaque gold
+  static const Color textPrimary   = Color(0xFFFFFFFF); // texto principal
+  static const Color textSecondary = Color(0xFF7A9BBF); // azul-acinzentado
+  static const Color textMuted     = Color(0xFF3D6080); // placeholders, disabled
+  static const Color textAccent    = Color(0xFF2D7DD2); // links, destaque
 
   // Semânticas
-  static const Color tagBackground  = Color(0xFF5A1A1A); // tag de categoria (vermelho escuro)
-  static const Color success        = Color(0xFFC9922A); // checkmarks (usa gold)
-  static const Color info           = Color(0xFF2A4A7A); // banner informativo (azul escuro)
-  static const Color error          = Color(0xFF8B2020); // erros
+  static const Color tagBackground = Color(0xFF0D2B4A); // tag de categoria
+  static const Color success       = Color(0xFF2D7DD2); // checkmarks (usa accent)
+  static const Color info          = Color(0xFF1A3A5C); // banner informativo
+  static const Color error         = Color(0xFF8B2020); // erros
+  static const Color errorBg       = Color(0xFF3A1A1A); // fundo de erro
 
   // Streak / Progresso
-  static const Color streakFire     = Color(0xFFFF6B00); // ícone de streak (laranja)
-  static const Color progressRing   = Color(0xFFC9922A); // anel de progresso (gold)
-  static const Color progressBg     = Color(0xFF3D2010); // fundo do anel
+  static const Color streakFire   = Color(0xFFE8963A); // unificado com amber
+  static const Color progressRing = Color(0xFFE8963A); // anel de progresso → amber
+  static const Color progressBg   = Color(0xFF0D1E33);
 
   // Avatares / Status
-  static const Color onlineDot      = Color(0xFF4CAF50); // ponto verde no avatar
+  static const Color onlineDot = Color(0xFF4CAF50); // mantém verde
 }
 ```
 
@@ -57,7 +64,7 @@ class AppColors {
 ```dart
 // Gradiente do anel de progresso (DonutChart)
 static const LinearGradient progressGradient = LinearGradient(
-  colors: [Color(0xFFC9922A), Color(0xFFE8B84B)],
+  colors: [Color(0xFF1A5CA0), Color(0xFF5BA3E8)],
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
 );
@@ -88,7 +95,7 @@ class AppTextStyles {
   static const TextStyle h3 = TextStyle(
     fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textPrimary,
   );
-  static const TextStyle h3Gold = TextStyle(
+  static const TextStyle h3Accent = TextStyle(
     fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.accent,
   );
 
@@ -114,7 +121,7 @@ class AppTextStyles {
     fontSize: 10, fontWeight: FontWeight.w400, color: AppColors.textMuted,
   );
 
-  // Accent / Gold
+  // Accent / Blue
   static const TextStyle accentLarge = TextStyle(
     fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.accent,
   );
@@ -129,7 +136,7 @@ class AppTextStyles {
   // Logo / Brand
   static const TextStyle logoTitle = TextStyle(
     fontSize: 22, fontWeight: FontWeight.w700,
-    color: AppColors.accent, letterSpacing: 2,
+    color: AppColors.amber, letterSpacing: 2,
   );
 }
 ```
@@ -188,9 +195,9 @@ class AppRadius {
 ### LcfTextField
 
 ```
-- Background: backgroundCard (#2D1200)
-- Border: 1px solid border (#3D2010)
-- Border focused: 1px solid accent (#C9922A)
+- Background: backgroundCard (#0D1E33)
+- Border: 1px solid border (#1A3352)
+- Border focused: 1px solid accent (#2D7DD2)
 - Border radius: 10px
 - Padding: 14px horizontal, 16px vertical
 - ícone leading: textSecondary quando vazio, accent quando focused
@@ -203,7 +210,7 @@ class AppRadius {
 
 | Variante | Background | Texto | Border |
 |----------|-----------|-------|--------|
-| `primary` | `accent` (#C9922A) | branco, bold | nenhum |
+| `primary` | `accent` (#2D7DD2) | branco, bold | nenhum |
 | `secondary` | `backgroundCard` | branco | 1px border |
 | `outline` | transparente | textMuted | 1px borderMuted |
 | `social` | `backgroundCard` | branco | 1px border |
@@ -214,8 +221,8 @@ Todos: `borderRadius: 12`, `height: 52px`, `width: double.infinity` por padrão.
 ### Card padrão
 
 ```
-- Background: backgroundCard (#2D1200)
-- Border: 1px solid border (#3D2010)
+- Background: backgroundCard (#0D1E33)
+- Border: 1px solid border (#1A3352)
 - Border radius: 16px
 - Padding: 16px
 - Shadow: nenhuma (flat design)
@@ -224,14 +231,14 @@ Todos: `borderRadius: 12`, `height: 52px`, `width: double.infinity` por padrão.
 ### Card destacado (selecionado / PRÓ)
 
 ```
-- Border: 1.5px solid accent (#C9922A)
-- Background: pode ter leve tint gold (C9922A com 10% opacidade)
+- Border: 1.5px solid accent (#2D7DD2)
+- Background: pode ter leve tint azul (2D7DD2 com 10% opacidade)
 ```
 
 ### CategoryTag (pill)
 
 ```
-- Background: tagBackground (#5A1A1A)
+- Background: tagBackground (#0D2B4A)
 - Texto: textPrimary, 12px, weight 500
 - Padding: 4px vertical, 10px horizontal
 - Border radius: full (100px)
@@ -240,9 +247,9 @@ Todos: `borderRadius: 12`, `height: 52px`, `width: double.infinity` por padrão.
 ### Badge "Membro Pró"
 
 ```
-- Background: backgroundSheet (#3D1200) ou backgroundCard
-- Borda: 1px solid accentDark
-- Texto: accent, 12px, weight 600
+- Background: amberGlow (0x33E8963A)
+- Borda: 1px solid amber (#E8963A)
+- Texto: amber, 12px, weight 600
 - Padding: 4px 10px
 - Border radius: full
 ```
@@ -250,23 +257,45 @@ Todos: `borderRadius: 12`, `height: 52px`, `width: double.infinity` por padrão.
 ### Streak Badge
 
 ```
-- Background: backgroundCard
-- Borda: 1px solid accent
-- Ícone: 🔥 laranja (#FF6B00)
-- Número: accent (gold), bold
-- Label: "Dias seguido", textSecondary, 10px
+- Background: backgroundSheet (inativo) / amberGlow (streak ≥ 7 dias)
+- Borda: border (inativo) / amber (streak ≥ 7 dias)
+- Ícone: 🔥 amber (#E8963A) — unificado com streakFire
+- Número/texto: textSecondary (inativo) / amber (streak ≥ 7 dias), bold
+- Troféu: amber quando streak ≥ 7 dias
 - Padding: 6px 10px
-- Border radius: 20px
+- Border radius: full
+```
+
+### Regra de uso das três cores
+
+```
+Azul (accent #2D7DD2):
+  - Ações primárias (botões, CTAs de navegação)
+  - Estados de foco em inputs e formulários
+  - Links, ícones de estado interativo
+  - BottomNav ativo, chips de filtro selecionados
+
+Âmbar (amber #E8963A):
+  - Identidade de marca: logo "LCF" na AppBar
+  - Plano PRÓ: badges, banners, ícone crown, border cards PRÓ
+  - Conquistas e streaks ativos (≥ 7 dias)
+  - Anel de progresso (progressRing) e fogo de streak (streakFire)
+  - Gradiente amberGradient para DonutChart / ProgressRing
+
+NUNCA usar âmbar em:
+  - Feedback semântico (erro, sucesso, info) — reservados para vermelho/verde/azul
+  - Inputs e formulários — sempre azul para foco
+  - Ações destrutivas
 ```
 
 ### BottomNav
 
 ```
-- Background: backgroundNav (#140600)
+- Background: backgroundNav (#030A14)
 - Altura: 60px + padding SafeArea
-- Ícone ativo: accent (#C9922A)
+- Ícone ativo: accent (#2D7DD2)
 - Label ativo: accent, 10px
-- Ícone inativo: textMuted (#6B5240)
+- Ícone inativo: textMuted (#3D6080)
 - Label inativo: textMuted, 10px
 - Sem indicador/blob — apenas mudança de cor
 ```
@@ -274,7 +303,7 @@ Todos: `borderRadius: 12`, `height: 52px`, `width: double.infinity` por padrão.
 ### AppBar padrão (telas internas)
 
 ```
-- Background: background (#1A0800) — sem elevação
+- Background: background (#050D1A) — sem elevação
 - Título: "LCF" centralizado, logoTitle style
 - Leading: ← ícone, textPrimary
 - Actions: ícones textPrimary ou accent
@@ -284,7 +313,7 @@ Todos: `borderRadius: 12`, `height: 52px`, `width: double.infinity` por padrão.
 
 ```
 - Diferente do padrão:
-- Leading: box com borda gold contendo "LCF" (logo box)
+- Leading: box com borda azul contendo "LCF" (logo box)
 - Title alinhado à esquerda: "Tutor IA" bold + subtítulo menor
 ```
 
