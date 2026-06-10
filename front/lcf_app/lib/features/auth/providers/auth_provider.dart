@@ -7,6 +7,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../data/auth_repository.dart';
 
@@ -101,10 +102,26 @@ class AuthNotifier extends _$AuthNotifier {
     state = const AsyncLoading();
     _pendingGoogleVerify = true;
     try {
-      await Supabase.instance.client.auth.signInWithOAuth(
-        OAuthProvider.google,
+      // Geramos a URL manualmente para controlar o launch mode.
+      // supabase_flutter 2.x hardcoda LaunchMode.externalApplication para Google,
+      // sem fallback — o que falha silenciosamente quando o Chrome do emulador não
+      // responde após reinicialização.
+      final res = await Supabase.instance.client.auth.getOAuthSignInUrl(
+        provider: OAuthProvider.google,
         redirectTo: 'com.lcf.app://auth-callback',
       );
+      final uri = Uri.parse(res.url);
+
+      bool launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+      }
+      if (!launched) {
+        throw Exception(
+          'Não foi possível abrir o navegador. '
+          'Verifique se há um browser instalado no dispositivo.',
+        );
+      }
       // Browser aberto — state permanece AsyncLoading até o deep link retornar.
       // O listener em build() chama verify() e atualiza state ao receber signedIn.
     } catch (e, st) {

@@ -62,9 +62,15 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
     setState(() => _loading = _AuthMethod.google);
     await ref.read(authNotifierProvider.notifier).signInWithGoogle();
     if (!mounted) return;
-    // signInWithGoogle abre o browser — estado volta para none para desbloquear UI.
-    // O listener onAuthStateChange em auth_provider atualiza o state quando retornar.
     setState(() => _loading = _AuthMethod.none);
+
+    final auth = ref.read(authNotifierProvider);
+    if (auth is AsyncError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(auth.error.toString())),
+      );
+    }
+    // Sucesso: browser aberto — listener onAuthStateChange cuida da navegação.
   }
 
   Future<void> _onApple() async {

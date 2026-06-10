@@ -98,8 +98,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _loading = _AuthMethod.google);
     await ref.read(authNotifierProvider.notifier).signInWithGoogle();
     if (!mounted) return;
-    // Browser aberto — desbloqueia UI; listener em auth_provider cuida do resto.
     setState(() => _loading = _AuthMethod.none);
+
+    final auth = ref.read(authNotifierProvider);
+    if (auth is AsyncError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(auth.error.toString())),
+      );
+    }
+    // Sucesso: browser aberto — listener onAuthStateChange cuida da navegação.
   }
 
   Future<void> _onApple() async {
