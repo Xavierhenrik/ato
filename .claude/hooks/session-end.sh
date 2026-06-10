@@ -1,49 +1,57 @@
 #!/bin/bash
 # Stop hook — LCF Project
-# Verifica se um log de sessão foi criado hoje.
-# Se não, retorna instrução forçando o Claude a escrever antes de finalizar.
+# Porta 1: log de sessão criado hoje
+# Porta 2: working tree limpa (alterou → aprovoucommitou)
 
 TODAY=$(date +%Y-%m-%d)
 SESSIONS_DIR="$(cd "$(dirname "$0")/.." && pwd)/sessions"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
-# Verifica se existe arquivo de sessão com a data de hoje
-if find "$SESSIONS_DIR" -name "${TODAY}*.md" 2>/dev/null | grep -q .; then
-  # Log já existe — saída silenciosa, Claude pode finalizar
-  exit 0
+PENDING=""
+
+# ── Porta 1: log de sessão ───────────────────────────────────────────────────
+if ! find "$SESSIONS_DIR" -name "${TODAY}*.md" 2>/dev/null | grep -q .; then
+  PENDING="${PENDING}LOG"
 fi
 
-# Sem log hoje — força Claude a continuar e escrever o resumo
-cat << EOF
-PENDÊNCIA OBRIGATÓRIA: Nenhum log de sessão foi registrado para hoje ($TODAY).
+# ── Porta 2: working tree limpa ──────────────────────────────────────────────
+if [ -d "$REPO_ROOT/.git" ]; then
+  DIRTY=$(cd "$REPO_ROOT" && git status --porcelain 2>/dev/null)
+  if [ -n "$DIRTY" ]; then
+    PENDING="${PENDING}COMMIT"
+  fi
+fi
 
-Antes de finalizar, execute as duas ações abaixo:
+# Ambas as portas OK — encerra silenciosamente
+[ -z "$PENDING" ] && exit 0
 
-1. Crie o arquivo .claude/sessions/${TODAY}_$(date +%H).md com o seguinte conteúdo:
+# ── Saída de bloqueio ────────────────────────────────────────────────────────
+echo "╔══════════════════════════════════════════════════════════╗"
+echo "║  PENDÊNCIAS OBRIGATÓRIAS antes de finalizar a sessão     ║"
+echo "╚══════════════════════════════════════════════════════════╝"
 
-# Sessão $TODAY $(date +%H:%M)
+if [[ "$PENDING" == *"LOG"* ]]; then
+  cat << EOF
 
-## O que foi feito
--
+PORTA 1 — Log de sessão ausente
+Crie .claude/sessions/${TODAY}_<slug>.md com:
+  ## O que foi feito / Arquivos modificados / Criterios de aceite / Decisoes
 
-## Arquivos modificados
-- 
+Atualize .claude/PROJECT_STATE.md (updated: $TODAY, status dos modulos).
 
-## Critérios de aceite cumpridos
-- [ ] 
-
-## Pendências / Próximos passos
--
-
-## Decisões tomadas
--
-
-2. Atualize .claude/PROJECT_STATE.md:
-   - Marque [x] nos critérios de aceite cumpridos nesta sessão
-   - Atualize o status dos módulos modificados (🔄 Esqueleto → ✅ Completo se aplicável)
-   - Adicione uma linha na tabela "Log de Sessões" com data e resumo
-   - Atualize o campo "updated:" no frontmatter para $TODAY
-
-Após criar os dois arquivos, você pode finalizar.
 EOF
+fi
+
+if [[ "$PENDING" == *"COMMIT"* ]]; then
+  cat << EOF
+PORTA 2 — Working tree nao esta limpa
+Arquivos pendentes:
+$(cd "$REPO_ROOT" && git status --short 2>/dev/null)
+
+Regra: alterou -> aprovou -> commitou.
+Use a skill lcf-versioning para agrupar e commitar antes de encerrar.
+
+EOF
+fi
 
 exit 0
