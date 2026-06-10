@@ -9,6 +9,8 @@ import '../../../../shared/widgets/lcf_text_field.dart';
 import '../../../../shared/widgets/social_auth_icons.dart';
 import '../../providers/auth_provider.dart';
 
+enum _AuthMethod { none, google, apple, email }
+
 class CadastroScreen extends ConsumerStatefulWidget {
   const CadastroScreen({super.key});
 
@@ -22,6 +24,10 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
   final _emailCtrl = TextEditingController();
   final _senhaCtrl = TextEditingController();
 
+  _AuthMethod _loading = _AuthMethod.none;
+
+  bool get _anyLoading => _loading != _AuthMethod.none;
+
   @override
   void dispose() {
     _nomeCtrl.dispose();
@@ -32,6 +38,7 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
 
   Future<void> _onCriarConta() async {
     if (!_formKey.currentState!.validate()) return;
+    setState(() => _loading = _AuthMethod.email);
 
     await ref.read(authNotifierProvider.notifier).signUp(
           email: _emailCtrl.text.trim(),
@@ -40,40 +47,42 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
         );
 
     if (!mounted) return;
-    final auth = ref.read(authNotifierProvider);
+    setState(() => _loading = _AuthMethod.none);
 
+    final auth = ref.read(authNotifierProvider);
     if (auth is AsyncError) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(auth.error.toString())),
       );
-      return;
     }
     // Sucesso: navegação delegada ao redirect do app_router.
-    // Redirect #3 envia para /onboarding quando onboarding_done != true.
   }
 
   Future<void> _onGoogle() async {
+    setState(() => _loading = _AuthMethod.google);
     await ref.read(authNotifierProvider.notifier).signInWithGoogle();
-    // Navegação delegada ao redirect do app_router via deep link callback.
+    if (!mounted) return;
+    // signInWithGoogle abre o browser — estado volta para none para desbloquear UI.
+    // O listener onAuthStateChange em auth_provider atualiza o state quando retornar.
+    setState(() => _loading = _AuthMethod.none);
   }
 
   Future<void> _onApple() async {
+    setState(() => _loading = _AuthMethod.apple);
     await ref.read(authNotifierProvider.notifier).signInWithApple();
     if (!mounted) return;
+    setState(() => _loading = _AuthMethod.none);
+
     final auth = ref.read(authNotifierProvider);
     if (auth is AsyncError) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(auth.error.toString())),
       );
     }
-    // Sucesso: navegação delegada ao redirect do app_router.
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.watch(authNotifierProvider);
-    final isLoading = auth is AsyncLoading;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Stack(
@@ -130,7 +139,7 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                       children: [
                         const Spacer(),
                         GestureDetector(
-                          onTap: () => Navigator.of(context).maybePop(),
+                          onTap: _anyLoading ? null : () => Navigator.of(context).maybePop(),
                           child: const Icon(
                             Icons.close,
                             color: AppColors.textSecondary,
@@ -148,8 +157,8 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                       label: 'Cadastrar com Google',
                       variant: LcfButtonVariant.social,
                       prefixIcon: const GoogleAuthIcon(),
-                      onPressed: _onGoogle,
-                      isLoading: isLoading,
+                      onPressed: _anyLoading ? null : _onGoogle,
+                      isLoading: _loading == _AuthMethod.google,
                     ),
                     const SizedBox(height: AppSpacing.sm),
 
@@ -158,8 +167,8 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                       label: 'Cadastrar com Apple',
                       variant: LcfButtonVariant.social,
                       prefixIcon: const AppleAuthIcon(),
-                      onPressed: _onApple,
-                      isLoading: isLoading,
+                      onPressed: _anyLoading ? null : _onApple,
+                      isLoading: _loading == _AuthMethod.apple,
                     ),
                     const SizedBox(height: AppSpacing.lg),
 
@@ -192,6 +201,7 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                             controller: _nomeCtrl,
                             icon: Icons.person_outline,
                             textInputAction: TextInputAction.next,
+                            enabled: !_anyLoading,
                             validator: (v) {
                               if (v == null || v.trim().isEmpty) {
                                 return 'Informe seu nome';
@@ -208,6 +218,7 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                             icon: Icons.email_outlined,
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
+                            enabled: !_anyLoading,
                             validator: (v) {
                               if (v == null || v.isEmpty) return 'Informe seu e-mail';
                               if (!RegExp(r'\S+@\S+\.\S+').hasMatch(v)) {
@@ -225,6 +236,7 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
                             icon: Icons.lock_outline,
                             obscureText: true,
                             textInputAction: TextInputAction.done,
+                            enabled: !_anyLoading,
                             onSubmitted: (_) => _onCriarConta(),
                             validator: (v) {
                               if (v == null || v.isEmpty) return 'Informe uma senha';
@@ -236,8 +248,8 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
 
                           LcfButton(
                             label: 'Criar conta e iniciar',
-                            onPressed: _onCriarConta,
-                            isLoading: isLoading,
+                            onPressed: _anyLoading ? null : _onCriarConta,
+                            isLoading: _loading == _AuthMethod.email,
                             suffixIcon: const Icon(
                               Icons.arrow_forward,
                               color: Colors.white,

@@ -19,6 +19,8 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
+enum _AuthMethod { none, email, google, apple }
+
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   static const _rememberMeKey = 'auth_remember_me';
   static const _rememberedEmailKey = 'auth_remembered_email';
@@ -27,6 +29,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailCtrl = TextEditingController();
   final _senhaCtrl = TextEditingController();
   bool _lembrarMe = false;
+  _AuthMethod _loading = _AuthMethod.none;
+
+  bool get _anyLoading => _loading != _AuthMethod.none;
 
   @override
   void initState() {
@@ -68,12 +73,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _onLogin() async {
     if (!_formKey.currentState!.validate()) return;
     final email = _emailCtrl.text.trim();
+    setState(() => _loading = _AuthMethod.email);
+
     await ref.read(authNotifierProvider.notifier).signInWithEmailPassword(
           email: email,
           password: _senhaCtrl.text,
         );
 
     if (!mounted) return;
+    setState(() => _loading = _AuthMethod.none);
+
     final auth = ref.read(authNotifierProvider);
     if (auth is AsyncData && auth.value != null) {
       await _persistRememberMe(email);
@@ -86,26 +95,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _onGoogle() async {
+    setState(() => _loading = _AuthMethod.google);
     await ref.read(authNotifierProvider.notifier).signInWithGoogle();
+    if (!mounted) return;
+    // Browser aberto — desbloqueia UI; listener em auth_provider cuida do resto.
+    setState(() => _loading = _AuthMethod.none);
   }
 
   Future<void> _onApple() async {
+    setState(() => _loading = _AuthMethod.apple);
     await ref.read(authNotifierProvider.notifier).signInWithApple();
     if (!mounted) return;
+    setState(() => _loading = _AuthMethod.none);
+
     final auth = ref.read(authNotifierProvider);
     if (auth is AsyncError) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(auth.error.toString())),
       );
     }
-    // Sucesso: navegação delegada ao redirect do app_router (redirect #2/#3).
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.watch(authNotifierProvider);
-    final isLoading = auth is AsyncLoading;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -186,8 +198,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Entrar
                 LcfButton(
                   label: 'Entrar',
-                  onPressed: _onLogin,
-                  isLoading: isLoading,
+                  onPressed: _anyLoading ? null : _onLogin,
+                  isLoading: _loading == _AuthMethod.email,
                 ),
                 const SizedBox(height: AppSpacing.lg),
 
@@ -212,8 +224,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   label: 'Entrar com Google',
                   variant: LcfButtonVariant.social,
                   prefixIcon: const GoogleAuthIcon(),
-                  onPressed: _onGoogle,
-                  isLoading: isLoading,
+                  onPressed: _anyLoading ? null : _onGoogle,
+                  isLoading: _loading == _AuthMethod.google,
                 ),
                 const SizedBox(height: AppSpacing.sm),
 
@@ -222,8 +234,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   label: 'Entrar com Apple',
                   variant: LcfButtonVariant.social,
                   prefixIcon: const AppleAuthIcon(),
-                  onPressed: _onApple,
-                  isLoading: isLoading,
+                  onPressed: _anyLoading ? null : _onApple,
+                  isLoading: _loading == _AuthMethod.apple,
                 ),
                 const SizedBox(height: AppSpacing.xxxl),
 
