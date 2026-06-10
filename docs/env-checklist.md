@@ -108,8 +108,36 @@ Criar em [upstash.com](https://upstash.com) → New Database → Region: us-east
 
 ## Railway — Deploy
 
+**URL de produção:** `https://lcf-production.up.railway.app`
+
 1. Conectar repositório GitHub em Railway
 2. Adicionar todas as vars acima em Railway → Variables
 3. `npm run build` via Railway build command
 4. Start command: `node dist/server.js`
 5. Health check: `GET /health`
+
+> **ATENÇÃO — `SUPABASE_JWT_PUBLIC_KEY` no Railway:** cole a chave PEM com `\n` literal
+> (Railway não preserva quebras de linha reais). O `app.ts` normaliza automaticamente via `.replace(/\\n/g, '\n')`.
+
+---
+
+## Flutter App — Variáveis de build
+
+Para rodar o app apontando para o backend correto:
+
+```bash
+# Emulador Android (aponta para Railway — recomendado)
+flutter run --dart-define=API_BASE_URL=https://lcf-production.up.railway.app \
+            --dart-define=SUPABASE_URL=https://xxxx.supabase.co \
+            --dart-define=SUPABASE_ANON_KEY=eyJ...
+
+# Emulador Android (backend local no host)
+# localhost no emulador = o próprio emulador; use 10.0.2.2 para o host
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000 \
+            --dart-define=SUPABASE_URL=https://xxxx.supabase.co \
+            --dart-define=SUPABASE_ANON_KEY=eyJ...
+```
+
+> **Causa dos erros "Erro ao carregar dados/metas/revisões":** o app usa `http://localhost:3000`
+> como default. No Android Emulator, `localhost` é o próprio emulador — sem servidor lá,
+> todas as chamadas falham por connection refused. Sempre passe `API_BASE_URL` explícito.

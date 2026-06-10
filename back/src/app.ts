@@ -40,7 +40,9 @@ export async function buildApp() {
   await app.register(cors, { origin: corsOrigin });
   await app.register(jwt, {
     secret: {
-      public: process.env.SUPABASE_JWT_PUBLIC_KEY!,
+      // Railway stores env vars with literal \n — normalize to real newlines
+      // so that @fastify/jwt / jsonwebtoken can parse the PEM correctly.
+      public: (process.env.SUPABASE_JWT_PUBLIC_KEY ?? '').replace(/\\n/g, '\n'),
     },
   });
   await app.register(rateLimit, {
