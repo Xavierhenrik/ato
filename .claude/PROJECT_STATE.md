@@ -1,6 +1,6 @@
 ---
-updated: 2026-06-10
-sprint: "Auth Signup Unificado — Google+Apple no cadastro, verify centralizado, deep links"
+updated: 2026-06-11
+sprint: "Auth OAuth fix definitivo + cadastro como overlay modal de vidro"
 ---
 
 # LCF — Estado do Projeto
@@ -206,6 +206,8 @@ Nenhuma pendente.
 | 2026-06-10 | Ajustes finos tutor flutuante: fio dourado vira `Border.all` no shape (topo+quinas+laterais); `ChatInputBar.backgroundColor` (transparente na gaveta); header identidade "Lex/Tutor IA" removido do `LcfTutorAppBar` modo padrão; `/tutor/context` envolto em `ScaffoldWithNav` (BottomNav visível, sessão ainda isolada via `ProviderScope`) | Acabamento visual do padrão de vidro + navegação consistente: chat aberto pelo Manual mostra BottomNav mantendo voltar "Resumo" |
 | 2026-06-10 | Refino visual tutor flutuante: fio dourado do `LcfGlassSheet` vira `_GoldTrimPainter` (CustomPainter — arco esquerdo + aresta do topo + arco direito, para no fim do arredondamento; laterais/base sem dourado); gaveta com respiro lateral `AppSpacing.sm` (8px); blur `_kFrostSigma = 18` mantido | `Border.all` pintava laterais inteiras — o fio deve ser só acabamento do topo seguindo a curvatura; gaveta não encosta nos cantos do aparelho |
 | 2026-06-10 | `ProGateSheet` normalizado para o padrão `LcfGlassSheet`; `LcfGlassSheet` aceita altura intrínseca (`height == null` → child dimensiona a folha, sem `Positioned.fill`) | Sheet PRO usava superfície sólida `backgroundSheet` + `Border.all` dourado integral — fora do padrão de vidro fixado hoje. Todo bottom sheet do app deve usar `LcfGlassSheet` (vidro 30 %, fio dourado no topo, respiro lateral 8px) |
+| 2026-06-11 | Deep links de esquema customizado interceptados em `main.dart` via `SystemChannels.navigation` — nunca chegam ao GoRouter | CAUSA RAIZ do bug de navegação pós-OAuth: GoRouter chama `uri.origin` em `com.lcf.app://auth-callback` → `StateError` corrompe `_routeInformationProvider` permanentemente; redirect nunca rodava. supabase_flutter recebe o deep link via app_links EventChannel (caminho próprio, intacto) |
+| 2026-06-11 | Telas-bottom-sheet (ex.: `/cadastro`) usam rota transparente (`_slideUpPage`: `opaque: false` + scrim em fade + slide vertical) — nunca página opaca | Vidro do `LcfGlassSheet` precisa de conteúdo real atrás para frostar (blur de fundo liso é invisível); página opaca subia inteira como parede. Login permanece pintado atrás; tap fora fecha |
 
 ---
 
@@ -294,6 +296,7 @@ flutter run \
 | 2026-06-07 | sessions/2026-06-07_security_session_ownership.md | [SECURITY] AUTH-SESSION-OWN: Session ownership validation no Tutor IA — `create`, `validateOwnership`, `clear` atualizados; controller protege newSession/sendMessage/getSession/deleteSession. tsc zero erros. |
 | 2026-06-07 | — | [INFRA] 61 arquivos do `back/` commitados e pusheados para origin/main (commit dcca01f). Railway agora consegue detectar Node.js e executar `npm run build`. |
 | 2026-06-09 | sessions/2026-06-09_dashboard_bug_fix.md | [BUG] Dashboard 3 erros: causa raiz = `API_BASE_URL=http://localhost:3000` no emulador Android (localhost = o próprio emulador). Railway healthy (`/health` ok). Fix: PEM normalization `\n` em `app.ts`; URL Railway + instruções Flutter em `env-checklist.md`. |
+| 2026-06-11 | sessions/2026-06-11_oauth_navfix_cadastro_modal.md | CAUSA RAIZ navegação pós-OAuth corrigida (interceptor SystemChannels.navigation em main.dart); cadastro vira overlay modal de vidro (rota transparente + scrim + LcfGlassSheet frostando o login); git credential fixado (Xavierhenrik). flutter analyze zero issues. |
 
 
 
