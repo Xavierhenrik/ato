@@ -41,21 +41,15 @@ class _RouterNotifier extends ChangeNotifier with WidgetsBindingObserver {
 
   _RouterNotifier() {
     WidgetsBinding.instance.addObserver(this);
-    _sub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
-      debugPrint('[LCF-ROUTER] onAuthStateChange: ${event.event} — user: ${event.session?.user.email}');
+    _sub = Supabase.instance.client.auth.onAuthStateChange.listen((_) {
       notifyListeners();
     });
-    debugPrint('[LCF-ROUTER] _RouterNotifier criado, _sub ativo');
   }
 
-  void refresh() {
-    debugPrint('[LCF-ROUTER] refresh() chamado');
-    notifyListeners();
-  }
+  void refresh() => notifyListeners();
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    debugPrint('[LCF-ROUTER] lifecycle: $state');
     if (state == AppLifecycleState.resumed) notifyListeners();
   }
 
@@ -122,29 +116,17 @@ GoRouter appRouter(AppRouterRef ref) {
       final loc = state.matchedLocation;
       final onboardingDone = ref.read(onboardingDoneProvider);
 
-      debugPrint('[LCF-ROUTER] redirect: loc=$loc isLoggedIn=$isLoggedIn onboardingDone=$onboardingDone user=${user?.email}');
-
       // 1. Não autenticado + rota protegida → login
-      if (!isLoggedIn && !_publicRoutes.contains(loc)) {
-        debugPrint('[LCF-ROUTER] redirect → /login');
-        return '/login';
-      }
+      if (!isLoggedIn && !_publicRoutes.contains(loc)) return '/login';
 
       // 2. Autenticado + rota pública → dashboard
-      if (isLoggedIn && _publicRoutes.contains(loc)) {
-        debugPrint('[LCF-ROUTER] redirect → /dashboard');
-        return '/dashboard';
-      }
+      if (isLoggedIn && _publicRoutes.contains(loc)) return '/dashboard';
 
       // 3. Autenticado + onboarding pendente + fora das telas de onboarding → onboarding
-      if (isLoggedIn &&
-          !onboardingDone &&
-          !_preOnboardingRoutes.contains(loc)) {
-        debugPrint('[LCF-ROUTER] redirect → /onboarding');
+      if (isLoggedIn && !onboardingDone && !_preOnboardingRoutes.contains(loc)) {
         return '/onboarding';
       }
 
-      debugPrint('[LCF-ROUTER] redirect → null (sem mudança)');
       return null;
     },
     routes: [

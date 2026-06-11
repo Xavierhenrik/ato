@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
-
 import 'package:crypto/crypto.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -104,22 +102,15 @@ class AuthNotifier extends _$AuthNotifier {
     state = const AsyncLoading();
     _pendingGoogleVerify = true;
     try {
-      debugPrint('[LCF-AUTH] signInWithGoogle: início — chamando getOAuthSignInUrl');
-
       final res = await Supabase.instance.client.auth.getOAuthSignInUrl(
         provider: OAuthProvider.google,
         redirectTo: 'com.lcf.app://auth-callback',
       );
       final uri = Uri.parse(res.url);
 
-      debugPrint('[LCF-AUTH] getOAuthSignInUrl OK — url: $uri');
-
       bool launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      debugPrint('[LCF-AUTH] launchUrl(externalApplication) = $launched');
-
       if (!launched) {
         launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
-        debugPrint('[LCF-AUTH] launchUrl(platformDefault) = $launched');
       }
       if (!launched) {
         throw Exception(
@@ -127,9 +118,7 @@ class AuthNotifier extends _$AuthNotifier {
           'Verifique se há um browser instalado no dispositivo.',
         );
       }
-      debugPrint('[LCF-AUTH] browser aberto com sucesso — aguardando deep link');
     } catch (e, st) {
-      debugPrint('[LCF-AUTH] ERRO em signInWithGoogle: $e');
       _pendingGoogleVerify = false;
       state = AsyncError(e, st);
     }
