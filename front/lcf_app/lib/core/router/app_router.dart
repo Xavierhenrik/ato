@@ -61,34 +61,40 @@ class _RouterNotifier extends ChangeNotifier with WidgetsBindingObserver {
   }
 }
 
-// Transição de bottom sheet — a tela sobe de baixo, com o fundo aparecendo
-// em fade. Usada nas telas de auth desenhadas como DraggableScrollableSheet
-// (ex.: cadastro), onde o slide lateral padrão quebraria a metáfora visual.
+// Transição de bottom sheet modal — a rota é transparente (opaque: false),
+// então a tela anterior continua pintada atrás; um scrim escurece em fade e
+// o conteúdo sobe de baixo. É o que permite ao LcfGlassSheet frostar o que
+// está atrás: sem a tela anterior visível, o blur não tem o que desfocar.
 CustomTransitionPage<void> _slideUpPage(GoRouterState state, Widget child) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
+    opaque: false,
+    barrierColor: Colors.transparent,
     transitionDuration: const Duration(milliseconds: 320),
     reverseTransitionDuration: const Duration(milliseconds: 240),
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      return FadeTransition(
-        opacity: CurvedAnimation(
-          parent: animation,
-          curve: const Interval(0, 0.6, curve: Curves.easeOut),
-        ),
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 1),
-            end: Offset.zero,
-          ).animate(
-            CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-              reverseCurve: Curves.easeInCubic,
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      return Stack(
+        children: [
+          Positioned.fill(
+            child: FadeTransition(
+              opacity: curved,
+              child: const ColoredBox(color: Colors.black54),
             ),
           ),
-          child: child,
-        ),
+          SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 1),
+              end: Offset.zero,
+            ).animate(curved),
+            child: child,
+          ),
+        ],
       );
     },
   );

@@ -90,35 +90,19 @@ class _CadastroScreenState extends ConsumerState<CadastroScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Overlay modal: a rota é transparente (_slideUpPage com opaque: false),
+    // o login permanece visível atrás e o LcfGlassSheet o frosta. Sem fundo
+    // próprio — o logo e a tagline são os do login, atrás do scrim.
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
-          // Fundo com logo
-          SafeArea(
-            child: Column(
-              children: [
-                const SizedBox(height: AppSpacing.xxxl),
-                Center(
-                  child: Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border:
-                          Border.all(color: AppColors.borderAccent, width: 2),
-                      color: AppColors.backgroundCard,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text('Lex', style: AppTextStyles.logoTitle),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Sua aprovação para OAB começa aqui',
-                  style: AppTextStyles.bodySmall,
-                ),
-              ],
+          // Área acima do sheet — tap fecha, como em bottom sheet nativo.
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap:
+                  _anyLoading ? null : () => Navigator.of(context).maybePop(),
             ),
           ),
 
