@@ -10,18 +10,23 @@ class ChatInputBar extends StatelessWidget {
     required this.controller,
     required this.onSend,
     this.enabled = true,
+    this.backgroundColor = AppColors.background,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onSend;
   final bool enabled;
 
+  /// Fundo da barra — transparente quando inserida em superfícies de vidro
+  /// (ex.: gaveta do tutor no Manual), para se fundir ao translúcido.
+  final Color backgroundColor;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       top: false,
       child: Container(
-        color: AppColors.background,
+        color: backgroundColor,
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
           AppSpacing.sm,
