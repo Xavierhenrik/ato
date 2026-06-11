@@ -152,7 +152,7 @@ Nenhuma pendente.
 | Decisão | Bloqueia | Status |
 |---------|---------|--------|
 | Pricing model PRO | Sprint 3 — RevenueCat config | ⏳ Pendente |
-| Banco de questões | Sprint 2 — M5 Simulados | ✅ Concluído — 2.210 questões OAB + 5.791 questões review (active) em live + staging |
+| Banco de questões | Sprint 2 — M5 Simulados | ⚠️ **PARCIALMENTE** — 2.210 questões OAB ativas em live. **5.791 questões review ainda `pending_review` no staging, ZERO no live.** Necessário rodar `scripts/promote_review_questions.js` no live antes de lançar. |
 | Topics (M3 Manual) | Pipeline generate_review_questions.py | ✅ Concluído — 1.883 topics em live + staging (2026-05-04) |
 | App IDs Apple/Google | Sprint 3 — IAP + Sign in with Apple | ⏳ Pendente — **bloqueia RevenueCat (preços dinâmicos) e Apple Sign In em produção** |
 | OneSignal App ID + API Key | Sprint 3 — Push | ⏳ Pendente |
@@ -163,6 +163,43 @@ Nenhuma pendente.
 | Passo 3 — Supabase: ativar Apple Auth Provider | Compliance 4.8 | ⏳ Aguarda passo anterior |
 | Passo 4 — App Store Connect: Age Rating 17+, conta demo, URL policy | Compliance geral | ⏳ Aguarda licença Apple |
 | Passo 5 — RevenueCat: produtos IAP + REVENUECAT_APPLE_API_KEY | Compliance 3.1.1 | ⏳ Aguarda App Store Connect configurado |
+
+---
+
+## Roadmap Pós-MVP — 2ª Fase OAB
+
+> Estudo aprofundado planejado antes de iniciar implementação.
+
+### Contexto
+A 2ª fase OAB é fundamentalmente diferente da 1ª: 5h de prova, 1 peça prático-profissional (45 pts)
++ 4 questões discursivas (~13,75 pts cada), em uma das ~14 especialidades (Penal, Civil, Constitucional,
+Trabalho, Tributário, Empresarial, Administrativo, Previdenciário, Internacional, Ambiental, Consumidor,
+ECA, Eleitoral, Digital). Avaliação por rubrica FGV, não gabarito.
+
+### Decisões já tomadas
+- `oab_phase2` no SimuladoConfig virou badge **"Em breve"** para todos os planos (2026-06-11)
+- Nenhum conteúdo real de 2ª fase no banco — modo era rótulo vazio
+- **Módulo 2ª fase NÃO entra no MVP de lançamento** — validar o app com 1ª fase primeiro
+
+### O que o LCF pode oferecer (pesquisa 2026-06-11)
+
+| Nível | O que é | Esforço | Quando |
+|-------|---------|---------|--------|
+| **1 — Tutor coach** | Mode "fase2" no Tutor IA com system prompt para estrutura de peças | Baixo | Sprint F10 |
+| **1 — Manual filtrado** | Filtro "Área 2ª fase" — organiza 1.883 tópicos por especialidade | Baixo | Sprint F10 |
+| **1 — Biblioteca de peças** | Modelos de petição inicial, HC, MS, contestação por área no Manual | Médio (curadoria) | Sprint F10 |
+| **2 — Módulo completo** | Editor de texto + LLM corrige peça via rubrica FGV + discursivas | Alto | Pós-validação MVP |
+
+### Diferencial competitivo
+Nenhuma plataforma hoje oferece correção automatizada de peça com rubrica FGV via LLM.
+Claude Sonnet + Tool Use é tecnicamente capaz — maior diferencial de monetização PRO para
+o público de 2ª fase (motivado, disposto a pagar, mal atendido pelo mercado).
+
+### Pendências antes de implementar
+- [ ] Estudo aprofundado: rubrica FGV por área, tipos de peça por especialidade, exemplos reais
+- [ ] Definir estrutura de dados: `PecaExercise`, `DiscursivaExercise`, `PecaAttempt`
+- [ ] Avaliar custo por submissão (Claude Sonnet por peça) para precificação PRO
+- [ ] Curadoria de banco de exercícios (provas anteriores por especialidade)
 
 ---
 

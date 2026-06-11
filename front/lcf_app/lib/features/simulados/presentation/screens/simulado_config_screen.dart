@@ -33,8 +33,9 @@ class _SimuladoConfigScreenState
 
   static const _quantities = [10, 15, 30, 50, 80];
 
-  bool _isModeLockedForFree(SimuladoMode mode) =>
-      mode == SimuladoMode.oabPhase2 || mode == SimuladoMode.weakAreas;
+  bool _isModeComingSoon(SimuladoMode mode) => mode == SimuladoMode.oabPhase2;
+
+  bool _isModeLockedForFree(SimuladoMode mode) => mode == SimuladoMode.weakAreas;
 
   bool _isQtyLockedForFree(int qty) => qty > 15;
 
@@ -144,6 +145,15 @@ class _SimuladoConfigScreenState
   }
 
   void _onModeTap(SimuladoMode mode, bool isPro) {
+    if (_isModeComingSoon(mode)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Em breve. Estamos preparando o módulo da 2ª fase OAB.'),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
     final isLocked = !isPro && _isModeLockedForFree(mode);
     if (isLocked) {
       ProGateSheet.show(context, feature: mode.label);
@@ -188,11 +198,13 @@ class _SimuladoConfigScreenState
               mainAxisSpacing: AppSpacing.sm,
               childAspectRatio: 1.6,
               children: SimuladoMode.values.map((mode) {
-                final locked = !isPro && _isModeLockedForFree(mode);
+                final comingSoon = _isModeComingSoon(mode);
+                final locked = !comingSoon && !isPro && _isModeLockedForFree(mode);
                 return ModeOptionCard(
                   mode: mode,
                   isSelected: _selectedMode == mode,
                   isLocked: locked,
+                  isComingSoon: comingSoon,
                   onTap: () => _onModeTap(mode, isPro),
                 );
               }).toList(),

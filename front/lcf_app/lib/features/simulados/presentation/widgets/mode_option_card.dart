@@ -13,31 +13,34 @@ class ModeOptionCard extends StatelessWidget {
     required this.isSelected,
     required this.isLocked,
     required this.onTap,
+    this.isComingSoon = false,
   });
 
   final SimuladoMode mode;
   final bool isSelected;
   final bool isLocked;
+  final bool isComingSoon;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final activeColor =
-        isLocked ? AppColors.textMuted : (isSelected ? AppColors.accent : AppColors.textSecondary);
+    final activeColor = (isLocked || isComingSoon)
+        ? AppColors.textMuted
+        : (isSelected ? AppColors.accent : AppColors.textSecondary);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: isSelected && !isLocked
+        color: isSelected && !isLocked && !isComingSoon
             ? AppColors.accent.withValues(alpha: 0.1)
             : AppColors.backgroundCard,
         borderRadius: AppRadius.card,
         border: Border.all(
-          color: isSelected && !isLocked
+          color: isSelected && !isLocked && !isComingSoon
               ? AppColors.borderAccent
               : AppColors.border,
-          width: isSelected && !isLocked ? 1.5 : 1,
+          width: isSelected && !isLocked && !isComingSoon ? 1.5 : 1,
         ),
       ),
       child: Material(
@@ -59,7 +62,29 @@ class ModeOptionCard extends StatelessWidget {
                   alignment: Alignment.topRight,
                   children: [
                     Icon(_modeIcon, color: activeColor, size: 28),
-                    if (isLocked)
+                    if (isComingSoon)
+                      Positioned(
+                        right: -2,
+                        top: -4,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: AppColors.backgroundSheet,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                                color: AppColors.border, width: 0.5),
+                          ),
+                          child: Text(
+                            'Em breve',
+                            style: AppTextStyles.labelSmall.copyWith(
+                              color: AppColors.textMuted,
+                              fontSize: 8,
+                            ),
+                          ),
+                        ),
+                      )
+                    else if (isLocked)
                       Positioned(
                         right: 0,
                         top: 0,
