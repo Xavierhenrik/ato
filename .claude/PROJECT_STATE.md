@@ -201,6 +201,11 @@ Nenhuma pendente.
 | 2026-05-28 | Rota PUT /users/notifications/player separada de PUT /users/notifications | Evita quebrar contrato Flutter das preferências gerais; player ID tem validação UUID + OneSignal API |
 | 2026-05-28 | Retry manual 401 removido do Dio interceptor (`api_client.dart`) | Loop infinito com Supabase staging JWT; SDK Flutter já gerencia refresh via `onAuthStateChange` |
 | 2026-05-28 | Profile APK fix: pré-criar `aar_metadata` de profile em `build/isar_flutter_libs/` | AGP 9+ desabilita `writeProfileAarMetadata` via `whenTaskAdded`; sem o arquivo pré-criado, `checkProfileAarMetadata` falha (path not found). Rebuild após `flutter clean` requer recriar. |
+| 2026-06-10 | `LcfGlassSheet` componente compartilhado — padrão de vidro translúcido sem blur | Encapsula superfície 30 %, fio dourado top, cantos 30 px. Primeiro uso: gaveta do Tutor IA no Manual (`ManualTutorOrb`). |
+| 2026-06-10 | Tutor IA no Manual: orbe flutuante + gaveta de vidro substituem ⚡ por seção | Único ponto de entrada, animação orbe→âncora, stagger de pills, `LcfTutorAppBar` minimalista em modo contexto (showBack=true). |
+| 2026-06-10 | Ajustes finos tutor flutuante: fio dourado vira `Border.all` no shape (topo+quinas+laterais); `ChatInputBar.backgroundColor` (transparente na gaveta); header identidade "Lex/Tutor IA" removido do `LcfTutorAppBar` modo padrão; `/tutor/context` envolto em `ScaffoldWithNav` (BottomNav visível, sessão ainda isolada via `ProviderScope`) | Acabamento visual do padrão de vidro + navegação consistente: chat aberto pelo Manual mostra BottomNav mantendo voltar "Resumo" |
+| 2026-06-10 | Refino visual tutor flutuante: fio dourado do `LcfGlassSheet` vira `_GoldTrimPainter` (CustomPainter — arco esquerdo + aresta do topo + arco direito, para no fim do arredondamento; laterais/base sem dourado); gaveta com respiro lateral `AppSpacing.sm` (8px); blur `_kFrostSigma = 18` mantido | `Border.all` pintava laterais inteiras — o fio deve ser só acabamento do topo seguindo a curvatura; gaveta não encosta nos cantos do aparelho |
+| 2026-06-10 | `ProGateSheet` normalizado para o padrão `LcfGlassSheet`; `LcfGlassSheet` aceita altura intrínseca (`height == null` → child dimensiona a folha, sem `Positioned.fill`) | Sheet PRO usava superfície sólida `backgroundSheet` + `Border.all` dourado integral — fora do padrão de vidro fixado hoje. Todo bottom sheet do app deve usar `LcfGlassSheet` (vidro 30 %, fio dourado no topo, respiro lateral 8px) |
 
 ---
 
@@ -259,6 +264,10 @@ flutter run \
 | 2026-05-16 | sessions/2026-05-16_sprint3_tutor_subscriptions.md | Sprint 3 completo: M4 gaps PRO (chips, auto-save, persistência sessão) + Subscriptions hardening |
 | 2026-05-22 | sessions/2026-05-22_flutter_f1_foundation.md | Sprint F1: 22 arquivos Flutter criados — core/theme, router, auth, onboarding (aguardando build_runner) |
 | 2026-05-22 | sessions/2026-05-22_monorepo_restructure.md | Monorepo: git mv back/ + front/docs + docs/ + .claude/ — commits 2c2df2f e d3360fc |
+| 2026-06-10 | sessions/2026-06-10_tutor_flutuante_manual.md | Tutor flutuante: orbe + gaveta de vidro no Manual, LcfGlassSheet, LcfTutorAppBar context-mode |
+| 2026-06-10 | sessions/2026-06-10_tutor_ajustes_finos.md | Ajustes finos tutor flutuante: borda dourada no shape, input bar transparente na gaveta, header identidade removido, /tutor/context com BottomNav. flutter analyze zero issues |
+| 2026-06-10 | sessions/2026-06-10_tutor_refino_visual.md | Refino visual: fio dourado via CustomPainter (arcos + topo, sem laterais), respiro lateral 8px na gaveta. flutter analyze zero issues |
+| 2026-06-10 | sessions/2026-06-10_progate_glass_normalize.md | ProGateSheet normalizado para LcfGlassSheet (vidro + fio dourado + respiro 8px); LcfGlassSheet com suporte a altura intrínseca. flutter analyze zero issues |
 | 2026-05-23 | sessions/2026-05-23_sprint_f1_finalizacao.md | Sprint F1 finalização: 4 widgets novos, OnboardingDone guard, app_router reescrito, prefer_const clean — 26 arquivos auditados |
 | 2026-05-23 | sessions/2026-05-23_sprint_f2_dashboard.md | Sprint F2 Dashboard: 10 arquivos Flutter — models, repository, providers, 5 widgets, dashboard_screen, router. build_runner + flutter analyze zero issues |
 | 2026-05-23 | sessions/2026-05-23_sprint_f3_tutor.md | Sprint F3 Tutor IA: 11 arquivos Flutter — tutor_models, tutor_repository, tutor_provider, 7 widgets, tutor_screen, router atualizado. build_runner + flutter analyze zero issues |

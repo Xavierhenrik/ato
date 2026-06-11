@@ -12,6 +12,7 @@ Skills especializadas em `.claude/skills/` — use com `/skill <nome>`:
 | `lcf-tech-lead` | Análise técnica, decisões de arquitetura, prompts de implementação para agentes dev |
 | `lcf-apple-compliance` | Auditoria de conformidade App Store, checklist de submissão, Sign in with Apple, privacy policy |
 | `lcf-security` | Auditoria de segurança por camada (auth, injeção, rate limit, mobile, infra), prompts de correção |
+| `lcf-qa` | Testes funcionais (perspectiva do usuário), refatoração segura, polish de módulos — usa TESTING_STRATEGY.md + REFACTORING_GUIDE.md |
 
 ---
 
@@ -58,6 +59,8 @@ Produto jurídico: **alucinação = perda de credibilidade imediata**. Toda deci
 | **API Contract** | `docs/api-contract.md` | Referência de contratos |
 | **Arquitetura** | `docs/architecture-overview.md` | Visão geral da arquitetura do sistema |
 | **Env Setup** | `docs/env-checklist.md` | Checklist de variáveis de ambiente |
+| **Testes** | `docs/TESTING_STRATEGY.md` | Antes de qualquer sessão de QA — cenários por módulo, fluxos compostos, formato de bug report |
+| **Refatoração** | `docs/REFACTORING_GUIDE.md` | Antes de qualquer sessão de limpeza de código — padrões obrigatórios, anti-padrões, scripts de auditoria |
 | **Estado atual** | `.claude/PROJECT_STATE.md` | Início de cada sessão |
 | **Última sessão** | `.claude/sessions/` | Início de cada sessão |
 
