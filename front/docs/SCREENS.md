@@ -414,6 +414,20 @@ O design apresenta seções diferentes e mais genéricas. Os pipelines de geraç
 - "Ver mais" por seção pode expandir inline ou navegar para sub-tela.
 - O coração de favoritar não tem endpoint mapeado no backend — verificar se entra no MVP.
 
+### Tutor contextual flutuante (orbe-robô) — decidido jun/2026
+
+Ponto de entrada do Tutor IA dentro do resumo. Substitui o antigo gatilho ⚡ por seção (removido) por um **orbe flutuante único** com contexto do tópico inteiro.
+
+- **Orbe-robô** — botão circular flutuante (canto inferior direito), fundo `AppColors.accent`, borda `AppColors.accentLight`, **ícone/imagem do robô** do Tutor (sem texto "Lex").
+- **Abrir** — ao tocar, scrim translúcido leve (~12%, **sem blur** no fundo) e a **gaveta de vidro** sobe; o orbe **anima e ancora no topo da gaveta** como cabeçalho.
+- **Cancelar** — tocar fora ou no orbe novamente reverte a animação.
+- **Gaveta** — padrão de vidro translúcido (ver `DESIGN_TOKENS.md` › Padrão de Vidro Translúcido): translúcida, sem blur, cantos 30px, **fio dourado de acabamento** no topo.
+- **Conteúdo (sólido/opaco)** — 3 pills de ação rápida ("Resumo para a prova", "Como cai na OAB?", "Exemplo prático") + barra de input **idêntica à do chat** (reusar o widget `ChatInputBar`).
+- **Navegação** — tocar numa pill ou enviar texto → `context.push('/tutor/context', extra: TutorScreenArgs(initialMessage, topicContext: TutorTopicContext(topicTitle, topicContent)))`. Contexto = tópico inteiro.
+- **Header do Tutor em modo contexto** — `LcfTutorAppBar` com `showBack: true` exibe um voltar **sutil**: seta + texto **"Resumo"** (não "Voltar para o resumo"); o bloco de avatar/identidade do topo é **omitido** nesse modo (fica subentendido). A tab `/tutor` normal permanece inalterada.
+
+Arquivos: `manual_detail_screen.dart`, `manual_tutor_sheet.dart` (redesenhado), `topic_section_tile.dart` (⚡ removido), `tutor_screen.dart`/`LcfTutorAppBar` (header), `shared/widgets/lcf_glass_sheet.dart` (novo).
+
 ---
 
 ## 7. Perfil

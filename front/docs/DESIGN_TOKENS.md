@@ -1,6 +1,7 @@
 # LCF — Design Tokens
 
-> Extraído das telas enviadas em 2026-05-21. Paleta migrada para dark azul-marinho em 2026-06-09.
+> Extraído das telas enviadas em 2026-05-21.
+> ⚠️ A migração para azul-marinho (2026-06-09) foi **apenas um teste e sofreu rollback**. A paleta vigente é a **âmbar/dourado sobre fundo marrom escuro** — a fonte de verdade real é `lib/core/theme/app_colors.dart` (ex.: `background #1A0800`, `accent #C9922A`). Os valores azuis listados abaixo neste doc estão desatualizados e devem ser alinhados ao código.
 > Implementar em `lib/core/theme/app_colors.dart` e `app_text_styles.dart`.
 > Esta é a fonte de verdade de design. Nunca usar valores hardcoded no código.
 
@@ -417,3 +418,32 @@ ThemeData get darkTheme => ThemeData(
   ),
 );
 ```
+
+---
+
+## Padrão de Vidro Translúcido (overlays)
+
+> Decidido na ideação do tutor contextual do Manual (jun/2026). **Padrão a reutilizar** em todos os overlays onde fizer sentido (gavetas, pop-ups, modais). Encapsular em `shared/widgets/lcf_glass_sheet.dart`.
+
+Regras inegociáveis do padrão:
+
+- **Superfície externa translúcida** — a "folha de vidro" usa cor de fundo com baixa opacidade (ex. `AppColors.backgroundCard.withOpacity(0.30)`).
+- **Frost só na folha de vidro, nunca no fundo** — o `BackdropFilter`/`ImageFilter.blur` aplica-se SOMENTE à superfície da gaveta/barra que sobe, com escopo limitado à região dela via `ClipRRect`. NÃO aplicar blur global ao fundo/scrim — o conteúdo fora da gaveta (o resumo) permanece nítido.
+- **Fio dourado de acabamento** — borda escura (token de borda) **com um detalhe dourado** no acabamento (ex. hairline `AppColors.accent.withOpacity(0.6)` na borda superior da gaveta). Assinatura visual padrão.
+- **Conteúdo nunca translúcido** — qualquer elemento com texto ou ícone (pills, campos, bubbles) é `Container` de cor **sólida e opaca** por cima do vidro, para legibilidade total. A transparência fica só na folha externa.
+- **Cantos bem arredondados** — anti-"quadrado" (ex. 30px nos cantos superiores da gaveta).
+
+Tokens sugeridos a adicionar em `AppColors`/tema (constantes, não hardcoded):
+`glassSurfaceOpacity = 0.30`, `glassEdgeAccent = AppColors.accent.withOpacity(0.6)`.
+
+**Padrão obrigatório para TODOS os bottom sheets / barras que sobem.** Implementado em `shared/widgets/lcf_glass_sheet.dart` — ponto único de controle (mudar a opacidade lá propaga para todos). Aplicar em: tutor do Manual (`ManualTutorSheet` ✓), paywall PRO (`ProGateSheet`), sheet de cadastro (`cadastro_screen.dart`), e qualquer novo sheet. Cards estáticos (Dashboard, Simulados, etc.) NÃO usam vidro — só superfícies que deslizam para cima.
+
+**Implementação canônica (2026-06-10):** `shared/widgets/lcf_glass_sheet.dart` encapsula
+o padrão completo. Constantes `_kSurfaceOpacity = 0.30`, `_kTopBorderOpacity = 0.60` e
+`_kFrostSigma = 18.0` vivem no arquivo do componente. Uso atual: gaveta de vidro do
+Tutor IA no Manual (`ManualTutorOrb`).
+
+> ⚠️ Revisão 2026-06-10 (decisão do produto): o vidro passou a usar `BackdropFilter`
+> (blur σ18) DENTRO da folha — efeito fosco do conteúdo atrás da gaveta, mantendo a
+> opacidade 0.30. O fio dourado é uma hairline separada (1.5 px) no topo, dentro do
+> `ClipRRect` — nunca usar `Border` não-uniforme com `borderRadius` (exception de paint).
