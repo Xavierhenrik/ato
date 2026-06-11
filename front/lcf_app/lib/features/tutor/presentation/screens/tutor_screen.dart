@@ -82,7 +82,8 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
 
   @override
   void dispose() {
-    _tutorNotifier.endSession();
+    // endSession() modifica state do provider — diferir para fora do finalizeTree.
+    Future(() => _tutorNotifier.endSession());
     _inputController.dispose();
     _scrollController.dispose();
     super.dispose();

@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../../core/theme/app_theme.dart';
 
 // AppBar padrão — título "LCF" centralizado, sem elevação
 //
@@ -77,56 +76,44 @@ class LcfTutorAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
-  Widget? _resolveLeading(BuildContext context) {
-    if (!showBack) return null;
-    return IconButton(
-      icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-      tooltip: 'Voltar',
-      onPressed: () {
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go(fallbackRoute);
-        }
-      },
-    );
+  void _goBack(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(fallbackRoute);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Modo contexto (veio do Manual): header minimalista — seta + "Resumo"
+    if (showBack) {
+      return AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            size: 18,
+            color: AppColors.textSecondary,
+          ),
+          onPressed: () => _goBack(context),
+        ),
+        titleSpacing: 0,
+        title: Text(
+          'Resumo',
+          style: AppTextStyles.labelLarge.copyWith(color: AppColors.accent),
+        ),
+        actions: actions,
+      );
+    }
+
+    // Modo padrão: header minimalista — sem título de identidade
     return AppBar(
       backgroundColor: AppColors.background,
       elevation: 0,
       automaticallyImplyLeading: false,
-      leading: _resolveLeading(context),
-      titleSpacing: showBack ? null : AppSpacing.lg,
-      title: Row(
-        children: [
-          // LCF logo box com borda gold
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.borderAccent, width: 1.5),
-              borderRadius: BorderRadius.circular(AppRadius.xs),
-            ),
-            alignment: Alignment.center,
-            child: Text('Lex', style: AppTextStyles.accentMedium),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Tutor IA', style: AppTextStyles.h3),
-              Text(
-                'Direito inteligente para sua aprovação',
-                style: AppTextStyles.labelSmall,
-              ),
-            ],
-          ),
-        ],
-      ),
       actions: actions,
     );
   }
