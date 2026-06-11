@@ -61,6 +61,39 @@ class _RouterNotifier extends ChangeNotifier with WidgetsBindingObserver {
   }
 }
 
+// Transição de bottom sheet — a tela sobe de baixo, com o fundo aparecendo
+// em fade. Usada nas telas de auth desenhadas como DraggableScrollableSheet
+// (ex.: cadastro), onde o slide lateral padrão quebraria a metáfora visual.
+CustomTransitionPage<void> _slideUpPage(GoRouterState state, Widget child) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    transitionDuration: const Duration(milliseconds: 320),
+    reverseTransitionDuration: const Duration(milliseconds: 240),
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurvedAnimation(
+          parent: animation,
+          curve: const Interval(0, 0.6, curve: Curves.easeOut),
+        ),
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1),
+            end: Offset.zero,
+          ).animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+              reverseCurve: Curves.easeInCubic,
+            ),
+          ),
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
 CustomTransitionPage<void> _fadeSlidePage(GoRouterState state, Widget child) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
@@ -137,7 +170,8 @@ GoRouter appRouter(AppRouterRef ref) {
       ),
       GoRoute(
         path: '/cadastro',
-        builder: (context, state) => const CadastroScreen(),
+        pageBuilder: (context, state) =>
+            _slideUpPage(state, const CadastroScreen()),
       ),
       GoRoute(
         path: '/esqueci-senha',
