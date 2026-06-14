@@ -1,6 +1,6 @@
 ---
-updated: 2026-06-11
-sprint: "Auth OAuth fix definitivo + cadastro como overlay modal de vidro"
+updated: 2026-06-12
+sprint: "Histórico do Tutor IA — planejado; delegação noturna agendada (temp-feat-historico)"
 ---
 
 # LCF — Estado do Projeto
@@ -63,6 +63,7 @@ clonar no note + copiar `.env` manualmente = ambiente completo.
 | **M5 — Simulados** | ✅ Completo (bug response field names — FIXED) | — | 2 |
 | **Push Notifications** | ✅ Completo (aguardando credenciais) | NotificationsService implementado com graceful degradation. Credenciais OneSignal pendentes. | 3 |
 | **Sprint 4 — Hardening** | ✅ Completo | — | 4 |
+| **Histórico Tutor (M4.1 + F10a)** | 🕓 Planejado | Spec pronta (`docs/specs/TUTOR_HISTORY_SPEC.md`); execução delegada agendada (pacote `temp-feat-historico/`, fora do repo) | — |
 
 ---
 
@@ -152,7 +153,8 @@ Nenhuma pendente.
 | Decisão | Bloqueia | Status |
 |---------|---------|--------|
 | Pricing model PRO | Sprint 3 — RevenueCat config | ⏳ Pendente |
-| Banco de questões | Sprint 2 — M5 Simulados | ⚠️ **PARCIALMENTE** — 2.210 questões OAB ativas em live. **5.791 questões review ainda `pending_review` no staging, ZERO no live.** Necessário rodar `scripts/promote_review_questions.js` no live antes de lançar. |
+| Banco de questões | Sprint 2 — M5 Simulados | ✅ **2026-06-12** — 2.210 questões OAB ativas + 5.744 questões review ativas em live e staging. |
+| Migration Camada 2 | Camada 2 Sonnet profile | ✅ **2026-06-12** — `weak_topics` + `analyzed_at` aplicados em staging e live via `camada2_weak_topics.sql`. |
 | Topics (M3 Manual) | Pipeline generate_review_questions.py | ✅ Concluído — 1.883 topics em live + staging (2026-05-04) |
 | App IDs Apple/Google | Sprint 3 — IAP + Sign in with Apple | ⏳ Pendente — **bloqueia RevenueCat (preços dinâmicos) e Apple Sign In em produção** |
 | OneSignal App ID + API Key | Sprint 3 — Push | ⏳ Pendente |
@@ -207,6 +209,10 @@ o público de 2ª fase (motivado, disposto a pagar, mal atendido pelo mercado).
 
 | Data | Decisão | Motivo |
 |------|---------|--------|
+| 2026-06-12 | Histórico do Tutor v1: persistência **write-through** (`persistTurn` por turno; TutorSession lazy na 1ª msg, `id` = sessionId Redis, `title` = 1ª msg ≤ 80 chars determinístico) + endpoints `GET /tutor/history`, `GET /tutor/history/:id`, `DELETE /tutor/history/:id`. Free vê 7 dias (gate na leitura), PRO tudo. Conversas antigas **read-only** com CTA "Nova conversa sobre isso"; `mode: simulado` não persiste; sem Isar; sem cron. `persistToDB` será removido; `DELETE /tutor/session/:id` vira só encerrar (endedAt + Redis clear). Spec: `docs/specs/TUTOR_HISTORY_SPEC.md` | Modelo atual perde conversas (persistência só no DELETE explícito + fatia de 8 msgs); reidratar transcript com tool_use serializado no LLM viola anti-alucinação; read-only não fere a decisão fixada "sem memória entre sessões" (v2.0). Free 7d = alavanca de conversão barata. |
+| 2026-06-11 | Revisão Inteligente vira "porta dupla": tap no card abre `RevisarSheet` (LcfGlassSheet) com **Ler resumo** (`/manual?subject=`) + **Praticar questões** (`POST /simulados/start` modo custom, subject, type:review). Borda dourada passa a ser estado de toque (não `isFirst` fixo); subtítulo "repetição espaçada" trocado por copy honesto. ✅ **IMPLEMENTADO 2026-06-11** | Reaproveita 100% do que existe (LcfGlassSheet, fluxo simulado F5, resumos M3) — sem endpoint novo, sem migration. Ativa as 5.791 questões `type:review` paradas. Card antes mentia ("X questões"=respondidas; botão Revisar caía em `/manual` sem filtro). **Depende:** promover `type:review` para `active` no live. |
+| 2026-06-11 | Direcionamento por tópico determinístico na `RevisarSheet`: `getRevisionCards` adiciona `topTopics` (top 3 por erros dos últimos 14 dias em questões `type:review` com `topicId`). PRO: linhas tappáveis → `/manual/topic/:id`. Free: cadeado → `ProGateSheet`. "Ler resumo": PRO com tópicos → tópico #1; demais → `/manual?subject=`. Backend antigo (sem `topTopics`) não quebra o app (`@JsonKey(defaultValue: [])`). ✅ **IMPLEMENTADO 2026-06-11** | Join determinístico `SimuladoQuestion → Question.topicId → Topic.title` — sem LLM, sem endpoint novo, sem migration. |
+| 2026-06-12 | Camada 2 — análise de perfil Sonnet: `runProfileAnalysis(userId)` disparado como fire-and-forget em `POST /simulados/:id/complete` (PRO only). Agrega erros dos últimos 60 dias por topicId → envia ao Sonnet → persiste `weakTopics Json` + `analyzedAt` em `StudyPlan`. `getRevisionCards` prefere `weakTopics` quando `analyzedAt < 7 dias`; conta de erros reais (14 dias) exibida mesmo no path Camada 2. Migration: `camada2_weak_topics.sql` (ALTER TABLE study_plans ADD COLUMN weak_topics jsonb, analyzed_at timestamptz). ✅ **IMPLEMENTADO 2026-06-12** | Sonnet só para análise de perfil (decisão fixada); fire-and-forget garante que o response de complete não é bloqueado; Camada 1 continua como fallback quando análise é velha ou inexistente. |
 | 2026-06-07 | apply_topics_fts.sql executado em staging + live | KB estática do Tutor IA ativada (BM25 em 1.883 tópicos) |
 | 2026-06-07 | [SECURITY] Session ownership: `tutor:session:owner:{sessionId}` vincula sessão ao userId no Redis com TTL 4h | IDOR: qualquer JWT válido conseguia ler/injetar/deletar sessão alheia via UUID. `validateOwnership` lança 403 antes de qualquer operação. |
 | 2026-06-07 | JWT: `@fastify/jwt` usa `secret: SUPABASE_JWT_SECRET` (HS256 simétrico) | `SUPABASE_JWT_PUBLIC_KEY` não existe; Supabase usa HS256, não RS256. Undefined behavior se var ausente. |
@@ -334,6 +340,10 @@ flutter run \
 | 2026-06-07 | — | [INFRA] 61 arquivos do `back/` commitados e pusheados para origin/main (commit dcca01f). Railway agora consegue detectar Node.js e executar `npm run build`. |
 | 2026-06-09 | sessions/2026-06-09_dashboard_bug_fix.md | [BUG] Dashboard 3 erros: causa raiz = `API_BASE_URL=http://localhost:3000` no emulador Android (localhost = o próprio emulador). Railway healthy (`/health` ok). Fix: PEM normalization `\n` em `app.ts`; URL Railway + instruções Flutter em `env-checklist.md`. |
 | 2026-06-11 | sessions/2026-06-11_oauth_navfix_cadastro_modal.md | CAUSA RAIZ navegação pós-OAuth corrigida (interceptor SystemChannels.navigation em main.dart); cadastro vira overlay modal de vidro (rota transparente + scrim + LcfGlassSheet frostando o login); git credential fixado (Xavierhenrik). flutter analyze zero issues. |
+| 2026-06-11 | sessions/2026-06-11_revisao_porta_dupla.md | Revisão Inteligente porta dupla: RevisarSheet (LcfGlassSheet), borda por toque, label correto, filtro Manual por matéria, backend type:review no modo custom. flutter analyze + tsc zero issues. |
+| 2026-06-11 | sessions/2026-06-11_revisao_topico_exato.md | Camada 1: direcionamento determinístico por tópico — topTopics no getRevisionCards, RevisarSheet com gate PRO/Free, navegação /manual/topic/:id. tsc + flutter analyze + build_runner zero issues. |
+| 2026-06-12 | sessions/2026-06-12_camada2_sonnet_profile.md | Camada 2: análise Sonnet persistida — profile-analysis.service.ts, fire-and-forget em completeAttempt, getRevisionCards prefere weakTopics frescos, migration SQL. tsc zero issues. |
+| 2026-06-12 | sessions/2026-06-12_tutor_history_planning.md | Planejamento Histórico do Tutor: 4 decisões de produto fechadas, spec TUTOR_HISTORY_SPEC.md criada, pacote de delegação noturna (orquestrador + 3 agentes Sonnet + fix template) em temp-feat-historico/. |
 
 
 

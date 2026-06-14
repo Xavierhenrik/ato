@@ -55,6 +55,7 @@ Produto jurídico: **alucinação = perda de credibilidade imediata**. Toda deci
 | **Spec MVP** | `docs/specs/LCF_Especificacao_Sistema.txt` | Requisitos funcionais completos |
 | **Free vs PRO** | `docs/specs/LCF_Free_vs_PRO.txt` | Sempre que implementar feature com diferenciação de plano |
 | **Arquitetura IA** | `docs/specs/LCF_ArquiteturaIA_MVP.txt` | Antes de tocar no módulo tutor-ia |
+| **Histórico Tutor** | `docs/specs/TUTOR_HISTORY_SPEC.md` | Antes de tocar em persistência/histórico de sessões do Tutor |
 | **Stack Infra** | `docs/specs/LCF_Stack_Infraestrutura_v1.0.txt` | Decisões de infraestrutura |
 | **API Contract** | `docs/api-contract.md` | Referência de contratos |
 | **Arquitetura** | `docs/architecture-overview.md` | Visão geral da arquitetura do sistema |
