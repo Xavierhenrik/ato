@@ -75,7 +75,27 @@
 ### GET /dashboard/revision-cards
 ```json
 // Response 200
-{ "cards": [ { "id": "string", "question": "string", "subject": "string" } ] }
+{
+  "cards": [
+    {
+      "subject": "Civil",
+      "lawCode": "CC",
+      "errorRate": 0.72,
+      "totalAnswered": 18,
+      "priority": "high",
+      "topTopics": [
+        { "id": "uuid", "title": "Responsabilidade Civil Subjetiva", "errors": 5 },
+        { "id": "uuid", "title": "Vícios do Negócio Jurídico", "errors": 3 }
+      ]
+    }
+  ]
+}
+// topTopics: até 3 tópicos priorizados para revisão. Duas camadas:
+//   Camada 1 (padrão): top 3 por contagem de erros nos últimos 14 dias (questões type:review com topicId).
+//   Camada 2 (PRO, quando ativo): ranking Sonnet dos últimos 60 dias — substituído quando StudyPlan.analyzedAt < 7 dias.
+//                                  Trigger: ao completar simulado (POST /simulados/:id/complete) com plano PRO.
+//   Vazio se o usuário só tiver erros em questões OAB (topicId null) e nenhuma análise Sonnet persistida.
+// errors em Camada 2: contagem real da janela de 14 dias (0 se tópico não foi errado no período recente).
 ```
 
 ### GET /dashboard/performance

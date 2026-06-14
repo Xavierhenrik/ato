@@ -55,7 +55,8 @@ export class SimuladosController {
   async complete(req: FastifyRequest, reply: FastifyReply) {
     const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
     const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
-    return reply.send(await this.svc.completeAttempt(user.id, id));
+    const isPro = await getIsPro(user.id);
+    return reply.send(await this.svc.completeAttempt(user.id, id, isPro));
   }
 
   async abandon(req: FastifyRequest, reply: FastifyReply) {

@@ -2,6 +2,7 @@ import { db } from '../../shared/db';
 import { Errors } from '../../shared/errors';
 import { redis, keys, TTL } from '../../shared/redis';
 import { Prisma } from '@prisma/client';
+import { runProfileAnalysis } from './profile-analysis.service';
 
 const FREE_MAX_Q_PER_SIMULADO = 20;
 const FREE_MAX_Q_PER_DAY = 15;
@@ -99,6 +100,7 @@ export class SimuladosService {
       }
     } else if (params.mode === 'custom' && params.subject) {
       conditions.push(Prisma.sql`subject = ${params.subject}`);
+      conditions.push(Prisma.sql`type = 'review'`);
     } else if (params.subjects && params.subjects.length > 0) {
       conditions.push(
         Prisma.sql`subject IN (${Prisma.join(
@@ -274,7 +276,7 @@ export class SimuladosService {
     };
   }
 
-  async completeAttempt(userId: string, attemptId: string) {
+  async completeAttempt(userId: string, attemptId: string, isPro = false) {
     const attempt = await db.simuladoAttempt.findFirst({
       where: { id: attemptId, userId },
     });
@@ -282,10 +284,17 @@ export class SimuladosService {
 
     const score = attempt.totalQ > 0 ? (attempt.correctQ / attempt.totalQ) * 100 : 0;
 
-    return db.simuladoAttempt.update({
+    const result = await db.simuladoAttempt.update({
       where: { id: attemptId },
       data: { completedAt: new Date(), score, status: 'completed' },
     });
+
+    // Camada 2: fire-and-forget profile analysis for PRO users
+    if (isPro) {
+      runProfileAnalysis(userId).catch(() => {});
+    }
+
+    return result;
   }
 
   async getResults(userId: string, attemptId: string, isPro: boolean) {

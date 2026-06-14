@@ -65,13 +65,16 @@ model Profile {
 // ── Plano de estudos (T19) ────────────────────────────────────────────────────
 
 model StudyPlan {
-  id          String   @id @default(uuid())
-  userId      String   @unique @map("user_id")
-  goal        String                          // "oab_first" | "oab_second"
-  durationDays Int     @map("duration_days")
-  dailyMins   Int      @map("daily_mins")
-  areas       Json                            // [{code, name, weight, topicsCount}]
-  generatedAt DateTime @default(now()) @map("generated_at")
+  id          String    @id @default(uuid())
+  userId      String    @unique @map("user_id")
+  goal        String                           // "oab_first" | "oab_second"
+  durationDays Int      @map("duration_days")
+  dailyMins   Int       @map("daily_mins")
+  areas       Json                             // [{code, name, weight, topicsCount}]
+  // Camada 2 — Sonnet profile analysis
+  weakTopics  Json?     @map("weak_topics")   // { [subject]: [{id, title, priority}] }
+  analyzedAt  DateTime? @map("analyzed_at")   // timestamp of last Sonnet analysis
+  generatedAt DateTime  @default(now()) @map("generated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
