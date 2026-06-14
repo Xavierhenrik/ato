@@ -11,6 +11,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/lcf_app_bar.dart';
 import '../../../../shared/widgets/lcf_empty_state.dart';
 import '../../../../shared/widgets/lcf_error_state.dart';
+import '../../../../shared/widgets/lcf_glass_nav_bar.dart';
 import '../../../../shared/widgets/lcf_loading_shimmer.dart';
 import '../../data/manual_repository.dart';
 import '../../data/models/manual_models.dart';
@@ -20,7 +21,11 @@ import '../widgets/manual_search_bar.dart';
 import '../widgets/topic_card.dart';
 
 class ManualListScreen extends ConsumerStatefulWidget {
-  const ManualListScreen({super.key});
+  const ManualListScreen({super.key, this.initialSubject});
+
+  /// Matéria pré-selecionada (nome humano, e.g. 'Constitucional').
+  /// Quando presente, aplica o filtro correspondente ao abrir a tela.
+  final String? initialSubject;
 
   @override
   ConsumerState<ManualListScreen> createState() => _ManualListScreenState();
@@ -31,6 +36,27 @@ class _ManualListScreenState extends ConsumerState<ManualListScreen> {
   Timer? _debounce;
   bool _isSearching = false;
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    final subject = widget.initialSubject;
+    if (subject != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final code = _subjectToLawCode(subject);
+        ref.read(selectedLawCodeProvider.notifier).select(code);
+      });
+    }
+  }
+
+  /// Inverso de [kLawCodeToLabel]: 'Constitucional' → 'CF', etc.
+  static String? _subjectToLawCode(String subject) {
+    for (final entry in kLawCodeToLabel.entries) {
+      if (entry.value == subject) return entry.key;
+    }
+    return null;
+  }
 
   @override
   void dispose() {
@@ -147,8 +173,11 @@ class _TopicsListView extends ConsumerWidget {
             icon: Icons.menu_book_outlined,
           );
         }
+        final bottomPad = MediaQuery.viewPaddingOf(context).bottom;
         return ListView.separated(
-          padding: AppSpacing.screenPadding,
+          padding: AppSpacing.screenPadding.copyWith(
+            bottom: LcfGlassNavBar.clearance + bottomPad,
+          ),
           itemCount: topics.length,
           separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
           itemBuilder: (context, i) => TopicCard(
@@ -192,8 +221,11 @@ class _SearchResultsView extends ConsumerWidget {
             icon: Icons.menu_book_outlined,
           );
         }
+        final bottomPad = MediaQuery.viewPaddingOf(context).bottom;
         return ListView.separated(
-          padding: AppSpacing.screenPadding,
+          padding: AppSpacing.screenPadding.copyWith(
+            bottom: LcfGlassNavBar.clearance + bottomPad,
+          ),
           itemCount: results.length,
           separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
           itemBuilder: (context, i) => _SearchResultCard(

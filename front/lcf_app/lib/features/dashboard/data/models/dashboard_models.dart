@@ -49,6 +49,21 @@ class DashboardData {
 }
 
 @JsonSerializable()
+class RevisionTopic {
+  const RevisionTopic({
+    required this.id,
+    required this.title,
+    required this.errors,
+  });
+  final String id;
+  final String title;
+  final int errors;
+  factory RevisionTopic.fromJson(Map<String, dynamic> json) =>
+      _$RevisionTopicFromJson(json);
+  Map<String, dynamic> toJson() => _$RevisionTopicToJson(this);
+}
+
+@JsonSerializable()
 class RevisionCard {
   const RevisionCard({
     required this.subject,
@@ -56,12 +71,15 @@ class RevisionCard {
     required this.errorRate,
     required this.totalAnswered,
     required this.priority,
+    this.topTopics = const [],
   });
   final String subject;
   final String lawCode;
   final double errorRate;
   final int totalAnswered;
   final String priority;
+  @JsonKey(defaultValue: [])
+  final List<RevisionTopic> topTopics;
   factory RevisionCard.fromJson(Map<String, dynamic> json) =>
       _$RevisionCardFromJson(json);
   Map<String, dynamic> toJson() => _$RevisionCardToJson(this);

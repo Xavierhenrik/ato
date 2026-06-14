@@ -6,13 +6,13 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/widgets/lcf_glass_nav_bar.dart';
 import '../../data/dashboard_repository.dart';
 import '../../providers/dashboard_provider.dart';
 import '../widgets/cards_materia_card.dart';
 import '../widgets/greeting_card.dart';
 import '../widgets/metas_diarias_card.dart';
 import '../widgets/revisao_inteligente_card.dart';
-import '../widgets/tarefas_rapidas_card.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -52,6 +52,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       }
     });
 
+    final bottomPad = MediaQuery.viewPaddingOf(context).bottom;
     return SafeArea(
       bottom: false,
       child: RefreshIndicator(
@@ -79,10 +80,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               const SizedBox(height: AppSpacing.sectionGap),
               const RevisaoInteligenteCard(),
               const SizedBox(height: AppSpacing.sectionGap),
-              const TarefasRapidasCard(),
-              const SizedBox(height: AppSpacing.sectionGap),
               const CardsMateriaCard(),
-              const SizedBox(height: AppSpacing.xxxl),
+              SizedBox(height: LcfGlassNavBar.clearance + bottomPad),
             ],
           ),
         ),

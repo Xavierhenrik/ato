@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/theme/glass_tokens.dart';
 
 // AppBar padrão — título "LCF" centralizado, sem elevação
 //
@@ -48,14 +49,14 @@ class LcfAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       centerTitle: true,
-      // Disable Flutter's implicit back button — we control it explicitly.
       automaticallyImplyLeading: false,
       leading: _resolveLeading(context),
       actions: actions,
       title: Text('Lex', style: AppTextStyles.logoTitle),
+      flexibleSpace: const _GlassTopBar(),
     );
   }
 }
@@ -89,7 +90,7 @@ class LcfTutorAppBar extends StatelessWidget implements PreferredSizeWidget {
     // Modo contexto (veio do Manual): header minimalista — seta + "Resumo"
     if (showBack) {
       return AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: IconButton(
@@ -106,15 +107,45 @@ class LcfTutorAppBar extends StatelessWidget implements PreferredSizeWidget {
           style: AppTextStyles.labelLarge.copyWith(color: AppColors.accent),
         ),
         actions: actions,
+        flexibleSpace: const _GlassTopBar(),
       );
     }
 
     // Modo padrão: header minimalista — sem título de identidade
     return AppBar(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: false,
       actions: actions,
+      flexibleSpace: const _GlassTopBar(),
+    );
+  }
+}
+
+// Gradiente vidro-fosco para os AppBars do LCF.
+// Fundo sólido escuro → sem BackdropFilter (blur em sólido não tem efeito visível).
+class _GlassTopBar extends StatelessWidget {
+  const _GlassTopBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.backgroundCard,
+            AppColors.background,
+          ],
+        ),
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.accent.withValues(alpha: kGlassTrimOpacity),
+            width: kGlassTrimStroke,
+          ),
+        ),
+      ),
     );
   }
 }

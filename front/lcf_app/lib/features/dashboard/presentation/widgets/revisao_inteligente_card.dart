@@ -10,6 +10,7 @@ import '../../../../shared/widgets/lcf_error_state.dart';
 import '../../../../shared/widgets/lcf_loading_shimmer.dart';
 import '../../data/models/dashboard_models.dart';
 import '../../providers/dashboard_provider.dart';
+import 'revisar_sheet.dart';
 
 class RevisaoInteligenteCard extends ConsumerWidget {
   const RevisaoInteligenteCard({super.key});
@@ -64,7 +65,7 @@ class _RevisaoContent extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.lg),
             child: Text(
-              'Com base no algoritmo de repetição espaçada',
+              'Suas matérias com mais erros recentes',
               style: AppTextStyles.bodySmall,
             ),
           ),
@@ -89,7 +90,7 @@ class _RevisaoContent extends StatelessWidget {
                 separatorBuilder: (_, __) =>
                     const SizedBox(width: AppSpacing.md),
                 itemBuilder: (context, i) =>
-                    _RevisionTile(card: cards[i], isFirst: i == 0),
+                    _RevisionTile(card: cards[i]),
               ),
             ),
         ],
@@ -98,36 +99,44 @@ class _RevisaoContent extends StatelessWidget {
   }
 }
 
-class _RevisionTile extends StatelessWidget {
-  const _RevisionTile({required this.card, required this.isFirst});
+class _RevisionTile extends StatefulWidget {
+  const _RevisionTile({required this.card});
+
+  final RevisionCard card;
+
+  @override
+  State<_RevisionTile> createState() => _RevisionTileState();
+}
+
+class _RevisionTileState extends State<_RevisionTile> {
+  bool _pressed = false;
 
   static final TextStyle _revisarLabel = AppTextStyles.labelSmall.copyWith(
     color: Colors.white,
     fontWeight: FontWeight.w600,
   );
 
-  final RevisionCard card;
-  final bool isFirst;
-
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final card = widget.card;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 120),
       width: 160,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: isFirst
+        color: _pressed
             ? AppColors.accent.withValues(alpha: 0.12)
             : AppColors.backgroundSheet,
         borderRadius: AppRadius.card,
         border: Border.all(
-          color: isFirst ? AppColors.borderAccent : AppColors.border,
+          color: _pressed ? AppColors.borderAccent : AppColors.border,
         ),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          // Navega para o manual filtrado por lawCode — F4 implementará o filtro.
-          onTap: () => context.push('/manual'),
+          onTap: () => RevisarSheet.show(context, card: card),
+          onHighlightChanged: (v) => setState(() => _pressed = v),
           borderRadius: AppRadius.card,
           splashColor: AppColors.accent.withValues(alpha: 0.12),
           highlightColor: AppColors.accent.withValues(alpha: 0.06),
@@ -151,7 +160,7 @@ class _RevisionTile extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${card.totalAnswered} questões',
+                      '${card.totalAnswered} respondidas',
                       style: AppTextStyles.labelSmall,
                     ),
                     Container(

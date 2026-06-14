@@ -249,10 +249,17 @@ response: { flow, nivelamentoPendente }
 
 [RevisaoInteligenteCard]
   [Header: "Revisão inteligente" | "Ver todas >"]
-  [Subtítulo: "Com base no algoritmo de repetição espaçada"]
+  [Subtítulo: "Suas matérias com mais erros recentes" — repetição espaçada real fica para v2]
   [HorizontalScrollView de SubjectRevisionCards]
-    Cada card: subject name, "Revisão hoje", "{n} questões", [Revisar]
-    Primeiro card: destacado com borda/bg gold
+    Cada card: subject name (tag + título), "{n} respondidas" (totalAnswered, NÃO questões a fazer), [Revisar]
+    Borda/bg gold = ESTADO DE TOQUE (mobile), não pré-seleção fixa
+    Tap no card → abre RevisarSheet (LcfGlassSheet) — porta dupla, não navega direto
+
+[RevisarSheet] (bottom sheet de vidro — LcfGlassSheet)
+  [Título: subject + contexto de desempenho "Você errou {n}% · {n} respondidas"]
+  [Botão "📖 Ler resumo"]      → /manual?subject={subject}  (resumos M3)
+  [Botão "✍️ Praticar questões"] → POST /simulados/start {mode:'custom', subject, totalQ:5–10}
+    (questões type:review da matéria — reaproveita fluxo F5 completo: responder→resultado→explicação PRO)
 
 [TarefasRapidasCard]
   [Header: "Tarefas rápidas"]
@@ -283,6 +290,7 @@ response: { flow, nivelamentoPendente }
 - Frase motivacional ("Disciplina hoje, aprovação amanhã") pode ser fixa ou rotacionada.
 - Tarefas rápidas são shortcuts de navegação local — não chamam API diretamente.
 - "Ver todas >" em Revisão e Cards de matérias → rotas a definir (provavelmente `/simulados` e `/manual`).
+- **Revisão inteligente — estratégia "porta dupla" (decisão 2026-06-11):** o card detecta matérias fracas (errorRate 14 dias); o tap abre a `RevisarSheet` que oferece **Ler resumo** (Manual filtrado) OU **Praticar questões** (simulado custom por matéria, questões `type:review`). Nenhum endpoint novo — reusa `/simulados/start` modo custom + Manual filtrado. Dependência de dados: questões `type:review` precisam estar `active` no live (rodar `promote_review_questions.js`).
 
 ---
 

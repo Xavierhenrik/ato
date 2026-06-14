@@ -5,11 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../shared/widgets/lcf_app_bar.dart';
+import '../../../../shared/providers/nav_bar_provider.dart';
+import '../../../../shared/widgets/lcf_glass_nav_bar.dart';
+import '../../../../shared/widgets/lcf_top_scrim.dart';
 import '../../../../shared/widgets/pro_gate_sheet.dart';
-import '../../data/models/tutor_models.dart'; // TutorMessage, TutorTopicContext, TutorScreenArgs
+import '../../data/models/tutor_models.dart';
 import '../../providers/tutor_provider.dart';
 import '../widgets/chat_bubble.dart';
 import '../widgets/chat_input_bar.dart';
@@ -82,8 +83,13 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
 
   @override
   void dispose() {
-    // endSession() modifica state do provider — diferir para fora do finalizeTree.
-    Future(() => _tutorNotifier.endSession());
+    // Restaura nav bar ao sair do tutor.
+    Future(() {
+      _tutorNotifier.endSession();
+      try {
+        ref.read(navBarModeProvider.notifier).state = NavBarMode.expanded;
+      } catch (_) {}
+    });
     _inputController.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -144,92 +150,90 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
     });
   }
 
-  Future<void> _confirmEndSession() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.backgroundCard,
-        shape: RoundedRectangleBorder(borderRadius: AppRadius.card),
-        title: Text('Encerrar conversa?', style: AppTextStyles.h3),
-        content: Text(
-          'O histórico desta sessão será apagado.',
-          style: AppTextStyles.bodyMedium,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(
-              'Cancelar',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(
-              'Encerrar',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.accent,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && mounted) {
-      await ref.read(tutorNotifierProvider.notifier).endSession();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(tutorNotifierProvider);
     final hasMessages =
         chatState.messages.isNotEmpty || chatState.streamingContent != null;
 
-    // Scroll to bottom on every streaming tick so text stays in view.
+    // Compacta a nav bar ao iniciar a primeira mensagem; restaura em dispose().
     ref.listen<TutorChatState>(tutorNotifierProvider, (prev, next) {
+      final wasActive = (prev?.messages.isNotEmpty ?? false) ||
+          (prev?.streamingContent != null);
+      final isActive =
+          next.messages.isNotEmpty || next.streamingContent != null;
+      if (!wasActive && isActive) {
+        ref.read(navBarModeProvider.notifier).state = NavBarMode.compact;
+      }
       if (next.streamingContent != null) _scrollToBottom();
     });
 
+    // Reserva espaço para a nav bar flutuante apenas no estado vazio sem
+    // teclado. ChatInputBar tem SafeArea interno — não somar viewPadding.bottom.
+    final kbOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final navBarShowing = !hasMessages && !kbOpen;
+    final inputBottomPad = navBarShowing ? LcfGlassNavBar.clearance : 0.0;
+
+    final viewPadTop = MediaQuery.viewPaddingOf(context).top;
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: LcfTutorAppBar(
-        // Exibe botão de voltar quando aberto em modo contexto (desde o Manual).
-        showBack: widget.topicContext != null,
-        fallbackRoute: '/manual',
-        actions: [
-          if (hasMessages)
-            IconButton(
-              icon: const Icon(
-                Icons.delete_outline,
-                color: AppColors.textSecondary,
-              ),
-              onPressed: _confirmEndSession,
-            ),
-        ],
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: hasMessages
-                ? _ChatListView(
-                    messages: chatState.messages,
-                    isLoading: chatState.isLoading,
-                    streamingContent: chatState.streamingContent,
-                    scrollController: _scrollController,
-                    onChipTap: _onSend,
-                  )
-                : TutorEmptyState(onChipTap: _onSend),
+          // Conteúdo principal
+          Column(
+            children: [
+              // Espaço reservado para o scrim superior (status bar + toolbar)
+              SizedBox(height: viewPadTop + kToolbarHeight),
+              Expanded(
+                child: hasMessages
+                    ? _ChatListView(
+                        messages: chatState.messages,
+                        isLoading: chatState.isLoading,
+                        streamingContent: chatState.streamingContent,
+                        scrollController: _scrollController,
+                        onChipTap: _onSend,
+                      )
+                    : TutorEmptyState(onChipTap: _onSend),
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: inputBottomPad),
+                child: ChatInputBar(
+                  controller: _inputController,
+                  onSend: _onSend,
+                  enabled:
+                      !chatState.isLoading && chatState.streamingContent == null,
+                ),
+              ),
+            ],
           ),
-          ChatInputBar(
-            controller: _inputController,
-            onSend: _onSend,
-            // Disable input while loading OR streaming to avoid overlapping messages.
-            enabled: !chatState.isLoading && chatState.streamingContent == null,
+          // Gradiente de vidro no topo — substitui o AppBar
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: LcfTopScrim(),
           ),
+          // Botão voltar mínimo — só no modo contexto (aberto desde o Manual)
+          if (widget.topicContext != null)
+            Positioned(
+              top: viewPadTop,
+              left: AppSpacing.xs,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios_new,
+                  size: 18,
+                  color: AppColors.textSecondary,
+                ),
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/manual');
+                  }
+                },
+              ),
+            ),
         ],
       ),
     );
@@ -253,7 +257,6 @@ class _ChatListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Find last assistant message to show continuation chips there only
     final lastAiIndex =
         messages.lastIndexWhere((m) => m.role == 'assistant');
     final isStreaming = streamingContent != null;
@@ -261,14 +264,11 @@ class _ChatListView extends StatelessWidget {
     return ListView.builder(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-      // One extra slot: TypingIndicator while loading OR streaming bubble.
       itemCount: messages.length + ((isLoading || isStreaming) ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == messages.length) {
           if (isLoading) return const TypingIndicator();
           if (isStreaming) {
-            // The provider feeds streamingContent char-by-char. ChatBubble
-            // renders Markdown live — bold and lists form as the text grows.
             return ChatBubble(
               message: TutorMessage(
                 id: 'streaming',
@@ -282,7 +282,6 @@ class _ChatListView extends StatelessWidget {
         }
 
         final msg = messages[index];
-        // Hide chips while a response is still streaming to avoid layout jump.
         final showChips = msg.role == 'assistant' &&
             index == lastAiIndex &&
             msg.continuationChips.isNotEmpty &&

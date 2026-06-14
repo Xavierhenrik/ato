@@ -3,12 +3,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
-
-// Opacidades e blur do padrão de vidro LCF — ver front/docs/DESIGN_TOKENS.md.
-const double _kSurfaceOpacity = 0.30;
-const double _kTrimOpacity = 0.60;
-const double _kTrimStroke = 1.5;
-const double _kFrostSigma = 18.0;
+import '../../core/theme/glass_tokens.dart';
 
 /// Superfície de vidro fosco translúcida com fio dourado de acabamento.
 ///
@@ -34,11 +29,11 @@ class LcfGlassSheet extends StatelessWidget {
     return ClipRRect(
       borderRadius: radius,
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: _kFrostSigma, sigmaY: _kFrostSigma),
+        filter: ImageFilter.blur(sigmaX: kGlassFrostSigma, sigmaY: kGlassFrostSigma),
         child: Container(
           height: height,
           decoration: BoxDecoration(
-            color: AppColors.backgroundCard.withValues(alpha: _kSurfaceOpacity),
+            color: AppColors.backgroundCard.withValues(alpha: kGlassSurfaceOpacity),
             borderRadius: radius,
           ),
           child: Stack(
@@ -52,8 +47,8 @@ class LcfGlassSheet extends StatelessWidget {
                   child: CustomPaint(
                     painter: _GoldTrimPainter(
                       radius: topRadius,
-                      color: AppColors.accent.withValues(alpha: _kTrimOpacity),
-                      strokeWidth: _kTrimStroke,
+                      color: AppColors.accent.withValues(alpha: kGlassTrimOpacity),
+                      strokeWidth: kGlassTrimStroke,
                     ),
                   ),
                 ),

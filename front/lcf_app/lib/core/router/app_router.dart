@@ -220,7 +220,7 @@ GoRouter appRouter(AppRouterRef ref) {
         },
       ),
 
-      // ── Push routes (sem ShellRoute) ──────────────────────────────────
+      // ── Push routes fullscreen (sem nav bar) ──────────────────────────
       GoRoute(
         path: '/subscription',
         builder: (context, state) => const SubscriptionScreen(),
@@ -240,48 +240,38 @@ GoRouter appRouter(AppRouterRef ref) {
           );
         },
       ),
+      // Sub-rotas profundas do Manual — fullscreen, fora do ShellRoute
       GoRoute(
-        path: '/manual',
-        builder: (context, state) => const ManualListScreen(),
+        path: '/manual/topic/:id',
+        pageBuilder: (context, state) => _fadeSlidePage(
+          state,
+          ManualDetailScreen(topicId: state.pathParameters['id']!),
+        ),
+      ),
+      // Sub-rotas profundas de Simulados — fullscreen, fora do ShellRoute
+      GoRoute(
+        path: '/simulados/:id',
+        pageBuilder: (context, state) {
+          final attempt = state.extra as SimuladoAttempt?;
+          final screen = attempt == null
+              ? const SimuladoConfigScreen()
+              : SimuladoAttemptScreen(attempt: attempt);
+          return _fadeSlidePage(state, screen);
+        },
         routes: [
           GoRoute(
-            path: 'topic/:id',
+            path: 'results',
             pageBuilder: (context, state) => _fadeSlidePage(
               state,
-              ManualDetailScreen(topicId: state.pathParameters['id']!),
+              SimuladoResultScreen(
+                simuladoId: state.pathParameters['id']!,
+              ),
             ),
           ),
         ],
       ),
-      GoRoute(
-        path: '/simulados',
-        builder: (context, state) => const SimuladoConfigScreen(),
-        routes: [
-          GoRoute(
-            path: ':id',
-            pageBuilder: (context, state) {
-              final attempt = state.extra as SimuladoAttempt?;
-              final screen = attempt == null
-                  ? const SimuladoConfigScreen()
-                  : SimuladoAttemptScreen(attempt: attempt);
-              return _fadeSlidePage(state, screen);
-            },
-            routes: [
-              GoRoute(
-                path: 'results',
-                pageBuilder: (context, state) => _fadeSlidePage(
-                  state,
-                  SimuladoResultScreen(
-                    simuladoId: state.pathParameters['id']!,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
 
-      // ── Shell — telas com BottomNav ────────────────────────────────────
+      // ── Shell — telas com nav bar flutuante ───────────────────────────
       ShellRoute(
         builder: (context, state, child) => ScaffoldWithNav(child: child),
         routes: [
@@ -300,6 +290,16 @@ GoRouter appRouter(AppRouterRef ref) {
           GoRoute(
             path: '/perfil',
             builder: (context, state) => const PerfilScreen(),
+          ),
+          GoRoute(
+            path: '/manual',
+            builder: (context, state) => ManualListScreen(
+              initialSubject: state.uri.queryParameters['subject'],
+            ),
+          ),
+          GoRoute(
+            path: '/simulados',
+            builder: (context, state) => const SimuladoConfigScreen(),
           ),
         ],
       ),

@@ -1,105 +1,127 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_text_styles.dart';
+import '../providers/nav_bar_provider.dart';
+import 'lcf_glass_nav_bar.dart';
 
-class ScaffoldWithNav extends StatelessWidget {
+class ScaffoldWithNav extends ConsumerStatefulWidget {
   const ScaffoldWithNav({super.key, required this.child});
 
   final Widget child;
 
-  static const _tabs = [
-    _NavTab(
-      route: '/tutor',
-      icon: Icons.chat_bubble_outline,
-      selectedIcon: Icons.chat_bubble,
-      label: 'Tutor',
-    ),
-    _NavTab(
-      route: '/anotacoes',
-      icon: Icons.edit_note_outlined,
-      selectedIcon: Icons.edit_note,
-      label: 'Anotações',
-    ),
-    _NavTab(
-      route: '/dashboard',
-      icon: Icons.home_outlined,
-      selectedIcon: Icons.home,
-      label: 'Início',
-    ),
-    _NavTab(
-      route: '/perfil',
-      icon: Icons.person_outline,
-      selectedIcon: Icons.person,
-      label: 'Perfil',
-    ),
-  ];
+  @override
+  ConsumerState<ScaffoldWithNav> createState() => _ScaffoldWithNavState();
+}
 
-  int _activeIndex(String location) {
-    final idx = _tabs.indexWhere((t) => location.startsWith(t.route));
-    return idx == -1 ? 2 : idx; // default: Início
+class _ScaffoldWithNavState extends ConsumerState<ScaffoldWithNav>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _compactCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _compactCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 420),
+      reverseDuration: const Duration(milliseconds: 360),
+    );
+  }
+
+  @override
+  void dispose() {
+    _compactCtrl.dispose();
+    super.dispose();
+  }
+
+  /// Constrói o Positioned da barra interpolando entre pílula expandida e
+  /// meio-círculo flutuante na borda direita.
+  ///
+  /// t = 0  →  pílula completa centralizada na base
+  /// t = 1  →  círculo de diâmetro [barHeight] posicionado meio a fio na direita
+  Widget _buildNavPositioned(
+    double t,
+    double screenWidth,
+    String location,
+  ) {
+    const bh = LcfGlassNavBar.barHeight; // 68
+    const bm = LcfGlassNavBar.barMargin; // 8
+
+    final expandedWidth = screenWidth - 2 * bm;
+
+    // right: começa em bm (margem esquerda de [bm] contabilizada pelo Positioned),
+    //        vai até -bh/2 (metade do círculo fora da tela).
+    final right = lerpDouble(bm, -bh / 2, t)!;
+
+    // width: encolhe da pílula até o diâmetro do círculo.
+    final width = lerpDouble(expandedWidth, bh, t)!;
+
+    return Positioned(
+      right: right,
+      bottom: 0,
+      width: width,
+      child: LcfGlassNavBar(location: location),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).matchedLocation;
-    final activeIndex = _activeIndex(location);
+    final dialOpen = ref.watch(navDialOpenProvider);
+
+    ref.listen<NavBarMode>(navBarModeProvider, (_, next) {
+      if (next == NavBarMode.compact) {
+        _compactCtrl.forward();
+      } else {
+        _compactCtrl.reverse();
+      }
+    });
 
     return Scaffold(
+      // false: impede que o Scaffold redimensione quando o teclado abre.
+      // O meio-círculo compacto fica fixo na borda direita, sem flutuar sobre
+      // o teclado. As telas filhas gerenciam seu próprio inset independentemente.
+      resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.background,
-      body: child,
-      bottomNavigationBar: NavigationBarTheme(
-        data: NavigationBarThemeData(
-          backgroundColor: AppColors.backgroundNav,
-          indicatorColor: AppColors.accent.withValues(alpha: 0.2),
-          surfaceTintColor: Colors.transparent,
-          labelTextStyle: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return AppTextStyles.navLabelSelected.copyWith(
-                color: AppColors.accent,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final screenWidth = constraints.maxWidth;
+          return AnimatedBuilder(
+            animation: _compactCtrl,
+            builder: (context, _) {
+              final t = CurvedAnimation(
+                parent: _compactCtrl,
+                curve: Curves.easeInOutCubic,
+              ).value;
+
+              return Stack(
+                // Permite que o meio-círculo compacto pinte além da borda
+                // direita da tela (right = -bh/2).
+                clipBehavior: Clip.none,
+                children: [
+                  child,
+                  // Barrier fecha speed-dial ao tocar fora da nav bar.
+                  if (dialOpen)
+                    Positioned.fill(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () =>
+                            ref.read(navDialOpenProvider.notifier).state =
+                                false,
+                      ),
+                    ),
+                  _buildNavPositioned(t, screenWidth, location),
+                ],
               );
-            }
-            return AppTextStyles.navLabelUnselected.copyWith(
-              color: AppColors.textMuted,
-            );
-          }),
-          iconTheme: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return const IconThemeData(color: AppColors.accent, size: 24);
-            }
-            return const IconThemeData(color: AppColors.textMuted, size: 24);
-          }),
-        ),
-        child: NavigationBar(
-          selectedIndex: activeIndex,
-          height: 68,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-          onDestinationSelected: (i) => context.go(_tabs[i].route),
-          destinations: _tabs
-              .map(
-                (tab) => NavigationDestination(
-                  icon: Icon(tab.icon),
-                  selectedIcon: Icon(tab.selectedIcon),
-                  label: tab.label,
-                ),
-              )
-              .toList(),
-        ),
+            },
+          );
+        },
       ),
     );
   }
-}
 
-class _NavTab {
-  const _NavTab({
-    required this.route,
-    required this.icon,
-    required this.selectedIcon,
-    required this.label,
-  });
-  final String route;
-  final IconData icon;
-  final IconData selectedIcon;
-  final String label;
+  Widget get child => widget.child;
 }

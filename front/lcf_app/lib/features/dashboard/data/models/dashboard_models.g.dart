@@ -52,12 +52,30 @@ Map<String, dynamic> _$DashboardDataToJson(DashboardData instance) =>
       'dailyProgress': instance.dailyProgress,
     };
 
+RevisionTopic _$RevisionTopicFromJson(Map<String, dynamic> json) =>
+    RevisionTopic(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      errors: (json['errors'] as num).toInt(),
+    );
+
+Map<String, dynamic> _$RevisionTopicToJson(RevisionTopic instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'title': instance.title,
+      'errors': instance.errors,
+    };
+
 RevisionCard _$RevisionCardFromJson(Map<String, dynamic> json) => RevisionCard(
       subject: json['subject'] as String,
       lawCode: json['lawCode'] as String,
       errorRate: (json['errorRate'] as num).toDouble(),
       totalAnswered: (json['totalAnswered'] as num).toInt(),
       priority: json['priority'] as String,
+      topTopics: (json['topTopics'] as List<dynamic>?)
+              ?.map((e) => RevisionTopic.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
 
 Map<String, dynamic> _$RevisionCardToJson(RevisionCard instance) =>
@@ -67,6 +85,7 @@ Map<String, dynamic> _$RevisionCardToJson(RevisionCard instance) =>
       'errorRate': instance.errorRate,
       'totalAnswered': instance.totalAnswered,
       'priority': instance.priority,
+      'topTopics': instance.topTopics,
     };
 
 SubjectPerformance _$SubjectPerformanceFromJson(Map<String, dynamic> json) =>
