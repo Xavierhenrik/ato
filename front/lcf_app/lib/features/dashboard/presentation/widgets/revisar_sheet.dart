@@ -23,6 +23,7 @@ class RevisarSheet extends ConsumerStatefulWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useRootNavigator: true,
       builder: (_) => RevisarSheet(card: card),
     );
   }

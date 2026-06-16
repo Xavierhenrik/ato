@@ -17,6 +17,7 @@ class ProGateSheet extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useRootNavigator: true,
       builder: (_) => ProGateSheet(feature: feature),
     );
   }

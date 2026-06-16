@@ -35,6 +35,7 @@ class ManualTutorSheet extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useRootNavigator: true,
       builder: (_) => ManualTutorSheet(section: section, topic: topic),
     );
   }
