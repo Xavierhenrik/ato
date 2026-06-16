@@ -1,4 +1,4 @@
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,12 +49,12 @@ class LcfGlassNavBar extends ConsumerStatefulWidget {
 class _LcfGlassNavBarState extends ConsumerState<LcfGlassNavBar>
     with TickerProviderStateMixin {
   late final AnimationController _moreCtrl;
-  late final AnimationController _compactCtrl; // conteúdo: expanded → compact
+  late final AnimationController _compactCtrl;
   late final Animation<double> _pill0;
   late final Animation<double> _pill1;
   late final Animation<double> _pill2;
 
-  bool _awaitingExpand = false; // primeiro toque no círculo compacto
+  bool _awaitingExpand = false;
 
   @override
   void initState() {
@@ -105,16 +105,12 @@ class _LcfGlassNavBarState extends ConsumerState<LcfGlassNavBar>
     }
   }
 
+  // Fecha o dial e navega imediatamente — sem race condition de .then().
   void _navigate(String route) {
-    ref.read(navDialOpenProvider.notifier).state = false;
-    _moreCtrl.reverse().then((_) {
-      if (!mounted) return;
-      context.go(route);
-    });
+    _closeMore();
+    if (mounted) context.go(route);
   }
 
-  // Dois toques para restaurar: primeiro toque = feedback dourado,
-  // segundo toque = expande de volta.
   void _handleCompactTap() {
     if (!_awaitingExpand) {
       setState(() => _awaitingExpand = true);
@@ -134,15 +130,13 @@ class _LcfGlassNavBarState extends ConsumerState<LcfGlassNavBar>
 
   @override
   Widget build(BuildContext context) {
-    // Fecha speed-dial quando barrier externo seta false.
     ref.listen<bool>(navDialOpenProvider, (_, next) {
       if (!next && !_moreCtrl.isDismissed) _moreCtrl.reverse();
     });
 
-    // Reage a mudanças de modo: compact → anima conteúdo; expanded → reverte.
     ref.listen<NavBarMode>(navBarModeProvider, (_, next) {
       if (next == NavBarMode.compact) {
-        _closeMore(); // fecha speed-dial se aberto
+        _closeMore();
         _compactCtrl.forward();
       } else {
         _compactCtrl.reverse();
@@ -153,73 +147,116 @@ class _LcfGlassNavBarState extends ConsumerState<LcfGlassNavBar>
     final mode = ref.watch(navBarModeProvider);
     final mq = MediaQuery.of(context);
     final kbOpen = mq.viewInsets.bottom > 0;
-    // Compact: teclado cobre o círculo naturalmente (ScaffoldWithNav não redimensiona).
-    // Expanded: oculta com AnimatedSlide quando teclado abre.
     final isVisible = mode == NavBarMode.compact || !kbOpen;
     final bottomPad = mq.viewPadding.bottom;
     final location = widget.location;
     final moreSelected = _isMoreSelected(location);
     final activeMainIndex = _activeMainIndex(location);
 
-    return AnimatedSlide(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeInOut,
-      offset: isVisible ? Offset.zero : const Offset(0, 1.5),
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 200),
-        opacity: isVisible ? 1.0 : 0.0,
-        child: AnimatedBuilder(
+    // Este widget preenche a tela inteira (Positioned.fill em ScaffoldWithNav).
+    // Todos os filhos são absolutamente posicionados dentro do Stack de tela
+    // cheia — não há bounding box externo que limite o hit-testing.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.maxWidth;
+
+        return AnimatedBuilder(
           animation: Listenable.merge([_moreCtrl, _compactCtrl]),
           builder: (context, _) {
-            final ct = _compactCtrl.value; // 0=expanded, 1=compact
+            final ct = _compactCtrl.value;
             final isDialOpen = !_moreCtrl.isDismissed;
-            return Padding(
-              padding: EdgeInsets.only(
-                // Margens laterais são controladas pelo ScaffoldWithNav via Positioned.
-                bottom: _kBarMargin + bottomPad,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Speed-dial pills — só no modo expandido
-                  if (isDialOpen && ct < 0.25) ...[
-                    _SpeedDialPill(
-                      tab: _kMoreTabs[0],
-                      animation: _pill0,
-                      onTap: () => _navigate(_kMoreTabs[0].route),
+
+            // Posição da barra principal: anima de expandido para compacto.
+            final expandedWidth = maxWidth - 2 * _kBarMargin;
+            final barRight = lerpDouble(_kBarMargin, -_kBarHeight / 2, ct)!;
+            final barWidth = lerpDouble(expandedWidth, _kBarHeight, ct)!;
+            final barBottom =
+                lerpDouble(_kBarMargin, 120.0, ct)! + bottomPad;
+
+            // Base das pílulas do speed-dial: acima da barra.
+            final pillsBottom =
+                _kBarMargin + _kBarHeight + AppSpacing.sm + bottomPad;
+
+            return Stack(
+              children: [
+                // 1. Barreira — primeiro filho = testado por ÚLTIMO pelo Stack.
+                //    HitTestBehavior.opaque: bloqueia toques no conteúdo atrás.
+                if (isDialOpen && isVisible)
+                  Positioned.fill(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _closeMore,
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    _SpeedDialPill(
-                      tab: _kMoreTabs[1],
-                      animation: _pill1,
-                      onTap: () => _navigate(_kMoreTabs[1].route),
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    _SpeedDialPill(
-                      tab: _kMoreTabs[2],
-                      animation: _pill2,
-                      onTap: () => _navigate(_kMoreTabs[2].route),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                  ],
-                  _GlassPill(
-                    activeMainIndex: activeMainIndex,
-                    moreSelected: moreSelected,
-                    moreOpen: _moreCtrl.isCompleted,
-                    moreAnimValue: _moreCtrl.value,
-                    compactT: ct,
-                    awaitingExpand: _awaitingExpand,
-                    onTabTap: (route) => context.go(route),
-                    onMoreTap: _toggleMore,
-                    onCompactTap: _handleCompactTap,
                   ),
-                ],
-              ),
+
+                // 2. Pílulas — Positioned absoluto, testadas ANTES da barreira.
+                //    Não dependem de herdar height do pai para hit-testing.
+                if (isDialOpen && isVisible && ct < 0.25)
+                  Positioned(
+                    right: _kBarMargin,
+                    bottom: pillsBottom,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _SpeedDialPill(
+                          tab: _kMoreTabs[0],
+                          animation: _pill0,
+                          onTap: () => _navigate(_kMoreTabs[0].route),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        _SpeedDialPill(
+                          tab: _kMoreTabs[1],
+                          animation: _pill1,
+                          onTap: () => _navigate(_kMoreTabs[1].route),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        _SpeedDialPill(
+                          tab: _kMoreTabs[2],
+                          animation: _pill2,
+                          onTap: () => _navigate(_kMoreTabs[2].route),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                // 3. Barra principal — último filho = testado PRIMEIRO pelo Stack.
+                //    Posição e largura animadas por _compactCtrl.
+                Positioned(
+                  right: barRight,
+                  bottom: barBottom,
+                  width: barWidth,
+                  child: IgnorePointer(
+                    ignoring: !isVisible,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      opacity: isVisible ? 1.0 : 0.0,
+                      child: AnimatedSlide(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeInOut,
+                        offset: isVisible
+                            ? Offset.zero
+                            : const Offset(0, 1.5),
+                        child: _GlassPill(
+                          activeMainIndex: activeMainIndex,
+                          moreSelected: moreSelected,
+                          moreOpen: _moreCtrl.isCompleted,
+                          moreAnimValue: _moreCtrl.value,
+                          compactT: ct,
+                          awaitingExpand: _awaitingExpand,
+                          onTabTap: (route) => context.go(route),
+                          onMoreTap: _toggleMore,
+                          onCompactTap: _handleCompactTap,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             );
           },
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -263,7 +300,6 @@ class _GlassPill extends StatelessWidget {
           duration: const Duration(milliseconds: 250),
           height: _kBarHeight,
           decoration: BoxDecoration(
-            // Dourado quando aguardando segundo toque para expandir.
             color: awaitingExpand
                 ? AppColors.accent.withValues(alpha: 0.88)
                 : AppColors.backgroundCard.withValues(alpha: 0.18),
@@ -278,7 +314,7 @@ class _GlassPill extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              // ── Conteúdo expandido (nav items) ────────────────────────────
+              // ── Conteúdo expandido ────────────────────────────────────────
               IgnorePointer(
                 ignoring: compactT >= 0.5,
                 child: Opacity(
@@ -302,7 +338,7 @@ class _GlassPill extends StatelessWidget {
                   ),
                 ),
               ),
-              // ── Conteúdo compacto (ícone de restore) ──────────────────────
+              // ── Conteúdo compacto ─────────────────────────────────────────
               IgnorePointer(
                 ignoring: compactT < 0.5,
                 child: Opacity(
@@ -455,7 +491,7 @@ class _SpeedDialPill extends StatelessWidget {
       opacity: animation,
       child: SlideTransition(
         position: Tween<Offset>(
-          begin: const Offset(0, 0.25),
+          begin: const Offset(0, 0.3),
           end: Offset.zero,
         ).animate(animation),
         child: Semantics(
@@ -464,41 +500,35 @@ class _SpeedDialPill extends StatelessWidget {
           child: GestureDetector(
             onTap: onTap,
             behavior: HitTestBehavior.opaque,
-            child: ClipRRect(
-              borderRadius: AppRadius.chip,
-              child: BackdropFilter(
-                filter: ImageFilter.blur(
-                  sigmaX: kGlassFrostSigma,
-                  sigmaY: kGlassFrostSigma,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xxl,
-                    vertical: AppSpacing.lg,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.backgroundCard
-                        .withValues(alpha: 0.18),
-                    borderRadius: AppRadius.chip,
-                    border: Border.all(
-                      color: AppColors.accent.withValues(alpha: kGlassTrimOpacity),
-                      width: kGlassTrimStroke,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundCard,
+                borderRadius: AppRadius.card,
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withValues(alpha: 0.18),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      tab.selectedIcon,
+                      size: 16,
+                      color: AppColors.accent,
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(tab.icon, color: AppColors.textPrimary, size: 24),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        tab.label,
-                        style: AppTextStyles.labelMedium.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                  const SizedBox(width: AppSpacing.md),
+                  Text(tab.label, style: AppTextStyles.labelMedium),
+                ],
               ),
             ),
           ),

@@ -11,7 +11,6 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/lcf_app_bar.dart';
 import '../../../../shared/widgets/lcf_empty_state.dart';
 import '../../../../shared/widgets/lcf_error_state.dart';
-import '../../../../shared/widgets/lcf_glass_nav_bar.dart';
 import '../../../../shared/widgets/lcf_loading_shimmer.dart';
 import '../../data/anotacao_repository.dart';
 import '../../data/models/anotacao_models.dart';
@@ -207,7 +206,7 @@ class _AnotacoesListView extends ConsumerWidget {
         final bottomPad = MediaQuery.viewPaddingOf(context).bottom;
         return ListView.separated(
           padding: AppSpacing.screenPadding.copyWith(
-            bottom: LcfGlassNavBar.clearance + bottomPad,
+            bottom: bottomPad,
           ),
           itemCount: anotacoes.length,
           separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
@@ -265,7 +264,7 @@ class _SearchResultsView extends ConsumerWidget {
         final bottomPad = MediaQuery.viewPaddingOf(context).bottom;
         return ListView.separated(
           padding: AppSpacing.screenPadding.copyWith(
-            bottom: LcfGlassNavBar.clearance + bottomPad,
+            bottom: bottomPad,
           ),
           itemCount: anotacoes.length,
           separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),

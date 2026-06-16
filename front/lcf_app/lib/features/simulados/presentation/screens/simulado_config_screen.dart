@@ -8,7 +8,6 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/lcf_app_bar.dart';
 import '../../../../shared/widgets/lcf_button.dart';
-import '../../../../shared/widgets/lcf_glass_nav_bar.dart';
 import '../../../../shared/widgets/pro_gate_sheet.dart';
 import '../../data/models/simulado_models.dart';
 import '../../data/simulado_repository.dart';
@@ -239,10 +238,7 @@ class _SimuladoConfigScreenState
               label: _isStarting ? 'Iniciando...' : 'Iniciar simulado',
               onPressed: _isStarting ? null : _startSimulado,
             ),
-            SizedBox(
-              height: LcfGlassNavBar.clearance +
-                  MediaQuery.viewPaddingOf(context).bottom,
-            ),
+            SizedBox(height: MediaQuery.viewPaddingOf(context).bottom),
           ],
         ),
       ),

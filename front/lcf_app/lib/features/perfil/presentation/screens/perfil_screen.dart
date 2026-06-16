@@ -7,7 +7,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/widgets/lcf_app_bar.dart';
 import '../../../../shared/widgets/lcf_button.dart';
-import '../../../../shared/widgets/lcf_glass_nav_bar.dart';
 import '../../../../shared/widgets/lcf_error_state.dart';
 import '../../../../shared/widgets/lcf_loading_shimmer.dart';
 import '../../data/models/perfil_models.dart';
@@ -78,10 +77,7 @@ class _PerfilScreenState extends ConsumerState<PerfilScreen> {
             isLoading: _isSigningOut,
             onPressed: _isSigningOut ? null : _signOut,
           ),
-          SizedBox(
-            height: LcfGlassNavBar.clearance +
-                MediaQuery.viewPaddingOf(context).bottom,
-          ),
+          SizedBox(height: MediaQuery.viewPaddingOf(context).bottom),
         ],
       ),
     );

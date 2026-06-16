@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../shared/widgets/lcf_glass_nav_bar.dart';
 import '../../data/dashboard_repository.dart';
 import '../../providers/dashboard_provider.dart';
 import '../widgets/cards_materia_card.dart';
@@ -81,7 +80,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               const RevisaoInteligenteCard(),
               const SizedBox(height: AppSpacing.sectionGap),
               const CardsMateriaCard(),
-              SizedBox(height: LcfGlassNavBar.clearance + bottomPad),
+              SizedBox(height: bottomPad),
             ],
           ),
         ),

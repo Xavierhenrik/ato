@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/providers/nav_bar_provider.dart';
-import '../../../../shared/widgets/lcf_glass_nav_bar.dart';
 import '../../../../shared/widgets/lcf_top_scrim.dart';
 import '../../../../shared/widgets/pro_gate_sheet.dart';
 import '../../data/models/tutor_models.dart';
@@ -156,23 +155,24 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
     final hasMessages =
         chatState.messages.isNotEmpty || chatState.streamingContent != null;
 
-    // Compacta a nav bar ao iniciar a primeira mensagem; restaura em dispose().
+    // Compacta a nav bar ao iniciar a conversa E ao término de cada resposta da IA.
+    // Isso garante que após o usuário restaurar a barra (double-tap) e mandar
+    // outra mensagem, a barra volta para compacto ao fim do streaming — sem
+    // exigir que seja a primeira mensagem.
     ref.listen<TutorChatState>(tutorNotifierProvider, (prev, next) {
       final wasActive = (prev?.messages.isNotEmpty ?? false) ||
           (prev?.streamingContent != null);
       final isActive =
           next.messages.isNotEmpty || next.streamingContent != null;
-      if (!wasActive && isActive) {
+      final justFinishedStreaming = (prev?.streamingContent != null) &&
+          next.streamingContent == null &&
+          next.messages.isNotEmpty;
+
+      if ((!wasActive && isActive) || justFinishedStreaming) {
         ref.read(navBarModeProvider.notifier).state = NavBarMode.compact;
       }
       if (next.streamingContent != null) _scrollToBottom();
     });
-
-    // Reserva espaço para a nav bar flutuante apenas no estado vazio sem
-    // teclado. ChatInputBar tem SafeArea interno — não somar viewPadding.bottom.
-    final kbOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
-    final navBarShowing = !hasMessages && !kbOpen;
-    final inputBottomPad = navBarShowing ? LcfGlassNavBar.clearance : 0.0;
 
     final viewPadTop = MediaQuery.viewPaddingOf(context).top;
 
@@ -196,14 +196,11 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
                       )
                     : TutorEmptyState(onChipTap: _onSend),
               ),
-              Padding(
-                padding: EdgeInsets.only(bottom: inputBottomPad),
-                child: ChatInputBar(
-                  controller: _inputController,
-                  onSend: _onSend,
-                  enabled:
-                      !chatState.isLoading && chatState.streamingContent == null,
-                ),
+              ChatInputBar(
+                controller: _inputController,
+                onSend: _onSend,
+                enabled:
+                    !chatState.isLoading && chatState.streamingContent == null,
               ),
             ],
           ),
