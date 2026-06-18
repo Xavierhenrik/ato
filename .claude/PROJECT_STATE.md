@@ -63,7 +63,7 @@ clonar no note + copiar `.env` manualmente = ambiente completo.
 | **M5 — Simulados** | ✅ Completo (bug response field names — FIXED) | — | 2 |
 | **Push Notifications** | ✅ Completo (aguardando credenciais) | NotificationsService implementado com graceful degradation. Credenciais OneSignal pendentes. | 3 |
 | **Sprint 4 — Hardening** | ✅ Completo | — | 4 |
-| **Histórico Tutor (M4.1 + F10a)** | 🕓 Planejado | Spec pronta (`docs/specs/TUTOR_HISTORY_SPEC.md`); execução delegada agendada (pacote `temp-feat-historico/`, fora do repo) | — |
+| **Histórico Tutor (M4.1 + F10a)** | 🔄 Backend implementado (AG1) | Backend write-through completo (`persistTurn`, endpoints `/tutor/history`). Migration SQL pendente de aplicação. Flutter (AG2) em paralelo. | — |
 
 ---
 
@@ -135,10 +135,14 @@ clonar no note + copiar `.env` manualmente = ambiente completo.
 
 ## Migrations Prisma Pendentes
 
-Nenhuma pendente.
+| Arquivo | Descrição | Status |
+|---------|-----------|--------|
+| `back/prisma/migrations/tutor_history.sql` | Adiciona coluna `title text` em `tutor_sessions` + índice composto `(user_id, created_at DESC)` | ⏳ **Aguarda aplicação manual por Henrique** |
 
-> Migrations do Sprint 1 aplicadas em 2026-05-03 via `prisma/migrations/sprint1_manual.sql` (staging + live).
-> Índices Sprint 4 (`simulado_questions_is_correct_idx`, `simulado_questions_answered_at_idx`, `simulado_questions_attempt_id_is_correct_idx`) aplicados em 2026-05-28 via `prisma/migrations/apply_sprint4.js` (staging + live).
+> Migrations anteriores aplicadas:
+> - Sprint 1 (2026-05-03): `sprint1_manual.sql` (staging + live)
+> - Sprint 4 (2026-05-28): `apply_sprint4.js` — índices simulado_questions (staging + live)
+> - Camada 2 (2026-06-12): `camada2_weak_topics.sql` — `weak_topics` + `analyzed_at` em study_plans (staging + live)
 
 ## Débito Técnico Registrado
 

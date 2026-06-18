@@ -131,7 +131,10 @@
 | POST | `/tutor/session/new` | JWT | Cria sessão, retorna `session_id` (UUID) |
 | POST | `/tutor/message` | JWT | Envia mensagem. Body abaixo. |
 | GET | `/tutor/session/:id` | JWT | Histórico ativo (últimas 8 msgs do Redis) |
-| DELETE | `/tutor/session/:id` | JWT | Encerra sessão, limpa Redis |
+| DELETE | `/tutor/session/:id` | JWT | Encerra sessão: seta `endedAt` no DB (se não simulado) + limpa Redis |
+| GET | `/tutor/history` | JWT | Lista de conversas persistidas. Query: `mode` (obrigatório), `cursor?`, `limit?` |
+| GET | `/tutor/history/:id` | JWT | Detalhe de uma conversa com mensagens |
+| DELETE | `/tutor/history/:id` | JWT | Remove conversa (cascade mensagens) |
 
 ### POST /tutor/message body:
 ```json
@@ -160,6 +163,60 @@
 - Free: 20 msgs/dia → HTTP 429 (Redis, rate limit de negócio)
 - PRO: 200 msgs/dia
 - Infra: 60 req/min por usuário (independente do plano)
+
+### DELETE /tutor/session/:id — semântica (write-through)
+A persistência agora é write-through (acontece em cada turno via `persistTurn`).
+O `DELETE /tutor/session/:id` apenas encerra a sessão:
+- Se `mode !== 'simulado'`: seta `endedAt = now()` no `TutorSession` do DB (updateMany — sem erro se não houver turno persistido).
+- Sempre: limpa chaves Redis (`tutor:session:{id}`, `tutor:session:owner:{id}`).
+- Resposta: `204 No Content`.
+
+### GET /tutor/history
+```
+Query: mode=direct|reading (obrigatório) · cursor=uuid (opcional) · limit=1-50 (default 20)
+```
+```json
+// Response 200
+{
+  "sessions": [
+    {
+      "id": "uuid",
+      "mode": "reading",
+      "title": "O que é usucapião extraordinária?",
+      "topicId": "uuid-ou-null",
+      "topicTitle": "Usucapião — ou null",
+      "createdAt": "2026-06-12T03:21:00.000Z",
+      "msgCount": 6
+    }
+  ],
+  "nextCursor": "uuid-ou-null",
+  "retention": "7d"
+}
+```
+- `retention`: `"7d"` para Free (vê últimos 7 dias), `"all"` para PRO.
+- `nextCursor`: id do último item quando a página veio cheia (`length == limit`); senão `null`.
+- Paginação keyset: passar `cursor` = `id` do último item da página anterior.
+- `mode: simulado` nunca é persistido — não aparece na lista.
+- Cursor inválido ou de outro usuário retorna `400 VALIDATION`.
+
+### GET /tutor/history/:id
+```json
+// Response 200
+{
+  "session": { "id": "uuid", "mode": "reading", "title": "...", "topicId": "uuid|null", "topicTitle": "...|null", "createdAt": "ISO", "msgCount": 6 },
+  "messages": [
+    { "id": "uuid", "role": "user", "content": "...", "sources": null, "createdAt": "ISO" },
+    { "id": "uuid", "role": "assistant", "content": "...", "sources": [{ "full_reference": "...", "content": "...", "law_name": "...", "certainty": "verified" }], "createdAt": "ISO" }
+  ]
+}
+```
+- `404 NOT_FOUND`: sessão não existe, pertence a outro usuário, ou Free tentando acessar sessão > 7 dias.
+
+### DELETE /tutor/history/:id
+- Remove `TutorSession` + mensagens em cascade.
+- Ownership check: `404 NOT_FOUND` se não pertencer ao usuário.
+- Free **pode** deletar sessões antigas (gate de 7d é só de leitura).
+- Resposta: `204 No Content`.
 
 ---
 
