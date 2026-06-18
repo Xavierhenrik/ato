@@ -1,9 +1,9 @@
 ---
-updated: 2026-06-12
-sprint: "Histórico do Tutor IA — planejado; delegação noturna agendada (temp-feat-historico)"
+updated: 2026-06-18
+sprint: "Histórico da Lexia — planejado; delegação noturna agendada (temp-feat-historico)"
 ---
 
-# LCF — Estado do Projeto
+# LEX — Estado do Projeto
 
 > Atualizado pelo Claude ao fim de cada sessão de trabalho.
 > Para detalhes de implementação de cada módulo, ver `../docs/ROADMAP.md`.
@@ -63,7 +63,8 @@ clonar no note + copiar `.env` manualmente = ambiente completo.
 | **M5 — Simulados** | ✅ Completo (bug response field names — FIXED) | — | 2 |
 | **Push Notifications** | ✅ Completo (aguardando credenciais) | NotificationsService implementado com graceful degradation. Credenciais OneSignal pendentes. | 3 |
 | **Sprint 4 — Hardening** | ✅ Completo | — | 4 |
-| **Histórico Tutor (M4.1 + F10a)** | 🔄 Backend implementado (AG1) | Backend write-through completo (`persistTurn`, endpoints `/tutor/history`). Migration SQL pendente de aplicação. Flutter (AG2) em paralelo. | — |
+| **Histórico Tutor (M4.1 + F10a)** | ✅ Completo | Migration `tutor_history.sql` aplicada no banco live (coluna `title` + index). Flutter: tela de histórico funcionando, UI glass padronizada. | — |
+| **Google Sign-In Nativo** | 🔄 Flutter pronto — pendente config Google Cloud | Código migrado para `google_sign_in` SDK (sem browser redirect). Falta: `google-services.json` + Web Client ID (`--dart-define=GOOGLE_WEB_CLIENT_ID`). SHA-1 debug: `A9:03:BB:6C:8B:BB:F9:11:9B:E4:E6:51:D0:70:6A:24:F6:B3:1F:99`. | — |
 
 ---
 
@@ -313,6 +314,7 @@ flutter run \
 | 2026-05-16 | sessions/2026-05-16_sprint3_tutor_subscriptions.md | Sprint 3 completo: M4 gaps PRO (chips, auto-save, persistência sessão) + Subscriptions hardening |
 | 2026-05-22 | sessions/2026-05-22_flutter_f1_foundation.md | Sprint F1: 22 arquivos Flutter criados — core/theme, router, auth, onboarding (aguardando build_runner) |
 | 2026-05-22 | sessions/2026-05-22_monorepo_restructure.md | Monorepo: git mv back/ + front/docs + docs/ + .claude/ — commits 2c2df2f e d3360fc |
+| 2026-06-18 | sessions/2026-06-18_emulator_fix.md | Fix tela preta emulador: Impeller desabilitado em debug + interceptor Dio retry 401 |
 | 2026-06-10 | sessions/2026-06-10_tutor_flutuante_manual.md | Tutor flutuante: orbe + gaveta de vidro no Manual, LcfGlassSheet, LcfTutorAppBar context-mode |
 | 2026-06-10 | sessions/2026-06-10_tutor_ajustes_finos.md | Ajustes finos tutor flutuante: borda dourada no shape, input bar transparente na gaveta, header identidade removido, /tutor/context com BottomNav. flutter analyze zero issues |
 | 2026-06-10 | sessions/2026-06-10_tutor_refino_visual.md | Refino visual: fio dourado via CustomPainter (arcos + topo, sem laterais), respiro lateral 8px na gaveta. flutter analyze zero issues |
@@ -392,6 +394,3 @@ python scripts/run_pipeline_loop.py   # reinicia automaticamente após quota
 - **QUOTA_WAIT**: 180s entre restarts após rate-limit
 - **Agente 0 — Planner**: lógica Python local (sem LLM — output de 1.874 itens excede 8.192 tokens)
 - **Agente 1 — Generator**: prompt tolerante a ausência de artigos BM25 + fallback por número de artigo
-- **Agente 2 — Validator**: score ≥ 7/10 para aprovação
-- **Output**: `status='pending_review'` → promoção via admin (Sprint 4)
-

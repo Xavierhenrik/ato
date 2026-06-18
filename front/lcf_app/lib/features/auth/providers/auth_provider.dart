@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../data/auth_repository.dart';
 
@@ -53,34 +53,21 @@ Stream<User?> authUserStream(AuthUserStreamRef ref) {
 
 // ── Ações de autenticação ─────────────────────────────────────────────────────
 
+// Web Client ID do Google Cloud Console (Credentials → OAuth 2.0 → Web application).
+// Necessário para que o SDK nativo retorne o idToken compatível com o Supabase.
+// Injete via --dart-define=GOOGLE_WEB_CLIENT_ID=... ou defina aqui para dev.
+const _kGoogleWebClientId = String.fromEnvironment(
+  'GOOGLE_WEB_CLIENT_ID',
+  defaultValue: '',
+);
+
 /// Estado: null = idle | data(null) = signed-out | data(User) = signed-in
 /// Mutations atualizam `state` para refletir loading/error na UI.
 @riverpod
 class AuthNotifier extends _$AuthNotifier {
-  // Sinaliza que estamos aguardando o callback de redirect do Google OAuth.
-  // Usado pelo listener de onAuthStateChange para chamar verify() exatamente
-  // uma vez, sem interferir nos fluxos de email/Apple que já chamam verify().
-  bool _pendingGoogleVerify = false;
-
   @override
   AsyncValue<User?> build() {
-    final sub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
-      if (event.event == AuthChangeEvent.signedIn && _pendingGoogleVerify) {
-        _pendingGoogleVerify = false;
-        _verifyAndSetState(event.session?.user);
-      }
-    });
-    ref.onDispose(sub.cancel);
     return AsyncData(Supabase.instance.client.auth.currentUser);
-  }
-
-  Future<void> _verifyAndSetState(User? user) async {
-    try {
-      if (user != null) await ref.read(authRepositoryProvider).verify();
-      state = AsyncData(user);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-    }
   }
 
   Future<void> signInWithEmailPassword({
@@ -100,28 +87,38 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> signInWithGoogle() async {
     state = const AsyncLoading();
-    _pendingGoogleVerify = true;
-    try {
-      final res = await Supabase.instance.client.auth.getOAuthSignInUrl(
-        provider: OAuthProvider.google,
-        redirectTo: 'com.lcf.app://auth-callback',
+    state = await AsyncValue.guard(() async {
+      final googleSignIn = GoogleSignIn(
+        serverClientId: _kGoogleWebClientId.isNotEmpty ? _kGoogleWebClientId : null,
       );
-      final uri = Uri.parse(res.url);
 
-      bool launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (!launched) {
-        launched = await launchUrl(uri, mode: LaunchMode.platformDefault);
+      // Garante que não há sessão anterior pendente (evita cached token stale).
+      await googleSignIn.signOut();
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        // Usuário cancelou o picker — volta para idle sem erro.
+        return Supabase.instance.client.auth.currentUser;
       }
-      if (!launched) {
+
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null) {
         throw Exception(
-          'Não foi possível abrir o navegador. '
-          'Verifique se há um browser instalado no dispositivo.',
+          'Não foi possível obter o token do Google. '
+          'Verifique se o Web Client ID está configurado corretamente.',
         );
       }
-    } catch (e, st) {
-      _pendingGoogleVerify = false;
-      state = AsyncError(e, st);
-    }
+
+      final response = await Supabase.instance.client.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: googleAuth.accessToken,
+      );
+
+      await ref.read(authRepositoryProvider).verify();
+      return response.user;
+    });
   }
 
   Future<void> signUp({

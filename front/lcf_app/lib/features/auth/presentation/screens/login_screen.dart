@@ -106,7 +106,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         SnackBar(content: Text(auth.error.toString())),
       );
     }
-    // Sucesso: browser aberto — listener onAuthStateChange cuida da navegação.
+    // Sucesso: navegação delegada ao redirect do app_router (redirect #2).
   }
 
   Future<void> _onApple() async {

@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/glass_tokens.dart';
 import '../../../../shared/widgets/lcf_app_bar.dart';
 import '../../../../shared/widgets/lcf_empty_state.dart';
 import '../../../../shared/widgets/lcf_error_state.dart';
@@ -185,7 +188,9 @@ class _TutorHistoryScreenState extends ConsumerState<TutorHistoryScreen> {
   }
 }
 
-// ── Seletor de segmentos ──────────────────────────────────────────────────
+// ── Seletor de segmentos (padrão glass — mesma linguagem da nav bar) ──────
+
+const double _kSegmentHeight = 42.0;
 
 class _SegmentedControl extends StatelessWidget {
   const _SegmentedControl({
@@ -198,27 +203,49 @@ class _SegmentedControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.backgroundCard,
-        borderRadius: AppRadius.chip,
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          _Segment(
-            label: 'Diretas',
-            isSelected: selected == 0,
-            onTap: () => onChanged(0),
-            isFirst: true,
+    final radius = BorderRadius.circular(_kSegmentHeight / 2);
+    return ClipRRect(
+      borderRadius: radius,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: kGlassFrostSigma,
+          sigmaY: kGlassFrostSigma,
+        ),
+        child: Container(
+          height: _kSegmentHeight,
+          decoration: BoxDecoration(
+            color: AppColors.backgroundCard.withValues(alpha: 0.18),
+            borderRadius: radius,
+            border: Border.all(
+              color: AppColors.accent.withValues(alpha: kGlassTrimOpacity),
+              width: kGlassTrimStroke,
+            ),
           ),
-          _Segment(
-            label: 'Do Manual',
-            isSelected: selected == 1,
-            onTap: () => onChanged(1),
-            isFirst: false,
+          child: Row(
+            children: [
+              _Segment(
+                label: 'Diretas',
+                isSelected: selected == 0,
+                onTap: () => onChanged(0),
+                isLeft: true,
+              ),
+              // Divisor vertical
+              VerticalDivider(
+                width: kGlassTrimStroke,
+                thickness: kGlassTrimStroke,
+                color: AppColors.accent.withValues(alpha: kGlassTrimOpacity),
+                indent: 8,
+                endIndent: 8,
+              ),
+              _Segment(
+                label: 'Do Manual',
+                isSelected: selected == 1,
+                onTap: () => onChanged(1),
+                isLeft: false,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -229,38 +256,40 @@ class _Segment extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.onTap,
-    required this.isFirst,
+    required this.isLeft,
   });
 
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
-  final bool isFirst;
+  final bool isLeft;
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.horizontal(
+      left: isLeft ? const Radius.circular(_kSegmentHeight / 2) : Radius.zero,
+      right: isLeft ? Radius.zero : const Radius.circular(_kSegmentHeight / 2),
+    );
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.accent : Colors.transparent,
-            borderRadius: isFirst
-                ? const BorderRadius.horizontal(
-                    left: Radius.circular(AppRadius.full),
-                  )
-                : const BorderRadius.horizontal(
-                    right: Radius.circular(AppRadius.full),
-                  ),
+            color: isSelected
+                ? AppColors.accent.withValues(alpha: 0.88)
+                : Colors.transparent,
+            borderRadius: borderRadius,
           ),
+          alignment: Alignment.center,
           child: Text(
             label,
             style: AppTextStyles.labelLarge.copyWith(
               color: isSelected ? Colors.white : AppColors.textSecondary,
+              fontWeight:
+                  isSelected ? FontWeight.w600 : FontWeight.w400,
             ),
-            textAlign: TextAlign.center,
           ),
         ),
       ),

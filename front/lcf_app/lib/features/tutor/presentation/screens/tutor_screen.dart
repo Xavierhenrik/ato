@@ -41,6 +41,7 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
   final _scrollController = ScrollController();
 
   bool _pendingScroll = false;
+  bool _chipJustTapped = false;
   late final TutorNotifier _tutorNotifier;
 
   @override
@@ -133,6 +134,16 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
     }
   }
 
+  // Chip tapped: marca flag ANTES do GestureDetector pai disparar, evitando
+  // que o toque no chip expanda a barra indevidamente.
+  void _handleChipTap(String chip) {
+    _chipJustTapped = true;
+    _onSend(chip);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _chipJustTapped = false;
+    });
+  }
+
   void _scrollToBottom() {
     if (_pendingScroll) return;
     _pendingScroll = true;
@@ -186,15 +197,24 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
               // Espaço reservado para o scrim superior (status bar + toolbar)
               SizedBox(height: viewPadTop + kToolbarHeight),
               Expanded(
-                child: hasMessages
-                    ? _ChatListView(
-                        messages: chatState.messages,
-                        isLoading: chatState.isLoading,
-                        streamingContent: chatState.streamingContent,
-                        scrollController: _scrollController,
-                        onChipTap: _onSend,
-                      )
-                    : TutorEmptyState(onChipTap: _onSend),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    if (_chipJustTapped) return;
+                    FocusScope.of(context).unfocus();
+                    ref.read(navBarModeProvider.notifier).state =
+                        NavBarMode.expanded;
+                  },
+                  child: hasMessages
+                      ? _ChatListView(
+                          messages: chatState.messages,
+                          isLoading: chatState.isLoading,
+                          streamingContent: chatState.streamingContent,
+                          scrollController: _scrollController,
+                          onChipTap: _handleChipTap,
+                        )
+                      : TutorEmptyState(onChipTap: _handleChipTap),
+                ),
               ),
               ChatInputBar(
                 controller: _inputController,
