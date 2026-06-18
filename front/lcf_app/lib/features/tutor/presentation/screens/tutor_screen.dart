@@ -231,6 +231,20 @@ class _TutorScreenState extends ConsumerState<TutorScreen> {
                 },
               ),
             ),
+          // Ícone de histórico — só no modo padrão (sem contexto de tópico)
+          if (widget.topicContext == null)
+            Positioned(
+              top: viewPadTop,
+              right: AppSpacing.xs,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.history_rounded,
+                  color: AppColors.textSecondary,
+                ),
+                tooltip: 'Histórico',
+                onPressed: () => context.push('/tutor/history'),
+              ),
+            ),
         ],
       ),
     );

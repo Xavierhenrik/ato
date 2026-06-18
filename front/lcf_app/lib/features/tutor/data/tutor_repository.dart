@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/network/api_client.dart';
+import 'models/tutor_history_models.dart';
 import 'models/tutor_models.dart'; // TutorMessage, TutorTopicContext, etc.
 
 part 'tutor_repository.g.dart';
@@ -58,6 +59,41 @@ class TutorRepository {
       '/tutor/session/$sessionId',
       queryParameters: {'mode': mode},
     );
+  }
+
+  // ── Histórico permanente ─────────────────────────────────────────────────
+
+  /// [GET /tutor/history?mode=&cursor=&limit=]
+  /// Retorna página de sessões históricas paginada por keyset (cursor).
+  Future<HistoryListResponse> getHistory({
+    required String mode,
+    String? cursor,
+    int limit = 20,
+  }) async {
+    final resp = await _dio.get<Map<String, dynamic>>(
+      '/tutor/history',
+      queryParameters: {
+        'mode': mode,
+        'limit': limit,
+        if (cursor != null) 'cursor': cursor,
+      },
+    );
+    return HistoryListResponse.fromJson(resp.data!);
+  }
+
+  /// [GET /tutor/history/:id]
+  /// Retorna o detalhe de uma sessão com todas as mensagens (read-only).
+  Future<HistoryDetailResponse> getHistoryDetail(String sessionId) async {
+    final resp = await _dio.get<Map<String, dynamic>>(
+      '/tutor/history/$sessionId',
+    );
+    return HistoryDetailResponse.fromJson(resp.data!);
+  }
+
+  /// [DELETE /tutor/history/:id]
+  /// Remove permanentemente a sessão e suas mensagens (cascade).
+  Future<void> deleteHistory(String sessionId) async {
+    await _dio.delete<void>('/tutor/history/$sessionId');
   }
 }
 

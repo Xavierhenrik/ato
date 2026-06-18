@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/glass_tokens.dart';
 
+
 // AppBar padrão — título "LCF" centralizado, sem elevação
 //
 // Back button behavior:
@@ -112,11 +113,22 @@ class LcfTutorAppBar extends StatelessWidget implements PreferredSizeWidget {
     }
 
     // Modo padrão: header minimalista — sem título de identidade
+    // Ícone de histórico à direita para navegar para /tutor/history.
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: false,
-      actions: actions,
+      actions: [
+        IconButton(
+          icon: const Icon(
+            Icons.history_rounded,
+            color: AppColors.textSecondary,
+          ),
+          tooltip: 'Histórico',
+          onPressed: () => context.push('/tutor/history'),
+        ),
+        if (actions != null) ...actions!,
+      ],
       flexibleSpace: const _GlassTopBar(),
     );
   }

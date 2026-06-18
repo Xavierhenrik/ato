@@ -25,6 +25,8 @@ import '../../features/simulados/presentation/screens/simulado_attempt_screen.da
 import '../../features/simulados/presentation/screens/simulado_config_screen.dart';
 import '../../features/simulados/presentation/screens/simulado_result_screen.dart';
 import '../../features/tutor/data/models/tutor_models.dart';
+import '../../features/tutor/presentation/screens/tutor_history_detail_screen.dart';
+import '../../features/tutor/presentation/screens/tutor_history_screen.dart';
 import '../../features/tutor/presentation/screens/tutor_screen.dart';
 import '../../features/tutor/providers/tutor_provider.dart';
 import '../../shared/widgets/scaffold_with_nav.dart';
@@ -218,6 +220,22 @@ GoRouter appRouter(AppRouterRef ref) {
             ),
           );
         },
+      ),
+
+      // ── Histórico do Tutor IA ─────────────────────────────────────────
+      GoRoute(
+        path: '/tutor/history',
+        pageBuilder: (context, state) =>
+            _fadeSlidePage(state, const TutorHistoryScreen()),
+      ),
+      GoRoute(
+        path: '/tutor/history/:id',
+        pageBuilder: (context, state) => _fadeSlidePage(
+          state,
+          TutorHistoryDetailScreen(
+            sessionId: state.pathParameters['id']!,
+          ),
+        ),
       ),
 
       // ── Push routes fullscreen (sem nav bar) ──────────────────────────
