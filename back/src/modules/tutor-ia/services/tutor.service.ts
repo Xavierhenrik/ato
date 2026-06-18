@@ -65,6 +65,16 @@ export class TutorService {
         ];
         await this.sessionSvc.append(req.sessionId, newMessages);
 
+        await this.sessionSvc.persistTurn({
+          sessionId: req.sessionId,
+          userId: req.userId,
+          mode: req.mode,
+          topicId: req.context?.topic_id,
+          userMessage: req.message,
+          assistantMessage: kbResult.message,
+          sources: [],
+        });
+
         return {
           message: kbResult.message,
           sources: [],
@@ -147,6 +157,16 @@ export class TutorService {
       },
       'tutor:response_parsed',
     );
+
+    await this.sessionSvc.persistTurn({
+      sessionId: req.sessionId,
+      userId: req.userId,
+      mode: req.mode,
+      topicId: req.context?.topic_id,
+      userMessage: req.message,
+      assistantMessage: parsed.message,
+      sources: parsed.sources,
+    });
 
     // PRO: auto-save como anotação quando confidence === "high"
     let autoSavedAnnotationId: string | undefined;

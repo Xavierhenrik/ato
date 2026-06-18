@@ -2,6 +2,7 @@ import { redis, keys, TTL } from '../../../shared/redis';
 import { Errors } from '../../../shared/errors';
 import { ChatMessage } from '../adapters/llm.interface';
 import { db } from '../../../shared/db';
+import { Prisma } from '@prisma/client';
 
 const MAX_HISTORY = 8; // últimas 8 mensagens (spec seção 8.1)
 
@@ -55,28 +56,50 @@ export class SessionService {
     return { allowed: true, remaining: dailyLimit - count - 1 };
   }
 
-  async persistToDB(sessionId: string, userId: string, mode: string): Promise<void> {
-    const history = await this.getHistory(sessionId);
-    if (history.length === 0) return;
+  async persistTurn(params: {
+    sessionId: string;
+    userId: string;
+    mode: 'reading' | 'simulado' | 'direct';
+    topicId?: string;
+    userMessage: string;
+    assistantMessage: string;
+    sources?: unknown[];
+  }): Promise<void> {
+    if (params.mode === 'simulado') return;
 
-    const session = await db.tutorSession.create({
-      data: {
-        userId,
-        mode,
-        endedAt: new Date(),
-        msgCount: history.length,
-      },
-    });
-
-    for (const msg of history) {
-      await db.tutorMessage.create({
-        data: {
-          sessionId: session.id,
-          role: msg.role,
-          content: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content),
-          sources: undefined,
+    try {
+      await db.tutorSession.upsert({
+        where: { id: params.sessionId },
+        create: {
+          id: params.sessionId,
+          userId: params.userId,
+          mode: params.mode,
+          topicId: params.topicId ?? null,
+          title: params.userMessage.slice(0, 80),
+          msgCount: 2,
+        },
+        update: {
+          msgCount: { increment: 2 },
         },
       });
+
+      await db.tutorMessage.createMany({
+        data: [
+          {
+            sessionId: params.sessionId,
+            role: 'user',
+            content: params.userMessage,
+          },
+          {
+            sessionId: params.sessionId,
+            role: 'assistant',
+            content: params.assistantMessage,
+            sources: params.sources !== undefined ? (params.sources as Prisma.JsonArray) : undefined,
+          },
+        ],
+      });
+    } catch (err) {
+      console.error(JSON.stringify({ event: 'tutor:persist_failed', sessionId: params.sessionId, err: String(err) }));
     }
   }
 

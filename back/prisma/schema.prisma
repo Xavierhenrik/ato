@@ -131,6 +131,7 @@ model TutorSession {
   userId    String    @map("user_id")
   mode      String                      // "reading" | "simulado" | "direct"
   topicId   String?   @map("topic_id")
+  title     String?                     // 1ª mensagem do usuário, truncada em 80 chars
   createdAt DateTime  @default(now()) @map("created_at")
   endedAt   DateTime? @map("ended_at")
   msgCount  Int       @default(0) @map("msg_count")
@@ -138,7 +139,7 @@ model TutorSession {
   user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages TutorMessage[]
 
-  @@index([userId])
+  @@index([userId, createdAt(sort: Desc)])
   @@map("tutor_sessions")
 }
 

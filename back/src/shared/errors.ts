@@ -16,6 +16,7 @@ export const Errors = {
   notFound: (resource: string) => new AppError(404, 'NOT_FOUND', `${resource} não encontrado`),
   conflict: (msg: string) => new AppError(409, 'CONFLICT', msg),
   badRequest: (msg: string) => new AppError(400, 'BAD_REQUEST', msg),
+  validation: (msg: string) => new AppError(400, 'VALIDATION', msg),
   rateLimited: (plan: string) =>
     new AppError(
       429,

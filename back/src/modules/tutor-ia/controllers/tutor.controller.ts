@@ -2,8 +2,8 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { TutorService } from '../services/tutor.service';
 import { SessionService } from '../services/session.service';
+import { getIsPro } from '../services/plan.service';
 import { db } from '../../../shared/db';
-import { redis, keys } from '../../../shared/redis';
 import { FOLLOW_UP_CHIPS, READING_CHIPS } from '../prompts/chips.config';
 
 const MessageBodySchema = z.object({
@@ -34,17 +34,6 @@ export class TutorController {
   private tutorSvc = new TutorService();
   private sessionSvc = new SessionService();
 
-  private async _getIsPro(userId: string): Promise<boolean> {
-    const cacheKey = keys.subPro(userId);
-    const cached = await redis.get<string>(cacheKey);
-    if (cached !== null) return cached === 'true';
-
-    const sub = await db.subscription.findUnique({ where: { userId } });
-    const isPro = sub?.plan === 'pro' && sub?.status === 'active';
-    await redis.set(cacheKey, isPro ? 'true' : 'false', { ex: 300 });
-    return isPro;
-  }
-
   async newSession(req: FastifyRequest, reply: FastifyReply) {
     const user = (req as unknown as Record<string, unknown>).currentUser as { id: string };
     const sessionId = crypto.randomUUID();
@@ -57,7 +46,7 @@ export class TutorController {
     const body = MessageBodySchema.parse(req.body);
     await this.sessionSvc.validateOwnership(body.session_id, user.id);
 
-    const isPro = await this._getIsPro(user.id);
+    const isPro = await getIsPro(user.id);
 
     const response = await this.tutorSvc.chat({
       sessionId: body.session_id,
@@ -89,7 +78,13 @@ export class TutorController {
     }).parse(req.query);
     await this.sessionSvc.validateOwnership(id, user.id);
 
-    await this.sessionSvc.persistToDB(id, user.id, mode);
+    if (mode !== 'simulado') {
+      await db.tutorSession.updateMany({
+        where: { id, userId: user.id },
+        data: { endedAt: new Date() },
+      });
+    }
+
     await this.sessionSvc.clear(id);
     return reply.code(204).send();
   }
