@@ -1,4 +1,4 @@
-# LCF Backend — Environment Checklist
+# LEX Backend — Environment Checklist
 
 Variáveis obrigatórias antes do primeiro deploy. Copie `.env.example` para `.env`.
 
@@ -97,7 +97,7 @@ Criar em [upstash.com](https://upstash.com) → New Database → Region: us-east
 
 ---
 
-## Rate Limits (Tutor IA)
+## Rate Limits (Lexia)
 
 | Variável | Default | Descrição |
 |----------|---------|-----------|

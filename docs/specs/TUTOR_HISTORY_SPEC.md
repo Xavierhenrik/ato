@@ -1,4 +1,4 @@
-# Spec — Histórico de Conversas do Tutor IA (v1)
+# Spec — Histórico de Conversas do Lexia (v1)
 
 > **Fonte de verdade desta feature.** Agentes dev: leiam este documento por inteiro antes de codificar.
 > Decisões aqui registradas já passaram por análise de produto — não rediscutir, implementar.
@@ -8,7 +8,7 @@
 
 ## 1. Resumo
 
-O usuário passa a ter histórico permanente das conversas com o Tutor IA, separado por origem:
+O usuário passa a ter histórico permanente das conversas com o Lexia, separado por origem:
 
 - **Diretas** (`mode: direct`) — usuário abriu o Tutor e perguntou.
 - **Do Manual** (`mode: reading`) — usuário abriu o Tutor enquanto lia um resumo (orbe no Manual).

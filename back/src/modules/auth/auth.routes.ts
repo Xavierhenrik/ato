@@ -5,7 +5,7 @@ import { AuthController } from './auth.controller';
 export async function authRoutes(app: FastifyInstance) {
   const ctrl = new AuthController();
 
-  // Verifica JWT Supabase e retorna/cria usuário LCF
+  // Verifica JWT Supabase e retorna/cria usuário LEX
   app.post('/verify', { preHandler: [requireAuth] }, ctrl.verify.bind(ctrl));
 
   // Perfil do usuário autenticado

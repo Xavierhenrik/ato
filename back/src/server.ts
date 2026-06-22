@@ -18,7 +18,7 @@ async function start() {
 
   try {
     await app.listen({ port: PORT, host: HOST });
-    app.log.info(`LCF Backend running on ${HOST}:${PORT} [${process.env.NODE_ENV}]`);
+    app.log.info(`LEX Backend running on ${HOST}:${PORT} [${process.env.NODE_ENV}]`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

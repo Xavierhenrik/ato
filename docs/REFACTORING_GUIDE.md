@@ -1,7 +1,7 @@
-# LCF — Guia de Refatoração
+# LEX — Guia de Refatoração
 
 > **Objetivo:** Elevar progressivamente a qualidade do código sem introduzir regressões funcionais.
-> Refatoração no LCF é cirúrgica: comportamento externo invariável, estrutura interna melhorada.
+> Refatoração no LEX é cirúrgica: comportamento externo invariável, estrutura interna melhorada.
 >
 > **Regra de ouro:** se o `api-contract.md` continua válido e `flutter analyze + tsc --noEmit` continuam zerados, a refatoração está segura.
 

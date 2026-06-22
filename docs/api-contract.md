@@ -1,4 +1,4 @@
-# LCF Backend — API Contract
+# LEX Backend — API Contract
 
 **Base URL:** `https://api.lcf.app` (prod) | `http://localhost:3000` (dev)  
 **Auth:** Bearer JWT (Supabase JWT) em todos os endpoints exceto `/health` e `/subscriptions/webhook/revenuecat`  
@@ -24,7 +24,7 @@
 
 | Method | Route | Auth | Descrição |
 |--------|-------|------|-----------|
-| POST | `/auth/verify` | JWT | Verifica token Supabase; cria usuário LCF se novo |
+| POST | `/auth/verify` | JWT | Verifica token Supabase; cria usuário LEX se novo |
 | GET | `/auth/me` | JWT | Retorna usuário + perfil + assinatura |
 | DELETE | `/auth/me` | JWT | Exclui conta (LGPD cascade) |
 
@@ -124,7 +124,7 @@
 
 ---
 
-## Tutor IA (M4 — T14)
+## Lexia (M4 — T14)
 
 | Method | Route | Auth | Descrição |
 |--------|-------|------|-----------|
@@ -353,5 +353,5 @@ Query: mode=direct|reading (obrigatório) · cursor=uuid (opcional) · limit=1-5
 | 403 | Forbidden (PRO required) |
 | 404 | Not Found |
 | 409 | Conflict |
-| 429 | Rate Limited (Tutor IA) |
+| 429 | Rate Limited (Lexia) |
 | 500 | Internal Server Error |

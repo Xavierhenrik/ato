@@ -1,4 +1,4 @@
-# LCF Backend — Architecture Overview
+# LEX Backend — Architecture Overview
 
 **Stack:** Node.js 20 + TypeScript strict + Fastify 4 + Prisma 5 + PostgreSQL (Supabase) + Redis (Upstash)  
 **Deploy:** Railway (Hobby ~$5/mês)  
@@ -48,7 +48,7 @@ lcf-backend/
 ```
 Flutter App
   → GET /auth (Supabase SDK) → JWT Supabase
-  → POST /auth/verify (LCF API, Bearer JWT)
+  → POST /auth/verify (LEX API, Bearer JWT)
      → requireAuth middleware: jwtVerify() com SUPABASE_JWT_SECRET
      → auto-provision User + Profile + Subscription(free) se novo
      → req.currentUser = { id, email }
@@ -57,7 +57,7 @@ Flutter App
 
 ---
 
-## Fluxo Tutor IA — Loop Agêntico
+## Fluxo Lexia — Loop Agêntico
 
 ```
 POST /tutor/message
@@ -99,7 +99,7 @@ Três namespaces:
 
 ---
 
-## Módulo Tutor IA — LLM Híbrido
+## Módulo Lexia — LLM Híbrido
 
 | LLM | % queries | Quando usar |
 |-----|-----------|-------------|
@@ -132,7 +132,7 @@ Ambos implementam `LLMAdapter` — troca de modelo sem refatoração do loop ag�
 - [ ] Módulo manual (topics + search no corpus)
 - [ ] Módulo anotações
 
-### Sprint 3 — Tutor IA
+### Sprint 3 — Lexia
 - [ ] Configurar API keys Anthropic + Maritaca
 - [ ] Testar loop agêntico com 50 artigos reais
 - [ ] Rate limiting + session TTL
