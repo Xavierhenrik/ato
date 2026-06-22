@@ -1,9 +1,9 @@
 ---
-updated: 2026-06-12
-sprint: "Histórico do Tutor IA — planejado; delegação noturna agendada (temp-feat-historico)"
+updated: 2026-06-18
+sprint: "Histórico da Lexia — planejado; delegação noturna agendada (temp-feat-historico)"
 ---
 
-# LCF — Estado do Projeto
+# LEX — Estado do Projeto
 
 > Atualizado pelo Claude ao fim de cada sessão de trabalho.
 > Para detalhes de implementação de cada módulo, ver `../docs/ROADMAP.md`.
@@ -31,7 +31,7 @@ clonar no note + copiar `.env` manualmente = ambiente completo.
 
 **Resultado:**
 - `.claude/` (skills, hooks, sessions, settings.json, PROJECT_STATE.md, launch.json) rastreado no remoto
-- `front/lcf_app/` e `docs/` adicionados ao repo
+- `front/lex_app/` e `docs/` adicionados ao repo
 - `.gitignore` corrigido: cobre `android/build/` e `ios/build/` do Flutter
 - Nenhum `.env` nem `settings.local.json` commitado (validado com `git ls-files`)
 - 4 commits feitos, push concluído — working tree limpo
@@ -63,7 +63,8 @@ clonar no note + copiar `.env` manualmente = ambiente completo.
 | **M5 — Simulados** | ✅ Completo (bug response field names — FIXED) | — | 2 |
 | **Push Notifications** | ✅ Completo (aguardando credenciais) | NotificationsService implementado com graceful degradation. Credenciais OneSignal pendentes. | 3 |
 | **Sprint 4 — Hardening** | ✅ Completo | — | 4 |
-| **Histórico Tutor (M4.1 + F10a)** | 🕓 Planejado | Spec pronta (`docs/specs/TUTOR_HISTORY_SPEC.md`); execução delegada agendada (pacote `temp-feat-historico/`, fora do repo) | — |
+| **Histórico Tutor (M4.1 + F10a)** | ✅ Completo | Migration `tutor_history.sql` aplicada no banco live (coluna `title` + index). Flutter: tela de histórico funcionando, UI glass padronizada. | — |
+| **Google Sign-In Nativo** | ✅ Funcionando no emulador | SDK nativo `google_sign_in` + `signInWithIdToken` Supabase OK. Causa raiz resolvida: Supabase tinha Web Client ID errado (`330102139110-slj...`) — corrigido para `582625704045-pvsmv7...`. SHA-1 debug registrado: `A9:03:BB:6C:8B:BB:F9:11:9B:E4:E6:51:D0:70:6A:24:F6:B3:1F:99`. | — |
 
 ---
 
@@ -135,16 +136,22 @@ clonar no note + copiar `.env` manualmente = ambiente completo.
 
 ## Migrations Prisma Pendentes
 
-Nenhuma pendente.
+| Arquivo | Descrição | Status |
+|---------|-----------|--------|
+| ~~`back/prisma/migrations/tutor_history.sql`~~ | ~~Adiciona coluna `title text` em `tutor_sessions` + índice composto `(user_id, created_at DESC)`~~ | ✅ **Aplicada em live — 2026-06-21** |
 
-> Migrations do Sprint 1 aplicadas em 2026-05-03 via `prisma/migrations/sprint1_manual.sql` (staging + live).
-> Índices Sprint 4 (`simulado_questions_is_correct_idx`, `simulado_questions_answered_at_idx`, `simulado_questions_attempt_id_is_correct_idx`) aplicados em 2026-05-28 via `prisma/migrations/apply_sprint4.js` (staging + live).
+> Migrations aplicadas:
+> - Sprint 1 (2026-05-03): `sprint1_manual.sql` (staging + live)
+> - Sprint 4 (2026-05-28): `apply_sprint4.js` — índices simulado_questions (staging + live)
+> - Camada 2 (2026-06-12): `camada2_weak_topics.sql` — `weak_topics` + `analyzed_at` em study_plans (staging + live)
+> - Histórico Tutor (2026-06-21): `tutor_history.sql` — `title` + índice composto em tutor_sessions (live)
 
 ## Débito Técnico Registrado
 
 | Item | Impacto | Sprint |
 |------|---------|--------|
 | FK `simulado_questions → questions` implícita via Prisma relation | Baixo — a FK existe via Prisma ORM; `@db.Uuid` adicionado a `questions.id` resolve o type mismatch UUID/TEXT | ✅ Resolvido Sprint 4 |
+| Code health Wave — 5 anti-padrões corrigidos: `lexConfirmDialog` (5 dialogs → 1 utility), `handleAsyncError` (401 centralizado), `LexGlassSheet.show()` (3 sheets), `context.bottomPad` (8 telas), catch silencioso (13 → 0) | Médio — manutenibilidade e rastreabilidade de erros | ✅ Resolvido 2026-06-19 |
 
 ---
 
@@ -209,6 +216,8 @@ o público de 2ª fase (motivado, disposto a pagar, mal atendido pelo mercado).
 
 | Data | Decisão | Motivo |
 |------|---------|--------|
+| 2026-06-19 | Utilities globais Flutter: `lexConfirmDialog` (shared/utils/lex_dialogs.dart), `handleAsyncError` (shared/utils/async_value_handler.dart), `context.bottomPad` extension (shared/extensions/context_extensions.dart), `LexGlassSheet.show<T>()` static method | Code health — 5 padrões duplicados extraídos para utilities compartilhadas; 13 catches silenciosos documentados; `Errors.upstream()` adicionada ao backend |
+| 2026-06-18 | Renomeação de marca LCF → LEX: 11 widgets `lcf_*.dart` → `lex_*.dart` (classes `LcfXxx` → `LexXxx`), 27 arquivos de feature atualizados, pubspec `name: lcf_app` → `name: lex_app`, 4 strings backend (server.ts, auth.routes.ts, system.prompt.ts, profile-analysis.service.ts), back/CLAUDE.md. `.g.dart` files pendentes de regeneração via `build_runner`. Bundle ID `com.lcf.app` permanece inalterado — requer mudança manual em Android/iOS. Skill files `lcf-*` em `.claude/skills/` permanecem com prefixo antigo — renomear separadamente quando necessário. | Marca renomeada; produto passa a se chamar LEX em todo o código |
 | 2026-06-12 | Histórico do Tutor v1: persistência **write-through** (`persistTurn` por turno; TutorSession lazy na 1ª msg, `id` = sessionId Redis, `title` = 1ª msg ≤ 80 chars determinístico) + endpoints `GET /tutor/history`, `GET /tutor/history/:id`, `DELETE /tutor/history/:id`. Free vê 7 dias (gate na leitura), PRO tudo. Conversas antigas **read-only** com CTA "Nova conversa sobre isso"; `mode: simulado` não persiste; sem Isar; sem cron. `persistToDB` será removido; `DELETE /tutor/session/:id` vira só encerrar (endedAt + Redis clear). Spec: `docs/specs/TUTOR_HISTORY_SPEC.md` | Modelo atual perde conversas (persistência só no DELETE explícito + fatia de 8 msgs); reidratar transcript com tool_use serializado no LLM viola anti-alucinação; read-only não fere a decisão fixada "sem memória entre sessões" (v2.0). Free 7d = alavanca de conversão barata. |
 | 2026-06-11 | Revisão Inteligente vira "porta dupla": tap no card abre `RevisarSheet` (LcfGlassSheet) com **Ler resumo** (`/manual?subject=`) + **Praticar questões** (`POST /simulados/start` modo custom, subject, type:review). Borda dourada passa a ser estado de toque (não `isFirst` fixo); subtítulo "repetição espaçada" trocado por copy honesto. ✅ **IMPLEMENTADO 2026-06-11** | Reaproveita 100% do que existe (LcfGlassSheet, fluxo simulado F5, resumos M3) — sem endpoint novo, sem migration. Ativa as 5.791 questões `type:review` paradas. Card antes mentia ("X questões"=respondidas; botão Revisar caía em `/manual` sem filtro). **Depende:** promover `type:review` para `active` no live. |
 | 2026-06-11 | Direcionamento por tópico determinístico na `RevisarSheet`: `getRevisionCards` adiciona `topTopics` (top 3 por erros dos últimos 14 dias em questões `type:review` com `topicId`). PRO: linhas tappáveis → `/manual/topic/:id`. Free: cadeado → `ProGateSheet`. "Ler resumo": PRO com tópicos → tópico #1; demais → `/manual?subject=`. Backend antigo (sem `topTopics`) não quebra o app (`@JsonKey(defaultValue: [])`). ✅ **IMPLEMENTADO 2026-06-11** | Join determinístico `SimuladoQuestion → Question.topicId → Topic.title` — sem LLM, sem endpoint novo, sem migration. |
@@ -269,16 +278,17 @@ o público de 2ª fase (motivado, disposto a pagar, mal atendido pelo mercado).
 | **F7 — Perfil + Assinatura** | ✅ Concluído | 12 arquivos — models, repository, provider, 5 widgets, 2 screens, router atualizado. url_launcher adicionado. `flutter analyze` zero issues |
 | **F8 — Hardening + Offline** | ✅ Concluído | UI/UX pass (waves 1–4) + offline-first Isar (fallback stale, invalidateCache, pull-to-refresh 3 telas). `flutter analyze` zero issues. |
 | **F9 — Quiz Diagnóstico** | ✅ Concluído | `GET /diagnostic/questions` backend + Flutter UI funcional (questões reais, progresso, avanço). `tsc --noEmit` + `flutter analyze` zero. |
+| **Visual Icons Refactor** | ✅ Código concluído — aguardando SVGs em `assets/icons/` | `LexIcons` criado; 17 arquivos editados; zero analyze issues. Ver `sessions/2026-06-21_visual_icons_refactor.md` |
 
 ### Para ativar o Sprint F1 (próximos passos obrigatórios)
 
 ```bash
 # 1. Scaffoldar plataformas (mantém lib/ já criado)
 cd C:\Projetos\BX\LCF
-flutter create --org com.lcf --project-name lcf_app --platforms ios,android front/lcf_app
+flutter create --org com.lex --project-name lex_app --platforms ios,android front/lex_app
 
 # 2. Gerar código (Riverpod, Retrofit, json_serializable)
-cd front/lcf_app
+cd front/lex_app
 dart run build_runner build --delete-conflicting-outputs
 
 # 3. Verificar
@@ -309,6 +319,7 @@ flutter run \
 | 2026-05-16 | sessions/2026-05-16_sprint3_tutor_subscriptions.md | Sprint 3 completo: M4 gaps PRO (chips, auto-save, persistência sessão) + Subscriptions hardening |
 | 2026-05-22 | sessions/2026-05-22_flutter_f1_foundation.md | Sprint F1: 22 arquivos Flutter criados — core/theme, router, auth, onboarding (aguardando build_runner) |
 | 2026-05-22 | sessions/2026-05-22_monorepo_restructure.md | Monorepo: git mv back/ + front/docs + docs/ + .claude/ — commits 2c2df2f e d3360fc |
+| 2026-06-18 | sessions/2026-06-18_emulator_fix.md | Fix tela preta emulador: Impeller desabilitado em debug + interceptor Dio retry 401 |
 | 2026-06-10 | sessions/2026-06-10_tutor_flutuante_manual.md | Tutor flutuante: orbe + gaveta de vidro no Manual, LcfGlassSheet, LcfTutorAppBar context-mode |
 | 2026-06-10 | sessions/2026-06-10_tutor_ajustes_finos.md | Ajustes finos tutor flutuante: borda dourada no shape, input bar transparente na gaveta, header identidade removido, /tutor/context com BottomNav. flutter analyze zero issues |
 | 2026-06-10 | sessions/2026-06-10_tutor_refino_visual.md | Refino visual: fio dourado via CustomPainter (arcos + topo, sem laterais), respiro lateral 8px na gaveta. flutter analyze zero issues |
@@ -344,6 +355,8 @@ flutter run \
 | 2026-06-11 | sessions/2026-06-11_revisao_topico_exato.md | Camada 1: direcionamento determinístico por tópico — topTopics no getRevisionCards, RevisarSheet com gate PRO/Free, navegação /manual/topic/:id. tsc + flutter analyze + build_runner zero issues. |
 | 2026-06-12 | sessions/2026-06-12_camada2_sonnet_profile.md | Camada 2: análise Sonnet persistida — profile-analysis.service.ts, fire-and-forget em completeAttempt, getRevisionCards prefere weakTopics frescos, migration SQL. tsc zero issues. |
 | 2026-06-12 | sessions/2026-06-12_tutor_history_planning.md | Planejamento Histórico do Tutor: 4 decisões de produto fechadas, spec TUTOR_HISTORY_SPEC.md criada, pacote de delegação noturna (orquestrador + 3 agentes Sonnet + fix template) em temp-feat-historico/. |
+| 2026-06-18 | sessions/2026-06-18_rename_lcf_lex.md | Renomeação completa LCF → LEX: 11 widgets, 27 telas/features, pubspec, backend strings, docs |
+| 2026-06-19 | sessions/2026-06-19_code_health_wave.md | Code Health Wave: 4 utilities Flutter criadas (lexConfirmDialog, handleAsyncError, context.bottomPad, LexGlassSheet.show()); 17 arquivos Flutter + 3 backend corrigidos; 13 catches silenciosos documentados. flutter analyze + tsc zero issues. |
 
 
 
@@ -388,6 +401,3 @@ python scripts/run_pipeline_loop.py   # reinicia automaticamente após quota
 - **QUOTA_WAIT**: 180s entre restarts após rate-limit
 - **Agente 0 — Planner**: lógica Python local (sem LLM — output de 1.874 itens excede 8.192 tokens)
 - **Agente 1 — Generator**: prompt tolerante a ausência de artigos BM25 + fallback por número de artigo
-- **Agente 2 — Validator**: score ≥ 7/10 para aprovação
-- **Output**: `status='pending_review'` → promoção via admin (Sprint 4)
-

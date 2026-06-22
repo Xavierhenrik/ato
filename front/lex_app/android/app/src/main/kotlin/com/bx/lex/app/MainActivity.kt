@@ -1,0 +1,5 @@
+package com.bx.lex.app
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()

@@ -1,9 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { requireAuth } from '../../shared/middlewares/auth.middleware';
 import { TutorController } from './controllers/tutor.controller';
+import { HistoryController } from './controllers/history.controller';
 
 export async function tutorRoutes(app: FastifyInstance) {
   const ctrl = new TutorController();
+  const historyCtrl = new HistoryController();
 
   // POST /tutor/session/new
   app.post('/session/new', { preHandler: [requireAuth] }, ctrl.newSession.bind(ctrl));
@@ -28,4 +30,13 @@ export async function tutorRoutes(app: FastifyInstance) {
 
   // DELETE /tutor/session/:id
   app.delete('/session/:id', { preHandler: [requireAuth] }, ctrl.deleteSession.bind(ctrl));
+
+  // GET /tutor/history?mode=&cursor=&limit=
+  app.get('/history', { preHandler: [requireAuth] }, historyCtrl.list.bind(historyCtrl));
+
+  // GET /tutor/history/:id
+  app.get('/history/:id', { preHandler: [requireAuth] }, historyCtrl.getById.bind(historyCtrl));
+
+  // DELETE /tutor/history/:id
+  app.delete('/history/:id', { preHandler: [requireAuth] }, historyCtrl.deleteById.bind(historyCtrl));
 }

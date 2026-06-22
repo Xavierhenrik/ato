@@ -1,0 +1,103 @@
+import 'package:dio/dio.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../../core/network/api_client.dart';
+import 'models/tutor_history_models.dart';
+import 'models/tutor_models.dart'; // TutorMessage, TutorTopicContext, etc.
+
+part 'tutor_repository.g.dart';
+
+class TutorRepository {
+  const TutorRepository(this._dio);
+  final Dio _dio;
+
+  Future<TutorSession> createSession() async {
+    final resp = await _dio.post<Map<String, dynamic>>(
+      '/tutor/session/new',
+      data: <String, dynamic>{}, // explicit empty body — Fastify rejects Content-Type:json with no body
+    );
+    return TutorSession(id: resp.data!['session_id'] as String);
+  }
+
+  Future<SendMessageResponse> sendMessage(
+    String sessionId,
+    String content, {
+    String mode = 'direct',
+    TutorTopicContext? topicContext,
+  }) async {
+    final resp = await _dio.post<Map<String, dynamic>>(
+      '/tutor/message',
+      data: {
+        'session_id': sessionId,
+        'message': content,
+        'mode': mode,
+        if (topicContext != null) 'context': topicContext.toJson(),
+      },
+    );
+    final data = resp.data!;
+
+    // Backend returns 'reply' (REST contract) or 'message' (arch spec fallback)
+    final replyText =
+        (data['reply'] ?? data['message'] ?? '') as String;
+    final rawChips = data['chips'] as List<dynamic>? ?? const <dynamic>[];
+    final chips = rawChips.map((e) => e.toString()).toList();
+
+    return SendMessageResponse(
+      message: TutorMessage(
+        id: 'ai_${DateTime.now().millisecondsSinceEpoch}',
+        role: 'assistant',
+        content: replyText,
+        continuationChips: chips,
+        createdAt: DateTime.now(),
+      ),
+      autoSavedAnnotationId: data['autoSavedAnnotationId'] as String?,
+    );
+  }
+
+  Future<void> deleteSession(String sessionId, {String mode = 'direct'}) async {
+    await _dio.delete<void>(
+      '/tutor/session/$sessionId',
+      queryParameters: {'mode': mode},
+    );
+  }
+
+  // ── Histórico permanente ─────────────────────────────────────────────────
+
+  /// [GET /tutor/history?mode=&cursor=&limit=]
+  /// Retorna página de sessões históricas paginada por keyset (cursor).
+  Future<HistoryListResponse> getHistory({
+    required String mode,
+    String? cursor,
+    int limit = 20,
+  }) async {
+    final resp = await _dio.get<Map<String, dynamic>>(
+      '/tutor/history',
+      queryParameters: {
+        'mode': mode,
+        'limit': limit,
+        if (cursor != null) 'cursor': cursor,
+      },
+    );
+    return HistoryListResponse.fromJson(resp.data!);
+  }
+
+  /// [GET /tutor/history/:id]
+  /// Retorna o detalhe de uma sessão com todas as mensagens (read-only).
+  Future<HistoryDetailResponse> getHistoryDetail(String sessionId) async {
+    final resp = await _dio.get<Map<String, dynamic>>(
+      '/tutor/history/$sessionId',
+    );
+    return HistoryDetailResponse.fromJson(resp.data!);
+  }
+
+  /// [DELETE /tutor/history/:id]
+  /// Remove permanentemente a sessão e suas mensagens (cascade).
+  Future<void> deleteHistory(String sessionId) async {
+    await _dio.delete<void>('/tutor/history/$sessionId');
+  }
+}
+
+@riverpod
+TutorRepository tutorRepository(TutorRepositoryRef ref) {
+  return TutorRepository(ref.watch(dioProvider));
+}

@@ -16,6 +16,7 @@ export const Errors = {
   notFound: (resource: string) => new AppError(404, 'NOT_FOUND', `${resource} não encontrado`),
   conflict: (msg: string) => new AppError(409, 'CONFLICT', msg),
   badRequest: (msg: string) => new AppError(400, 'BAD_REQUEST', msg),
+  validation: (msg: string) => new AppError(400, 'VALIDATION', msg),
   rateLimited: (plan: string) =>
     new AppError(
       429,
@@ -35,4 +36,5 @@ export const Errors = {
       'SIMULADO_DAILY_LIMIT',
       'Limite de 15 questões/dia atingido no plano Free. Assine o PRO para questões ilimitadas.',
     ),
+  upstream: (msg: string) => new AppError(502, 'UPSTREAM_ERROR', msg),
 };

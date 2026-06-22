@@ -1,4 +1,4 @@
-LCF
+LEX
 
 Plataforma Jurídica Inteligente
 
@@ -36,7 +36,7 @@ Abril 2026
 9. Notas Importantes
 
 1. Visão Geral
-Este documento consolida as decisões de stack e infraestrutura para o MVP da plataforma LCF, um aplicativo EdTech jurídico mobile-first focado em estudantes de Direito e candidatos ao Exame da OAB.
+Este documento consolida as decisões de stack e infraestrutura para o MVP da plataforma LEX, um aplicativo EdTech jurídico mobile-first focado em estudantes de Direito e candidatos ao Exame da OAB.
 
 Escopo: listar TODAS as tecnologias a serem utilizadas no desenvolvimento do app. Decisões de arquitetura de dados, pipelines de IA e nuances de estrutura serão documentadas em documentos complementares.
 
@@ -182,7 +182,7 @@ Estimativa: 2-5 dias de engenharia incluindo validação
 
 Especificação técnica detalhada: LCF_ArquiteturaIA_MVP (seção 2.2)
 
-Status: frente de trabalho a especificar — estrutura (script avulso, job no Railway ou processo manual) a definir em etapa posterior. Pré-requisito para funcionamento do Tutor IA (M4).
+Status: frente de trabalho a especificar — estrutura (script avulso, job no Railway ou processo manual) a definir em etapa posterior. Pré-requisito para funcionamento do Lexia (M4).
 
 4.4 ORM / Query Builder
 Tecnologia
@@ -297,7 +297,7 @@ Upstash (Redis Serverless)
 
 Plano: Free ($0) — 10k comandos/dia, 256 MB storage
 
-Uso: sessão do Tutor IA (histórico das últimas 8 mensagens, TTL 4h), rate limiting por plano (Free: 20 msgs/dia; PRO: 200 msgs/dia via contador com TTL 24h), budget de tokens por sessão
+Uso: sessão do Lexia (histórico das últimas 8 mensagens, TTL 4h), rate limiting por plano (Free: 20 msgs/dia; PRO: 200 msgs/dia via contador com TTL 24h), budget de tokens por sessão
 
 Chave de sessão: UUID gerado no client — sem vínculo obrigatório ao user_id (simplifica LGPD)
 
@@ -355,7 +355,7 @@ Justificativa: obrigatório para aprovação na App Store e Google Play — assi
 
 Nota — Web: para eventuais assinaturas via WebApp, avaliar Stripe como processador complementar (fora do escopo MVP mobile).
 
-6.3 LLM para Tutor IA — Estratégia Híbrida
+6.3 LLM para Lexia — Estratégia Híbrida
 Serviço
 
 Detalhes
@@ -394,12 +394,12 @@ Requisitos: RF40, RF41, RF42, RF43, RF45
 
 6.4 Transcrição de Voz
 
-Fora do escopo MVP. Entrada por voz no Tutor IA foi avaliada e excluída por custo/valor desfavorável no estágio inicial.
+Fora do escopo MVP. Entrada por voz no Lexia foi avaliada e excluída por custo/valor desfavorável no estágio inicial.
 
 Previsão: v1.1 — Whisper API (OpenAI), integração Flutter audio plugin → upload → API Whisper → texto. Pipeline de texto do Tutor não muda ao reintroduzir.
 
 7. Custo Operacional MVP
-Cenário: 100-500 assinantes durante primeiros 6 meses, com 30% de engajamento ativo no Tutor IA e ~10 mensagens/usuário/mês.
+Cenário: 100-500 assinantes durante primeiros 6 meses, com 30% de engajamento ativo no Lexia e ~10 mensagens/usuário/mês.
 
 Serviço
 
@@ -550,6 +550,6 @@ Próximas Decisões (Documentos Futuros):
 
 — Fim do Documento —
 
-LCF Plataforma Jurídica Inteligente | Decisões de Stack e Infraestrutura | v1.0
+LEX Plataforma Jurídica Inteligente | Decisões de Stack e Infraestrutura | v1.0
 
 Abril 2026

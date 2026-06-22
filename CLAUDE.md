@@ -1,4 +1,4 @@
-# LCF — Contexto para Claude Code
+# LEX — Contexto para Claude Code
 
 > Leia este arquivo e `.claude/PROJECT_STATE.md` antes de começar qualquer trabalho.
 > Se existir um log recente em `.claude/sessions/`, leia também.
@@ -9,10 +9,10 @@ Skills especializadas em `.claude/skills/` — use com `/skill <nome>`:
 
 | Skill | Quando usar |
 |-------|------------|
-| `lcf-tech-lead` | Análise técnica, decisões de arquitetura, prompts de implementação para agentes dev |
-| `lcf-apple-compliance` | Auditoria de conformidade App Store, checklist de submissão, Sign in with Apple, privacy policy |
-| `lcf-security` | Auditoria de segurança por camada (auth, injeção, rate limit, mobile, infra), prompts de correção |
-| `lcf-qa` | Testes funcionais (perspectiva do usuário), refatoração segura, polish de módulos — usa TESTING_STRATEGY.md + REFACTORING_GUIDE.md |
+| `lex-tech-lead` | Análise técnica, decisões de arquitetura, prompts de implementação para agentes dev |
+| `lex-apple-compliance` | Auditoria de conformidade App Store, checklist de submissão, Sign in with Apple, privacy policy |
+| `lex-security` | Auditoria de segurança por camada (auth, injeção, rate limit, mobile, infra), prompts de correção |
+| `lex-qa` | Testes funcionais (perspectiva do usuário), refatoração segura, polish de módulos — usa TESTING_STRATEGY.md + REFACTORING_GUIDE.md |
 
 ---
 
@@ -20,7 +20,7 @@ Skills especializadas em `.claude/skills/` — use com `/skill <nome>`:
 
 ## O Projeto
 
-**LCF** — EdTech jurídica mobile-first para estudantes de Direito e candidatos ao Exame da OAB.
+**LEX** — EdTech jurídica mobile-first para estudantes de Direito e candidatos ao Exame da OAB.
 Modelo freemium (Free vs PRO). MVP em ~2 meses. Alvo: 100–500 assinantes nos primeiros 6 meses.
 
 Produto jurídico: **alucinação = perda de credibilidade imediata**. Toda decisão de arquitetura parte desse princípio.
@@ -37,9 +37,9 @@ Produto jurídico: **alucinação = perda de credibilidade imediata**. Toda deci
 | Cache | Redis (Upstash) |
 | Auth | Supabase Auth — Google OAuth + e-mail/senha |
 | LLM Análise de Perfil | Claude Sonnet — nivelamento, study plan, weak areas (chamadas raras, alta importância) |
-| LLM Padrão | Sabiá-4 (Maritaca AI) — Tutor IA, pipelines, validações (~16× mais barato) |
+| LLM Padrão | Sabiá-4 (Maritaca AI) — Lexia (Tutora IA), pipelines, validações (~16× mais barato) |
 | Anti-alucinação | Tool Use obrigatório (`lookup_article`) — não RAG passivo |
-| Sessão Tutor | Redis TTL 4h, últimas 8 mensagens |
+| Sessão Lexia | Redis TTL 4h, últimas 8 mensagens |
 | Busca legal | BM25 nativo PostgreSQL (`portuguese_unaccent`) — sem pgvector no MVP |
 | Pagamento | RevenueCat (Apple IAP + Google Play Billing) |
 | Notificações | OneSignal |
@@ -55,7 +55,7 @@ Produto jurídico: **alucinação = perda de credibilidade imediata**. Toda deci
 | **Spec MVP** | `docs/specs/LCF_Especificacao_Sistema.txt` | Requisitos funcionais completos |
 | **Free vs PRO** | `docs/specs/LCF_Free_vs_PRO.txt` | Sempre que implementar feature com diferenciação de plano |
 | **Arquitetura IA** | `docs/specs/LCF_ArquiteturaIA_MVP.txt` | Antes de tocar no módulo tutor-ia |
-| **Histórico Tutor** | `docs/specs/TUTOR_HISTORY_SPEC.md` | Antes de tocar em persistência/histórico de sessões do Tutor |
+| **Histórico Lexia** | `docs/specs/TUTOR_HISTORY_SPEC.md` | Antes de tocar em persistência/histórico de sessões da Lexia |
 | **Stack Infra** | `docs/specs/LCF_Stack_Infraestrutura_v1.0.txt` | Decisões de infraestrutura |
 | **API Contract** | `docs/api-contract.md` | Referência de contratos |
 | **Arquitetura** | `docs/architecture-overview.md` | Visão geral da arquitetura do sistema |
@@ -110,12 +110,12 @@ Para convenções de código obrigatórias (Errors factory, Zod, requireAuth, Re
 |---------|--------|
 | Tool Use, não RAG | Referências legais são exatas; BM25 supera semântica para lookup de artigos |
 | Sem pgvector no MVP | Entra na v1.1 como camada adicional após validação |
-| Sem memória entre sessões do Tutor | Roadmap v2.0 |
+| Sem memória entre sessões da Lexia | Roadmap v2.0 |
 | RevenueCat, sem Stripe in-app | Removido do escopo |
 | Sign in with Apple obrigatório | Guideline 4.8 — exigido pois Google OAuth está presente |
 | Monolito modular | Simples para 2 devs; migração para microserviços apenas se escalar |
-| LLM Routing — Sonnet só para análise de perfil | Sabiá-4 cobre Tutor IA (Free+PRO), pipelines e validações; Sonnet reservado para nivelamento, study plan e weak areas — chamadas raras com impacto na personalização persistida |
-| Free generoso sem trial separado | Conversão por bloqueio contextual (15 questões/dia) supera timer artificial; Free usa Sabiá-4, PRO usa Sonnet nas análises de perfil |
+| LLM Routing — Sonnet só para análise de perfil | Sabiá-4 cobre Lexia (Free+PRO), pipelines e validações; Sonnet reservado para nivelamento, study plan e weak areas — chamadas raras com impacto na personalização persistida |
+| Free generoso sem trial separado | Conversão por bloqueio contextual (15 questões/dia) supera timer artificial; Free usa Sabiá-4 (Lexia), PRO usa Sonnet nas análises de perfil |
 | PRO: R$29,90/mês · R$249,90/ano | Grade store Apple/Google; anual em destaque (badge "Economize 30%"); break-even a ~30 assinantes |
 | Textos do Manual — estrutura canônica v1.0 | 6 seções obrigatórias (fundamento → artigos centrais → exemplo prático → atenção → OAB → resumo); threshold validador 7.0/10; fidelidade veto se < 3/4 |
 

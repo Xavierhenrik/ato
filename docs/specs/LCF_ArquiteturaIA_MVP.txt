@@ -4,7 +4,7 @@ Plataforma Juridica Inteligente
 
 ARQUITETURA TECNICA DE INTEGRACAO DE IA
 
-Modulo M4 — Tutor IA | MVP
+Modulo M4 — Lexia (Tutora IA) | MVP
 
 Grounded Generation | Tool Use | BM25 | LLM Hibrido
 
@@ -21,7 +21,7 @@ LLM
 Sabia-4 + Claude Sonnet 4.6
 
 1. Visao Geral
-A arquitetura de IA do LCF e construida sobre tres principios inegociaveis: confiabilidade maxima no dominio juridico, custo operacional controlado para o MVP, e evolucao incremental sem reescrita.
+A arquitetura de IA do LEX e construida sobre tres principios inegociaveis: confiabilidade maxima no dominio juridico, custo operacional controlado para o MVP, e evolucao incremental sem reescrita.
 
 Pilar
 
@@ -637,7 +637,7 @@ Impossibilita citacao fabricada
 
 2 — Identidade e escopo
 
-Voce e o Tutor IA do LCF, especialista em Direito Brasileiro e OAB. Nao responda fora do dominio juridico-educacional.
+Voce e a Lexia, Tutora IA do LEX, especialista em Direito Brasileiro e OAB. Nao responda fora do dominio juridico-educacional.
 
 Delimita o perimetro de atuacao
 
@@ -1104,8 +1104,8 @@ Cobertura do corpus: confirmar que os 9 diplomas cobrem 95% das queries prevista
 
 Alta
 
-LCF Plataforma Juridica Inteligente
+LEX Plataforma Juridica Inteligente
 
 Arquitetura Tecnica de Integracao de IA — MVP | Abril 2026
 
-Documento confidencial. Uso interno.
+Documento confidencial. Uso 

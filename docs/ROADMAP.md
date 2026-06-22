@@ -1,4 +1,4 @@
-# LCF Backend — Roadmap de Desenvolvimento
+# LEX Backend — Roadmap de Desenvolvimento
 
 **Versão:** 1.0 — Abril 2026  
 **Stack:** Node.js 20 + TypeScript strict + Fastify 4 + Prisma 5 + PostgreSQL (Supabase) + Redis (Upstash)  
@@ -15,7 +15,7 @@
 | Módulo | Arquivo principal | Status |
 |--------|------------------|--------|
 | Auth | `src/modules/auth/` | **Completo** |
-| Tutor IA (M4) | `src/modules/tutor-ia/` | **Completo** — loop agêntico, adapters, tools, rate limit, Redis |
+| Lexia (M4) | `src/modules/tutor-ia/` | **Completo** — loop agêntico, adapters, tools, rate limit, Redis |
 | Subscriptions | `src/modules/subscriptions/` | **Completo** — webhook RevenueCat, status PRO |
 | Onboarding (M1) | `src/modules/onboarding/` | Esqueleto — falta endpoints do Quiz Diagnóstico e retorno com flow A/B |
 | Dashboard (M2) | `src/modules/dashboard/` | Esqueleto — falta dailyProgress, oabMode, revision cards, performance hub |
@@ -64,7 +64,7 @@ flowchart TD
 
 ## 2. Sprint 1 — Fundação Funcional
 
-**Objetivo:** todos os fluxos do plano Free funcionam end-to-end. O usuário consegue se cadastrar, completar o onboarding, ler conteúdo do Manual, usar o Tutor IA e criar anotações.
+**Objetivo:** todos os fluxos do plano Free funcionam end-to-end. O usuário consegue se cadastrar, completar o onboarding, ler conteúdo do Manual, usar a Lexia e criar anotações.
 
 **Pré-requisito global:** Auth já completo. `prisma migrate dev` rodado com o schema atual.
 
@@ -470,7 +470,7 @@ Response 204
 | Busca `q` aplica ILIKE em `title` e `content` | RF72 |
 | Exclusão requer pertencer ao usuário (verificar `userId` antes de deletar) | RF70 |
 | Anotação sem `title` exibe prévia do `content` como identificador no Flutter (lógica no cliente) | T19 |
-| Compartilhamento com Tutor IA via consentimento LGPD — fora do escopo MVP, sem endpoint agora | RF73, RF74 |
+| Compartilhamento com Lexia via consentimento LGPD — fora do escopo MVP, sem endpoint agora | RF73, RF74 |
 
 #### Arquivos a tocar
 
@@ -544,7 +544,7 @@ Response 200: { ...profile }
 | Mudar `academicPhase` → atualizar `nivelamentoPath`: `"oab"` se novo valor for `oab_prep`, `"graduation"` para os demais | T21 |
 | `nivelamentoPendente` **não é alterado** pela troca de `academicPhase` — foi setado universalmente no onboarding e só muda via `/diagnostic/complete` ou `/diagnostic/dismiss` | T21, RF14 |
 | `graduation_end` é um valor válido de `academicPhase` — mesma duração de plano que `oab_prep` (90 dias) | Design 2026-05 |
-| Troca de senha → responsabilidade do Supabase Auth (SDK Flutter). Sem endpoint no backend LCF | T21 |
+| Troca de senha → responsabilidade do Supabase Auth (SDK Flutter). Sem endpoint no backend LEX | T21 |
 | Upload de foto de perfil → `avatarUrl` recebe URL já hospedada (Supabase Storage via Flutter). Sem upload direto no backend | T21 |
 
 #### Arquivos a tocar
@@ -699,7 +699,7 @@ simulado:daily:{userId}  TTL: 24h (86400s)  Tipo: counter (incr)
 
 ---
 
-### Sprint 3 · M4 — Tutor IA (gaps PRO)
+### Sprint 3 · M4 — Lexia (gaps PRO)
 
 #### Contexto
 
@@ -839,7 +839,7 @@ class NotificationsService {
 |-------|-----------|
 | Validar `oneSignalPlayerId` via `GET /players/:id` da OneSignal API antes de salvar. Se inválido, retornar `400` | T21 |
 | Se `ONESIGNAL_APP_ID` não estiver configurado, `sendPush()` loga aviso e retorna `{ success: false }` sem lançar exceção | Graceful degradation |
-| Streak reminder cron — **fora do backend LCF**. Implementar como Railway Cron Job ou Supabase Edge Function que consulta `GET /dashboard/streak` e dispara via `NotificationsService` | T21 |
+| Streak reminder cron — **fora do backend LEX**. Implementar como Railway Cron Job ou Supabase Edge Function que consulta `GET /dashboard/streak` e dispara via `NotificationsService` | T21 |
 
 #### Arquivos a tocar
 
@@ -963,7 +963,7 @@ Ao entregar o Sprint 4, fornecer:
 
 ## 7. Convenções do Projeto
 
-Leia esta seção antes de escrever qualquer código no backend LCF.
+Leia esta seção antes de escrever qualquer código no backend LEX.
 
 ### Extraindo o usuário autenticado
 

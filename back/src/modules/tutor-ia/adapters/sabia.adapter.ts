@@ -1,6 +1,7 @@
 // Maritaca AI — Sabiá-4
 // API compatível com OpenAI: usa parâmetros tools e tool_choice nativamente.
 import { LLMAdapter, LLMRequest, LLMResponse, ToolCall, ChatMessage, ToolResultBlock } from './llm.interface';
+import { Errors } from '../../../shared/errors';
 
 interface MaritacaMessage {
   role: string;
@@ -134,7 +135,7 @@ export class SabiaAdapter implements LLMAdapter {
       }
       const errText = await res.text();
       console.error(`[SabiaAdapter] API error ${res.status}:`, errText);
-      throw new Error(`Maritaca API error ${res.status}: ${errText}`);
+      throw Errors.upstream(`Maritaca API error ${res.status}: ${errText}`);
     }
 
     const data = (await res.json()) as MaritacaResponse;

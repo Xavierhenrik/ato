@@ -1,4 +1,4 @@
-# LCF Backend — Convenções Obrigatórias
+# LEX Backend — Convenções Obrigatórias
 
 > Este arquivo complementa o `CLAUDE.md` raiz. Leia os dois antes de codificar.
 > Para specs de cada módulo (contratos de API, regras de negócio, critérios de aceite), leia `../docs/ROADMAP.md`.

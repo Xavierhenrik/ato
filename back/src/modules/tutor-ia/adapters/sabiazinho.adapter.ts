@@ -2,6 +2,7 @@
 // Usado para queries direct simples que não requerem raciocínio profundo.
 // API idêntica ao SabiaAdapter — apenas o model slug difere.
 import { LLMAdapter, LLMRequest, LLMResponse, ToolCall, ChatMessage, ToolResultBlock } from './llm.interface';
+import { Errors } from '../../../shared/errors';
 
 interface MaritacaMessage {
   role: string;
@@ -124,7 +125,7 @@ export class SabiazinhoAdapter implements LLMAdapter {
       }
       const errText = await res.text();
       console.error(`[SabiazinhoAdapter] API error ${res.status}:`, errText);
-      throw new Error(`Maritaca API error ${res.status}: ${errText}`);
+      throw Errors.upstream(`Maritaca API error ${res.status}: ${errText}`);
     }
 
     const data = (await res.json()) as MaritacaResponse;

@@ -2,14 +2,14 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "LCF Backend — staging",
+      "name": "LEX Backend — staging",
       "cwd": "lcf/back",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:staging"],
       "port": 3000
     },
     {
-      "name": "LCF Backend — live",
+      "name": "LEX Backend — live",
       "cwd": "lcf/back",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
@@ -30,21 +30,36 @@
       "port": 4321
     },
     {
-      "name": "LCF App (Flutter Web)",
-      "cwd": "lcf/front/lcf_app",
+      "name": "LEX App (Flutter Web)",
+      "cwd": "lcf/front/lex_app",
       "runtimeExecutable": "flutter",
       "runtimeArgs": [
         "run",
         "-d", "web-server",
         "--web-port", "8080",
         "--web-hostname", "localhost",
-        "--dart-define=API_BASE_URL=http://localhost:3000"
+        "--dart-define=API_BASE_URL=http://localhost:3000",
+        "--dart-define=GOOGLE_WEB_CLIENT_ID=330102139110-sljrnei82s2akbub14og7vknc8dbghp4.apps.googleusercontent.com"
       ],
       "port": 8080
+    },
+    {
+      "name": "LEX App (Android — staging)",
+      "cwd": "lcf/front/lex_app",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": [
+        "run",
+        "-d", "android",
+        "--dart-define=SUPABASE_URL=https://zmwufyrpcdlmihjcsajh.supabase.co",
+        "--dart-define=SUPABASE_ANON_KEY=YOUR_ANON_KEY",
+        "--dart-define=API_BASE_URL=http://10.0.2.2:3000",
+        "--dart-define=GOOGLE_WEB_CLIENT_ID=330102139110-sljrnei82s2akbub14og7vknc8dbghp4.apps.googleusercontent.com"
+      ]
     }
   ],
   "_notes": {
-    "flutter_auth": "Google OAuth no web requer http://localhost em Supabase Dashboard → Auth → URL Configuration → Redirect URLs. Adicionar SUPABASE_URL e SUPABASE_ANON_KEY nos runtimeArgs ao testar fluxo de auth.",
-    "flutter_mobile": "Para iOS/Android: flutter run --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=... --dart-define=API_BASE_URL=http://localhost:3000"
+    "flutter_auth": "Google Sign-In usa SDK nativo (google_sign_in). Requer: (1) google-services.json em android/app/ com SHA-1 A9:03:BB:6C:8B:BB:F9:11:9B:E4:E6:51:D0:70:6A:24:F6:B3:1F:99 registrado no Google Cloud Console para package com.lex.lex_app; (2) GOOGLE_WEB_CLIENT_ID passado via --dart-define.",
+    "flutter_mobile": "Android emulador: API_BASE_URL=http://10.0.2.2:3000 (não localhost). Dispositivo físico: use URL do Railway.",
+    "google_services": "google-services.json: baixar em Google Cloud Console → Credentials → Android Client ID (package: com.lex.lex_app). Colocar em front/lex_app/android/app/google-services.json"
   }
 }

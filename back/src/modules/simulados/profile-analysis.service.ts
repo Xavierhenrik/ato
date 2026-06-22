@@ -9,7 +9,7 @@ const MAX_TOPICS_PAYLOAD = 30;
 type WeakTopicEntry = { id: string; title: string; priority: number };
 type WeakTopicsMap = Record<string, WeakTopicEntry[]>;
 
-const SYSTEM_PROMPT = `Você é o coach de estudos do LCF, plataforma de preparação para o Exame da OAB.
+const SYSTEM_PROMPT = `Você é o coach de estudos do LEX, plataforma de preparação para o Exame da OAB.
 Analise os erros recentes do estudante e identifique os tópicos que mais precisam de revisão, agrupados por matéria.
 Critérios de priorização: (1) frequência de erros, (2) dificuldade das questões erradas, (3) relevância para a 1ª fase da OAB.
 Retorne APENAS um JSON válido, sem texto fora do JSON. Formato obrigatório:
