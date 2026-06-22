@@ -36,4 +36,5 @@ export const Errors = {
       'SIMULADO_DAILY_LIMIT',
       'Limite de 15 questões/dia atingido no plano Free. Assine o PRO para questões ilimitadas.',
     ),
+  upstream: (msg: string) => new AppError(502, 'UPSTREAM_ERROR', msg),
 };
