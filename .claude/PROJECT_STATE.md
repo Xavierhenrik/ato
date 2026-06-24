@@ -1,12 +1,29 @@
 ---
-updated: 2026-06-18
-sprint: "Histórico da Lexia — planejado; delegação noturna agendada (temp-feat-historico)"
+updated: 2026-06-24
+sprint: "Setup .claude refatorado para 4 camadas + agent lex-infra criado"
 ---
 
 # LEX — Estado do Projeto
 
 > Atualizado pelo Claude ao fim de cada sessão de trabalho.
 > Para detalhes de implementação de cada módulo, ver `../docs/ROADMAP.md`.
+
+---
+
+## Fase 4: Setup `.claude` em 4 camadas ✅ Concluída (2026-06-24)
+
+**Objetivo:** Replicar a engenharia do projeto Maida — commands/agents/skills/memory — e criar
+um guardião de infraestrutura para o pré-lançamento.
+
+**Resultado:**
+- **Memory** (novo): 6 arquivos de contexto por domínio — `infra`, `backend`, `frontend`, `llm`, `security`, `launch`
+- **Agents** (novo): 6 domain experts isolados — `lex-tech-lead` (opus), `lex-infra` (NOVO), `lex-backend`, `flutter-lex`, `lex-security` (opus), `lex-llm-ops`
+- **Commands** (novo): `/start`, `/sprint`, `/infra`, `/review`, `/launch`
+- **Skills**: mantidas como infra de execução (forge, verify, versioning, code-health, qa, apple-compliance, data)
+- `CLAUDE.md` raiz documenta a arquitetura de 4 camadas
+- `lex-infra` é o guardião de Railway/Supabase/Upstash/LLMs/observabilidade com independência para sugerir melhorias e troca de provedor; mantém análises de desempenho em `memory/infra.md`
+
+**Próximo passo:** rodar `/infra` (auditoria de pré-lançamento) e `/launch` (checklist go/no-go).
 
 ---
 

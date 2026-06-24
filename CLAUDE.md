@@ -3,16 +3,47 @@
 > Leia este arquivo e `.claude/PROJECT_STATE.md` antes de começar qualquer trabalho.
 > Se existir um log recente em `.claude/sessions/`, leia também.
 
-## Skills Disponíveis
+## Arquitetura do Ambiente de IA — 4 Camadas
 
-Skills especializadas em `.claude/skills/` — use com `/skill <nome>`:
+O setup `.claude/` segue 4 camadas (engenharia replicada do projeto Maida, 2026-06-24):
 
-| Skill | Quando usar |
-|-------|------------|
-| `lex-tech-lead` | Análise técnica, decisões de arquitetura, prompts de implementação para agentes dev |
-| `lex-apple-compliance` | Auditoria de conformidade App Store, checklist de submissão, Sign in with Apple, privacy policy |
-| `lex-security` | Auditoria de segurança por camada (auth, injeção, rate limit, mobile, infra), prompts de correção |
-| `lex-qa` | Testes funcionais (perspectiva do usuário), refatoração segura, polish de módulos — usa TESTING_STRATEGY.md + REFACTORING_GUIDE.md |
+```
+.claude/
+├── commands/   ← 1. Entry points — orquestram, nunca implementam
+├── agents/     ← 2. Domain experts isolados — model + tools + permissionMode próprios
+├── skills/     ← 3. Infra de execução — chamadas pelos agents
+└── memory/     ← 4. Contexto persistente por domínio — injetado nos agents
+```
+
+### 1 · Commands (`.claude/commands/`)
+| Command | Orquestra |
+|---------|-----------|
+| `/start` | Início de sessão: carrega estado, classifica, delega |
+| `/sprint` | Implementação: tech-lead → domain expert → verify → versioning |
+| `/infra` | Infra: audita provedores, custo, deploy → `lex-infra` |
+| `/review` | Review multidimensional: security + tech-lead + code-health |
+| `/launch` | Checklist go/no-go: infra + security + apple-compliance + qa |
+
+### 2 · Agents (`.claude/agents/`)
+| Agent | Model | Mode | Domínio |
+|-------|-------|------|---------|
+| `lex-tech-lead` | opus | plan | Arquitetura, decisões cross-domain, orquestração |
+| `lex-infra` | sonnet | plan | Railway, Supabase, Redis, LLMs (config), deploy, custo, observabilidade |
+| `lex-backend` | sonnet | auto | Node/Fastify/Prisma/Redis |
+| `flutter-lex` | sonnet | auto | Flutter/Riverpod/Isar/GoRouter |
+| `lex-security` | opus | plan | Auth, IDOR, rate limit, LGPD |
+| `lex-llm-ops` | sonnet | auto | Roteamento LLM, custo/qualidade, anti-alucinação |
+
+### 3 · Skills (`.claude/skills/`) — execução, chamadas pelos agents
+`lex-forge` (padrão FORJAR de prompts) · `lex-verify` (portão de validação) · `lex-versioning` (git) ·
+`lex-code-health` · `lex-qa` · `lex-apple-compliance` · `lex-data` (ETL).
+
+### 4 · Memory (`.claude/memory/`) — contexto persistente por domínio
+`infra.md` · `backend.md` · `frontend.md` · `llm.md` · `security.md` · `launch.md`.
+Cada agent carrega só a memória do seu escopo. **Memória é viva** — agents atualizam ao fim de cada trabalho.
+
+> **Princípios:** command orquestra (nunca implementa) · model routing (opus análise / sonnet execução) ·
+> permissionMode por agent (análise em `plan`, execução em `auto`) · handoff explícito (cada agent declara o que o próximo verifica) · memória de domínio isolada.
 
 ---
 
