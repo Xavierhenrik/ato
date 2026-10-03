@@ -58,8 +58,8 @@
     }
   ],
   "_notes": {
-    "flutter_auth": "Google Sign-In usa SDK nativo (google_sign_in). Requer: (1) google-services.json em android/app/ com SHA-1 A9:03:BB:6C:8B:BB:F9:11:9B:E4:E6:51:D0:70:6A:24:F6:B3:1F:99 registrado no Google Cloud Console para package com.lex.lex_app; (2) GOOGLE_WEB_CLIENT_ID passado via --dart-define.",
+    "flutter_auth": "Google Sign-In usa SDK nativo (google_sign_in). Requer: (1) google-services.json em android/app/ com SHA-1 A9:03:BB:6C:8B:BB:F9:11:9B:E4:E6:51:D0:70:6A:24:F6:B3:1F:99 registrado no Google Cloud Console para package com.bx.ato.app; (2) GOOGLE_WEB_CLIENT_ID passado via --dart-define.",
     "flutter_mobile": "Android emulador: API_BASE_URL=http://10.0.2.2:3000 (não localhost). Dispositivo físico: use URL do Railway.",
-    "google_services": "google-services.json: baixar em Google Cloud Console → Credentials → Android Client ID (package: com.lex.lex_app). Colocar em front/lex_app/android/app/google-services.json"
+    "google_services": "google-services.json: baixar em Google Cloud Console → Credentials → Android Client ID (package: com.bx.ato.app). Colocar em front/ato_app/android/app/google-services.json"
   }
 }

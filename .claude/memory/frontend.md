@@ -7,7 +7,7 @@ owner: flutter-ato
 # Memória de Frontend — ATO
 
 > Flutter 3.x, Riverpod 2.x (codegen), Isar 3.x (offline-first), Dio 5.x, GoRouter. Feature-first.
-> Marca: **ATO** desde 2026-10-03 (LCF até 18/06, LEX até 03/10). Bundle ID `com.lcf.app` ainda não migrado.
+> Marca: **ATO** desde 2026-10-03 (LCF até 18/06, LEX até 03/10). App ID `com.bx.ato.app` no Android e no iOS; deep link `com.bx.ato.app://auth-callback`.
 
 ---
 
@@ -31,7 +31,7 @@ Tema dark escuro/gold. Fonte Inter via GoogleFonts.
 
 - **`useRootNavigator: true`** obrigatório em modais.
 - MediaQuery injection para clearance global (não patch por tela).
-- Deep links de esquema customizado interceptados em `main.dart` via `SystemChannels.navigation` — nunca chegam ao GoRouter (`uri.origin` em `com.lcf.app://` → StateError corrompe o router).
+- Deep links de esquema customizado interceptados em `main.dart` via `SystemChannels.navigation` — nunca chegam ao GoRouter (`uri.origin` em `com.bx.ato.app://` → StateError corrompe o router).
 - Sem retry manual 401 no Dio interceptor (SDK Supabase já gerencia refresh) — evita loop infinito.
 - `onboarding_done` (metadata Supabase) é fonte de verdade do roteamento.
 

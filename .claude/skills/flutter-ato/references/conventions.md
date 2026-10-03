@@ -187,7 +187,7 @@ flutter build appbundle --release
 
 ## Bundle ID e Configuração
 
-- **Bundle ID temporário:** `com.lcf.app`
+- **App ID:** `com.bx.ato.app` (Android e iOS)
 - **App name:** `ATO`
 - **Env vars** (em `.env` na raiz de `front/ato_app/`):
   ```

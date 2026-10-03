@@ -456,8 +456,8 @@ dev_dependencies:
 - [ ] Sem formulário de cartão customizado (RevenueCat IAP nativo)
 
 **Product IDs RevenueCat:**
-- Mensal: `com.lcf.pro.monthly`
-- Anual: `com.lcf.pro.annual`
+- Mensal: `com.bx.ato.pro.monthly`
+- Anual: `com.bx.ato.pro.annual`
 
 ---
 

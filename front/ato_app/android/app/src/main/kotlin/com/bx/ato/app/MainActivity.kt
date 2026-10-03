@@ -1,4 +1,4 @@
-package com.bx.lex.app
+package com.bx.ato.app
 
 import io.flutter.embedding.android.FlutterActivity
 

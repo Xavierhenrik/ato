@@ -46,7 +46,7 @@ Com base no histórico de sessões, os bugs reais seguem padrões previsíveis:
 | **Contract drift** | Campo retornado pelo backend com nome diferente do esperado pelo Flutter (ex: `isCorrect` vs `correct`) | simulados, tutor |
 | **Nullable crash** | Flutter recebe `null` onde esperava valor — `!` explode em runtime | dashboard, simulados, perfil |
 | **JWT edge case** | Token expirado, staging JWT rejeitado por produção, 401 loop | auth, qualquer módulo autenticado |
-| **OAuth redirect** | Google/Apple OAuth não retorna deep link corretamente (`com.lcf.app://auth-callback`) | auth |
+| **OAuth redirect** | Google/Apple OAuth não retorna deep link corretamente (`com.bx.ato.app://auth-callback`) | auth |
 | **Redis state** | Contador diário não resetado, sessão Tutor vazando entre usuários | tutor, simulados |
 | **Empty state 204** | Backend retorna 204 sem corpo, Flutter tenta parsear e crasha | simulados (in-progress), notificações |
 | **Free gate** | Limite de 15 questões/dia ou bloqueio PRO não aplicado corretamente | simulados, tutor |
@@ -105,7 +105,7 @@ Ao receber uma tarefa de teste, o agente **deve**:
 
 **A4 — Google OAuth (crítico)**
 - Estado inicial: app limpo, nenhuma sessão ativa
-- Ações: iniciar `signInWithGoogle` → aguardar redirect → deep link `com.lcf.app://auth-callback` retornado → `POST /auth/verify` automático
+- Ações: iniciar `signInWithGoogle` → aguardar redirect → deep link `com.bx.ato.app://auth-callback` retornado → `POST /auth/verify` automático
 - Verificar: `_pendingGoogleVerify` flag setada antes do redirect, `verify()` chamado após `onAuthStateChange.signedIn`
 - Verificar: primeiro acesso → onboarding; acesso recorrente → dashboard
 - **Ponto de falha histórico:** `signInWithOAuth` retorna imediatamente; sessão só existe após o deep link voltar. Verificar que o app não chama `/auth/verify` antes do callback.

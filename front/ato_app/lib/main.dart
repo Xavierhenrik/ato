@@ -27,7 +27,7 @@ Future<void> main() async {
   // FIX: intercepta o canal flutter/navigation antes do GoRouter ser criado.
   //
   // Problema raiz: ao voltar do OAuth, o Android dispara onNewIntent com a URI
-  // com.lex.app://auth-callback?code=... O FlutterActivity envia essa URI para
+  // com.bx.ato.app://auth-callback?code=... O FlutterActivity envia essa URI para
   // o canal 'flutter/navigation' via pushRouteInformation. O GoRouter tenta
   // calcular uri.origin — que lança StateError para esquemas não-http/https —
   // e corrompe _routeInformationProvider._value permanentemente. Todo
