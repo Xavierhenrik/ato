@@ -131,7 +131,7 @@ Para convenções de código obrigatórias (Errors factory, Zod, requireAuth, Re
 
 - **`legal_articles`**: 18.779 registros (CF/88, CC, CP, CLT, CPC, CPP, CTN, CDC, Estatuto OAB). Fora do Prisma — acessar via `$queryRaw`.
 - **Schema Prisma migrado**: User, Profile, StudyPlan, Subscription, Topic, TutorSession, TutorMessage, Question, SimuladoAttempt, SimuladoQuestion, Annotation, UserQuestionAnswered.
-- **Questões (M5)**: 2.210 questões OAB reais (`type: simulado`) + 5.791 questões de revisão geradas (`type: review`, `status: pending_review` — aguardando promoção via SQL ou endpoint admin Sprint 4).
+- **Questões (M5)**: 2.210 questões OAB reais (`type: simulado`) + 5.791 questões de revisão geradas (`type: review`, promovidas para `status: active` em 2026-05-24).
 
 ---
 

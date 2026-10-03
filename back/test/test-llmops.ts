@@ -2,9 +2,9 @@
  * Smoke tests — LLM-Ops Fase 1+2
  * Cobre: selectLLM routing + extractTokens KB heuristic
  *
- * Run: npx tsx test-llmops.ts
+ * Run (em back/): npx tsx test/test-llmops.ts
  */
-import { selectLLM } from './src/modules/tutor-ia/adapters/llm.router';
+import { selectLLM } from '../src/modules/tutor-ia/adapters/llm.router';
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 let passed = 0;
