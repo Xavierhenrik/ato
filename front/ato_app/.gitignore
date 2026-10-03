@@ -47,6 +47,9 @@ app.*.map.json
 # Dart define files — contêm credenciais, nunca commitar
 dart-defines/*.json
 
+# Credenciais locais do setup package — nunca commitar
+.ato-env
+
 # Firebase — contém client IDs e API keys, nunca commitar
 google-services.json
 GoogleService-Info.plist
