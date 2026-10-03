@@ -8,13 +8,13 @@
 **/prisma/migrations/dev.db
 
 # Frontend Flutter
-front/lcf_app/.dart_tool/
-front/lcf_app/build/
-front/lcf_app/android/build/
-front/lcf_app/ios/build/
-front/lcf_app/.flutter-plugins
-front/lcf_app/.flutter-plugins-dependencies
-front/lcf_app/pubspec.lock
+front/ato_app/.dart_tool/
+front/ato_app/build/
+front/ato_app/android/build/
+front/ato_app/ios/build/
+front/ato_app/.flutter-plugins
+front/ato_app/.flutter-plugins-dependencies
+front/ato_app/pubspec.lock
 
 # Claude Code - machine-specific (do NOT version)
 .claude/settings.local.json

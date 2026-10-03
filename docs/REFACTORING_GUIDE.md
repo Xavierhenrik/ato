@@ -1,7 +1,7 @@
-# LEX — Guia de Refatoração
+# ATO — Guia de Refatoração
 
 > **Objetivo:** Elevar progressivamente a qualidade do código sem introduzir regressões funcionais.
-> Refatoração no LEX é cirúrgica: comportamento externo invariável, estrutura interna melhorada.
+> Refatoração no ATO é cirúrgica: comportamento externo invariável, estrutura interna melhorada.
 >
 > **Regra de ouro:** se o `api-contract.md` continua válido e `flutter analyze + tsc --noEmit` continuam zerados, a refatoração está segura.
 
@@ -255,7 +255,7 @@ Para cada endpoint em `docs/api-contract.md`:
 cd back && npx ts-node scripts/validate-contract.ts  # criar se não existir
 
 # Flutter: verificar fromJson com campos esperados
-grep -r "fromJson" front/lcf_app/lib/features/ | grep -v ".g.dart"
+grep -r "fromJson" front/ato_app/lib/features/ | grep -v ".g.dart"
 ```
 
 ---
@@ -265,7 +265,7 @@ grep -r "fromJson" front/lcf_app/lib/features/ | grep -v ".g.dart"
 | Métrica | Alvo | Como medir |
 |---------|------|-----------|
 | `tsc --noEmit` | 0 erros | `cd back && npm run typecheck` |
-| `flutter analyze` | 0 issues | `cd front/lcf_app && flutter analyze` |
+| `flutter analyze` | 0 issues | `cd front/ato_app && flutter analyze` |
 | Cobertura de Zod | 100% dos endpoints | Grep por handlers sem `.parse(` |
 | Erros via factory | 100% | Grep por `new Error(` no src/ |
 | Redis keys via builder | 100% | Grep por `redis.set\(`` ` em src/ |
@@ -292,7 +292,7 @@ grep -r 'queryRaw(`' src/ --include="*.ts"
 ### Script de auditoria rápida (frontend)
 
 ```bash
-cd lcf/front/lcf_app
+cd lcf/front/ato_app
 
 echo "=== Cores hardcoded (candidatos) ==="
 grep -r "Color(0x" lib/ --include="*.dart" | grep -v "_colors.dart"

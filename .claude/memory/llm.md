@@ -1,10 +1,10 @@
 ---
 domain: llm
 updated: 2026-06-24
-owner: lex-llm-ops
+owner: ato-llm-ops
 ---
 
-# Memória de LLM-Ops — LEX
+# Memória de LLM-Ops — ATO
 
 > Roteamento, custo e qualidade dos modelos. Produto jurídico: **alucinação = credibilidade destruída**.
 > Prioridade em conflito: qualidade/anti-alucinação > custo.

@@ -1,13 +1,13 @@
 ---
 domain: frontend
 updated: 2026-06-24
-owner: flutter-lex
+owner: flutter-ato
 ---
 
-# Memória de Frontend — LEX
+# Memória de Frontend — ATO
 
 > Flutter 3.x, Riverpod 2.x (codegen), Isar 3.x (offline-first), Dio 5.x, GoRouter. Feature-first.
-> Marca: **LEX** (renomeada de LCF em 2026-06-18). Bundle ID `com.lcf.app` ainda não migrado.
+> Marca: **ATO** desde 2026-10-03 (LCF até 18/06, LEX até 03/10). Bundle ID `com.lcf.app` ainda não migrado.
 
 ---
 
@@ -18,14 +18,14 @@ Tema dark escuro/gold. Fonte Inter via GoogleFonts.
 
 ## Padrões visuais fixados
 
-- **`LexGlassSheet`** — vidro translúcido 30%, fio dourado no topo via `_GoldTrimPainter` (CustomPainter, só topo seguindo curvatura), respiro lateral 8px, blur sigma 18. **Todo bottom sheet usa `LexGlassSheet`.** Método estático `LexGlassSheet.show<T>()`.
+- **`AtoGlassSheet`** — vidro translúcido 30%, fio dourado no topo via `_GoldTrimPainter` (CustomPainter, só topo seguindo curvatura), respiro lateral 8px, blur sigma 18. **Todo bottom sheet usa `AtoGlassSheet`.** Método estático `AtoGlassSheet.show<T>()`.
 - Telas-bottom-sheet usam rota transparente (`opaque:false` + scrim fade + slide) — nunca página opaca (vidro precisa de conteúdo atrás para frostar).
-- `LexMarkdownBody` — widget compartilhado de markdown (bold dourado).
-- `LexIcons` — assets de ícone centralizados (aguardando SVGs em `assets/icons/`).
+- `AtoMarkdownBody` — widget compartilhado de markdown (bold dourado).
+- `AtoIcons` — assets de ícone centralizados (aguardando SVGs em `assets/icons/`).
 
 ## Utilities globais (code health)
 
-`lexConfirmDialog` (shared/utils/lex_dialogs.dart) · `handleAsyncError` (shared/utils/async_value_handler.dart — 401 centralizado) · `context.bottomPad` (shared/extensions/context_extensions.dart) · `LexGlassSheet.show<T>()`.
+`atoConfirmDialog` (shared/utils/ato_dialogs.dart) · `handleAsyncError` (shared/utils/async_value_handler.dart — 401 centralizado) · `context.bottomPad` (shared/extensions/context_extensions.dart) · `AtoGlassSheet.show<T>()`.
 
 ## Convenções críticas
 

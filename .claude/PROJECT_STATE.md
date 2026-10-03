@@ -1,12 +1,30 @@
 ---
-updated: 2026-06-24
-sprint: "Setup .claude refatorado para 4 camadas + agent lex-infra criado"
+updated: 2026-10-03
+sprint: "Limpeza do workspace e rename definitivo LCF/LEX para ATO"
 ---
 
-# LEX — Estado do Projeto
+# ATO — Estado do Projeto
 
 > Atualizado pelo Claude ao fim de cada sessão de trabalho.
 > Para detalhes de implementação de cada módulo, ver `../docs/ROADMAP.md`.
+> Nome do produto: ATO desde 2026-10-03 (LCF até 18/06, LEX até 03/10). As fases abaixo da 5
+> mantêm o nome da época em que foram registradas.
+
+---
+
+## Fase 5: Limpeza e rename para ATO 🔄 Em andamento (2026-10-03)
+
+**Objetivo:** tirar o que morreu, dar ao produto o nome definitivo e deixar o repositório
+pronto para adotar o núcleo do unified.
+
+**Resultado até aqui:**
+- Main local avançada por fast-forward com o setup de 4 camadas (`657968d`); trabalho na branch `chore/rename-ato`, sem push
+- Removidos: 5 skills que duplicavam os agents, `back/scripts` de uso único (3 com senha do banco), `ManualTutorSheet` sem import, captura e relatório de build rastreados
+- `lex-qa` ganhou frontmatter; `test-llmops.ts` foi para `back/test/`
+- Rename de conteúdo: app `front/ato_app` (package `ato_app`), widgets `Ato*`, agents e skills `ato-*`, specs `ATO_*.txt`, strings de UI; Lexia continua como nome da tutora
+
+**Pendente:** identidade do app (applicationId, bundle, deep link), que depende de Supabase e Firebase; senha do Postgres a rotacionar; mudança de pasta para `D:\projetos\ato\main`.
+Auditoria e plano completos: `D:\projetos\vida\pesquisa\ato-2026-10\`.
 
 ---
 

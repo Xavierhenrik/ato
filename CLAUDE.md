@@ -1,4 +1,4 @@
-# LEX — Contexto para Claude Code
+# ATO — Contexto para Claude Code
 
 > Leia este arquivo e `.claude/PROJECT_STATE.md` antes de começar qualquer trabalho.
 > Se existir um log recente em `.claude/sessions/`, leia também.
@@ -20,23 +20,23 @@ O setup `.claude/` segue 4 camadas (engenharia replicada do projeto Maida, 2026-
 |---------|-----------|
 | `/start` | Início de sessão: carrega estado, classifica, delega |
 | `/sprint` | Implementação: tech-lead → domain expert → verify → versioning |
-| `/infra` | Infra: audita provedores, custo, deploy → `lex-infra` |
+| `/infra` | Infra: audita provedores, custo, deploy → `ato-infra` |
 | `/review` | Review multidimensional: security + tech-lead + code-health |
 | `/launch` | Checklist go/no-go: infra + security + apple-compliance + qa |
 
 ### 2 · Agents (`.claude/agents/`)
 | Agent | Model | Mode | Domínio |
 |-------|-------|------|---------|
-| `lex-tech-lead` | opus | plan | Arquitetura, decisões cross-domain, orquestração |
-| `lex-infra` | sonnet | plan | Railway, Supabase, Redis, LLMs (config), deploy, custo, observabilidade |
-| `lex-backend` | sonnet | auto | Node/Fastify/Prisma/Redis |
-| `flutter-lex` | sonnet | auto | Flutter/Riverpod/Isar/GoRouter |
-| `lex-security` | opus | plan | Auth, IDOR, rate limit, LGPD |
-| `lex-llm-ops` | sonnet | auto | Roteamento LLM, custo/qualidade, anti-alucinação |
+| `ato-tech-lead` | opus | plan | Arquitetura, decisões cross-domain, orquestração |
+| `ato-infra` | sonnet | plan | Railway, Supabase, Redis, LLMs (config), deploy, custo, observabilidade |
+| `ato-backend` | sonnet | auto | Node/Fastify/Prisma/Redis |
+| `flutter-ato` | sonnet | auto | Flutter/Riverpod/Isar/GoRouter |
+| `ato-security` | opus | plan | Auth, IDOR, rate limit, LGPD |
+| `ato-llm-ops` | sonnet | auto | Roteamento LLM, custo/qualidade, anti-alucinação |
 
 ### 3 · Skills (`.claude/skills/`) — execução, chamadas pelos agents
-`lex-forge` (padrão FORJAR de prompts) · `lex-verify` (portão de validação) · `lex-versioning` (git) ·
-`lex-code-health` · `lex-qa` · `lex-apple-compliance` · `lex-data` (ETL).
+`ato-forge` (padrão FORJAR de prompts) · `ato-verify` (portão de validação) · `ato-versioning` (git) ·
+`ato-code-health` · `ato-qa` · `ato-apple-compliance` · `ato-data` (ETL).
 
 ### 4 · Memory (`.claude/memory/`) — contexto persistente por domínio
 `infra.md` · `backend.md` · `frontend.md` · `llm.md` · `security.md` · `launch.md`.
@@ -51,7 +51,7 @@ Cada agent carrega só a memória do seu escopo. **Memória é viva** — agents
 
 ## O Projeto
 
-**LEX** — EdTech jurídica mobile-first para estudantes de Direito e candidatos ao Exame da OAB.
+**ATO** — EdTech jurídica mobile-first para estudantes de Direito e candidatos ao Exame da OAB.
 Modelo freemium (Free vs PRO). MVP em ~2 meses. Alvo: 100–500 assinantes nos primeiros 6 meses.
 
 Produto jurídico: **alucinação = perda de credibilidade imediata**. Toda decisão de arquitetura parte desse princípio.
@@ -83,11 +83,11 @@ Produto jurídico: **alucinação = perda de credibilidade imediata**. Toda deci
 | Documento | Caminho | Quando ler |
 |-----------|---------|-----------|
 | **Roadmap Backend** | `docs/ROADMAP.md` | Antes de implementar qualquer módulo — contém sprints, critérios de aceite e contratos de API |
-| **Spec MVP** | `docs/specs/LCF_Especificacao_Sistema.txt` | Requisitos funcionais completos |
-| **Free vs PRO** | `docs/specs/LCF_Free_vs_PRO.txt` | Sempre que implementar feature com diferenciação de plano |
-| **Arquitetura IA** | `docs/specs/LCF_ArquiteturaIA_MVP.txt` | Antes de tocar no módulo tutor-ia |
+| **Spec MVP** | `docs/specs/ATO_Especificacao_Sistema.txt` | Requisitos funcionais completos |
+| **Free vs PRO** | `docs/specs/ATO_Free_vs_PRO.txt` | Sempre que implementar feature com diferenciação de plano |
+| **Arquitetura IA** | `docs/specs/ATO_ArquiteturaIA_MVP.txt` | Antes de tocar no módulo tutor-ia |
 | **Histórico Lexia** | `docs/specs/TUTOR_HISTORY_SPEC.md` | Antes de tocar em persistência/histórico de sessões da Lexia |
-| **Stack Infra** | `docs/specs/LCF_Stack_Infraestrutura_v1.0.txt` | Decisões de infraestrutura |
+| **Stack Infra** | `docs/specs/ATO_Stack_Infraestrutura_v1.0.txt` | Decisões de infraestrutura |
 | **API Contract** | `docs/api-contract.md` | Referência de contratos |
 | **Arquitetura** | `docs/architecture-overview.md` | Visão geral da arquitetura do sistema |
 | **Env Setup** | `docs/env-checklist.md` | Checklist de variáveis de ambiente |

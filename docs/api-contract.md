@@ -1,4 +1,4 @@
-# LEX Backend — API Contract
+# ATO Backend — API Contract
 
 **Base URL:** `https://api.lcf.app` (prod) | `http://localhost:3000` (dev)  
 **Auth:** Bearer JWT (Supabase JWT) em todos os endpoints exceto `/health` e `/subscriptions/webhook/revenuecat`  
@@ -24,7 +24,7 @@
 
 | Method | Route | Auth | Descrição |
 |--------|-------|------|-----------|
-| POST | `/auth/verify` | JWT | Verifica token Supabase; cria usuário LEX se novo |
+| POST | `/auth/verify` | JWT | Verifica token Supabase; cria usuário ATO se novo |
 | GET | `/auth/me` | JWT | Retorna usuário + perfil + assinatura |
 | DELETE | `/auth/me` | JWT | Exclui conta (LGPD cascade) |
 

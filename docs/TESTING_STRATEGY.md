@@ -1,4 +1,4 @@
-# LEX — Estratégia de Testes
+# ATO — Estratégia de Testes
 
 > **Objetivo:** Detectar e documentar bugs funcionais que só se manifestam na experiência real do usuário.
 > Testes unitários e de integração existem, mas **não substituem** este protocolo — eles não capturam fluxos compostos, estados de borda de UI, inconsistências de contrato ou race conditions de OAuth.

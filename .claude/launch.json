@@ -2,14 +2,14 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "LEX Backend — staging",
+      "name": "ATO Backend — staging",
       "cwd": "lcf/back",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:staging"],
       "port": 3000
     },
     {
-      "name": "LEX Backend — live",
+      "name": "ATO Backend — live",
       "cwd": "lcf/back",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
@@ -30,8 +30,8 @@
       "port": 4321
     },
     {
-      "name": "LEX App (Flutter Web)",
-      "cwd": "lcf/front/lex_app",
+      "name": "ATO App (Flutter Web)",
+      "cwd": "lcf/front/ato_app",
       "runtimeExecutable": "flutter",
       "runtimeArgs": [
         "run",
@@ -44,8 +44,8 @@
       "port": 8080
     },
     {
-      "name": "LEX App (Android — staging)",
-      "cwd": "lcf/front/lex_app",
+      "name": "ATO App (Android — staging)",
+      "cwd": "lcf/front/ato_app",
       "runtimeExecutable": "flutter",
       "runtimeArgs": [
         "run",

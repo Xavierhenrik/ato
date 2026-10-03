@@ -1,5 +1,5 @@
 #!/bin/bash
-# Stop hook — LCF Project
+# Stop hook — ATO Project
 # Porta 1: log de sessão criado hoje
 # Porta 2: working tree limpa (alterou → aprovoucommitou)
 
@@ -49,7 +49,7 @@ Arquivos pendentes:
 $(cd "$REPO_ROOT" && git status --short 2>/dev/null)
 
 Regra: alterou -> aprovou -> commitou.
-Use a skill lcf-versioning para agrupar e commitar antes de encerrar.
+Use a skill ato-versioning para agrupar e commitar antes de encerrar.
 
 EOF
 fi

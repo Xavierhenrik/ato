@@ -1,10 +1,10 @@
 ---
 domain: backend
 updated: 2026-06-24
-owner: lex-backend
+owner: ato-backend
 ---
 
-# Memória de Backend — LEX
+# Memória de Backend — ATO
 
 > Node.js 20 + TS strict, Fastify 4, Prisma 5, Supabase PG, Upstash Redis. Monolito modular (2 devs).
 > Convenções obrigatórias: `back/CLAUDE.md` (fonte da verdade). Status detalhado: `.claude/PROJECT_STATE.md`.

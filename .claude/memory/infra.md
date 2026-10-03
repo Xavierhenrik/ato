@@ -1,13 +1,13 @@
 ---
 domain: infra
 updated: 2026-06-24
-owner: lex-infra
+owner: ato-infra
 ---
 
-# Memória de Infraestrutura — LEX
+# Memória de Infraestrutura — ATO
 
-> Estado real dos provedores e da configuração de ambiente. Mantido pelo agent `lex-infra`
-> ao fim de toda auditoria ou mudança de infra. Fonte de números: `docs/specs/LCF_Stack_Infraestrutura_v1.0.txt`,
+> Estado real dos provedores e da configuração de ambiente. Mantido pelo agent `ato-infra`
+> ao fim de toda auditoria ou mudança de infra. Fonte de números: `docs/specs/ATO_Stack_Infraestrutura_v1.0.txt`,
 > `docs/env-checklist.md`, `.claude/PROJECT_STATE.md`.
 
 ---

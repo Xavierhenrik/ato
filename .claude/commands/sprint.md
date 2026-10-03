@@ -10,11 +10,11 @@ Entry point para implementação. Classifica, delega ao domain expert, valida e 
 ## Fluxo
 
 1. Carregue `CLAUDE.md`, `.claude/PROJECT_STATE.md` e o log mais recente em `.claude/sessions/`.
-2. **`lex-tech-lead`** classifica `$ARGUMENTS` e identifica impacto holístico + decisões fixadas aplicáveis.
-3. Delegue ao domain expert: `lex-backend` · `flutter-lex` · `lex-llm-ops` · `lex-infra` (conforme o domínio).
+2. **`ato-tech-lead`** classifica `$ARGUMENTS` e identifica impacto holístico + decisões fixadas aplicáveis.
+3. Delegue ao domain expert: `ato-backend` · `flutter-ato` · `ato-llm-ops` · `ato-infra` (conforme o domínio).
 4. O expert implementa seguindo as convenções e valida (`tsc --noEmit` / `flutter analyze`).
-5. **`lex-verify`** confirma o critério de aceite com evidência.
-6. **Fechamento obrigatório:** atualizar `PROJECT_STATE.md` + memória do domínio, criar log em `.claude/sessions/`, commit via `lex-versioning`.
+5. **`ato-verify`** confirma o critério de aceite com evidência.
+6. **Fechamento obrigatório:** atualizar `PROJECT_STATE.md` + memória do domínio, criar log em `.claude/sessions/`, commit via `ato-versioning`.
 
 ## Regra
 Respeite a cadeia de dependência entre módulos (ROADMAP seção 1) e as decisões fixadas. Prompts de implementação delegados, nunca em arquivo.

@@ -1,10 +1,10 @@
 ---
 domain: security
 updated: 2026-06-24
-owner: lex-security
+owner: ato-security
 ---
 
-# Memória de Segurança — LEX
+# Memória de Segurança — ATO
 
 > Postura de segurança por camada e histórico de auditorias. Produto jurídico + LGPD.
 
@@ -36,6 +36,6 @@ owner: lex-security
 
 ## Validação
 
-Auditoria por camada → achados no padrão FORJAR (via `/lex-forge`). CRÍTICO só para o que quebra segurança/credibilidade.
+Auditoria por camada → achados no padrão FORJAR (via `/ato-forge`). CRÍTICO só para o que quebra segurança/credibilidade.
 
 Ver também: [[infra.md]] · [[backend.md]] · [[launch.md]]

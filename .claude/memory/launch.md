@@ -1,10 +1,10 @@
 ---
 domain: launch
 updated: 2026-06-24
-owner: lex-infra + lex-apple-compliance
+owner: ato-infra + ato-apple-compliance
 ---
 
-# Memória de Lançamento — LEX
+# Memória de Lançamento — ATO
 
 > Checklist de produção. App quase pronto para submeter. Bloqueantes ordenados por dependência.
 
@@ -44,6 +44,6 @@ R$29,90/mês · R$249,90/ano (badge "Economize 30%"). Break-even ~30 assinantes.
 
 ## Compliance Apple já implementado
 
-Privacy Policy (HTML pronto), Consent Modal IA, Delete Account UI, Disclaimer jurídico, Sign in with Apple (código), RevenueCat dynamic prices. Ver skill `lex-apple-compliance`.
+Privacy Policy (HTML pronto), Consent Modal IA, Delete Account UI, Disclaimer jurídico, Sign in with Apple (código), RevenueCat dynamic prices. Ver skill `ato-apple-compliance`.
 
 Ver também: [[infra.md]] · [[security.md]]
