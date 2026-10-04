@@ -96,7 +96,7 @@ Verde #4CAF50 → Apenas feedback de acerto no quiz
 
 ## Formato dos Assets
 
-**Destino:** `lcf/front/ato_app/assets/icons/` (SVGs inline no Flutter via `flutter_svg`)
+**Destino:** `front/ato_app/assets/icons/` (SVGs inline no Flutter via `flutter_svg`)
 
 Especificações técnicas:
 - Formato: SVG
@@ -341,7 +341,7 @@ O usuário confirmou: **nav bar fica como está** (Tutor, Anotações, Início, 
 ## Estrutura de Entrega Esperada
 
 ```
-lcf/front/ato_app/assets/icons/
+front/ato_app/assets/icons/
 ├── logo_mark.svg          ← A1
 ├── logo_icon.svg          ← A1 (standalone)
 ├── lexia_avatar.svg       ← A2

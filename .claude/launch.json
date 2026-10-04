@@ -3,35 +3,35 @@
   "configurations": [
     {
       "name": "ATO Backend — staging",
-      "cwd": "lcf/back",
+      "cwd": "back",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:staging"],
       "port": 3000
     },
     {
       "name": "ATO Backend — live",
-      "cwd": "lcf/back",
+      "cwd": "back",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
     },
     {
       "name": "Prisma Studio — staging",
-      "cwd": "lcf/back",
+      "cwd": "back",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "db:studio:staging"],
       "port": 5555
     },
     {
       "name": "Privacy Policy",
-      "cwd": "lcf/docs",
+      "cwd": "docs",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "-p", "4321", "--no-clipboard"],
       "port": 4321
     },
     {
       "name": "ATO App (Flutter Web)",
-      "cwd": "lcf/front/ato_app",
+      "cwd": "front/ato_app",
       "runtimeExecutable": "flutter",
       "runtimeArgs": [
         "run",
@@ -45,7 +45,7 @@
     },
     {
       "name": "ATO App (Android — staging)",
-      "cwd": "lcf/front/ato_app",
+      "cwd": "front/ato_app",
       "runtimeExecutable": "flutter",
       "runtimeArgs": [
         "run",

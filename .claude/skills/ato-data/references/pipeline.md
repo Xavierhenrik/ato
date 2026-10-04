@@ -1,13 +1,13 @@
 ﻿# ATO — Referência Técnica dos Pipelines de Dados
 
 > Carregado pela skill `ato-data` quando a tarefa exige detalhe de implementação.
-> `corpus/` vive fora do repo git, na raiz do workspace `BX/LCF`, ao lado de `lcf/`.
+> O ETL vive fora deste repositório, em `D:\projetos\ato\etl\` (`lexml\` com git próprio, `questions\` sem git).
 
 ---
 
 ## Pipeline 1 — etl-lexml (corpus jurídico)
 
-**Local:** `corpus/etl-lexml/`
+**Local:** `../etl/lexml/`
 **Orquestrador:** `main.py` · **Config:** `config.py`
 
 ### Fases (ordem)
@@ -15,7 +15,7 @@
 download → parse → validate-pre → load → validate-post
 ```
 ```bash
-cd corpus/etl-lexml
+cd ../etl/lexml
 python main.py --phase all                      # tudo, todos os diplomas
 python main.py --phase all --diploma CTN        # um diploma só
 python main.py --phase download --diploma CDC
@@ -65,14 +65,14 @@ python main.py --phase validate-post --target supabase-live
 
 ## Pipeline 2 — etl-questions (questões + tópicos)
 
-**Local:** `corpus/etl-questions/`
+**Local:** `../etl/questions/`
 
 ### Fases
 ```
 extract → transform → validate-pre → load → validate-post → inspect → mark-validated
 ```
 ```bash
-cd corpus/etl-questions
+cd ../etl/questions
 python main.py --phase extract                  # baixa do HuggingFace
 python main.py --phase transform                # raw → staging schema
 python main.py --phase load --target local

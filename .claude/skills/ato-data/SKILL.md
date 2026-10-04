@@ -20,15 +20,15 @@ Você nunca cria arquivos com prompts — entrega análise e prompts de implemen
 
 Leia, nesta ordem, antes de qualquer análise:
 
-1. `lcf/CLAUDE.md` — stack, decisões fixadas (BM25 sem pgvector, Tool Use obrigatório, roteamento de LLM)
-2. `lcf/.claude/PROJECT_STATE.md` — estado atual; quantos artigos/questões/tópicos estão carregados
+1. `CLAUDE.md` — stack, decisões fixadas (BM25 sem pgvector, Tool Use obrigatório, roteamento de LLM)
+2. `.claude/PROJECT_STATE.md` — estado atual; quantos artigos/questões/tópicos estão carregados
 3. `references/pipeline.md` (nesta skill) — referência técnica completa dos dois pipelines
 4. Conforme o alvo da tarefa:
-   - Corpus jurídico → `corpus/etl-lexml/README.md` + `corpus/ENTREGA_ETL_v1.md`
-   - Questões → `corpus/etl-questions/README.md` + `corpus/etl-questions/REVIEW_QUESTIONS_PIPELINE.md`
-   - Tópicos → `corpus/etl-questions/TOPICS_PIPELINE.md`
+   - Corpus jurídico → `../etl/lexml/README.md` + `D:\projetos\ato\_acervo\historico\ENTREGA_ETL_v1.md`
+   - Questões → `../etl/questions/README.md` + `../etl/questions/REVIEW_QUESTIONS_PIPELINE.md`
+   - Tópicos → `../etl/questions/TOPICS_PIPELINE.md`
 
-> `corpus/` vive **fora do repositório git** (ao lado de `lcf/`, na raiz do workspace `BX/LCF`). Se algum arquivo não existir, continue com o que houver e registre o que faltou. Não pergunte — vá em frente.
+> O ETL vive **fora deste repositório**, em `D:\projetos\ato\etl\` (`lexml\` tem git próprio; `questions\` ainda não tem). Se algum arquivo não existir, continue com o que houver e registre o que faltou. Não pergunte — vá em frente.
 
 ---
 
@@ -75,12 +75,12 @@ Qual pipeline, qual fase, estado atual (contagens reais do PROJECT_STATE).
 Uma frase. Resultado observável (ex.: "CDC carregado em staging com 119 artigos, validate-post OK").
 
 ### Escopo
-Pipeline/arquivos-alvo: caminhos reais (corpus/etl-.../src/...)
+Pipeline/arquivos-alvo: caminhos reais (../etl/<lexml|questions>/src/...)
 Não tocar: schema live, dados já validados.
 
 ### Implementação
 Passos numerados, com comando exato e fase:
-- `cd corpus/etl-lexml && python main.py --phase <x> --diploma <COD>`
+- `cd ../etl/lexml && python main.py --phase <x> --diploma <COD>`
 - `--target supabase-staging` antes de `--target supabase-live`
 
 ### Restrições
@@ -114,10 +114,10 @@ Se o usuário pede algo amplo ("como está o corpus", "o que falta nos dados"):
 
 ## Conhecimento do Stack de Dados
 
-**Pipeline 1 — `corpus/etl-lexml`** (corpus jurídico):
+**Pipeline 1 — `../etl/lexml`** (corpus jurídico):
 Fases `download → parse → validate-pre → load → validate-post`. Fonte: Planalto (HTML compilado) por diploma. 9 diplomas (CTN, CDC, EOAB, CF/88, CC, CP, CLT, CPC, CPP…). Schema: `legal_document`, `legal_articles` (~18.779), `ingestion_run`, `source_audit`. BM25 via `content_tsv` GIN + `portuguese_unaccent`. Idempotência por `uq_article_reference` (COALESCE).
 
-**Pipeline 2 — `corpus/etl-questions`** (questões + tópicos):
+**Pipeline 2 — `../etl/questions`** (questões + tópicos):
 Fases `extract → transform → validate-pre → load → validate-post → inspect → mark-validated`. Fonte questões: HuggingFace `eduagarcia/oab_exams` (CC BY 4.0). 2.210 questões OAB reais (`type: simulado`) + 5.791 de revisão geradas (`type: review`). Scripts: `generate_topics_from_articles.py`, `generate_review_questions.py`, `enrich_topics_llm.py`, `run_pipeline_loop.py`, `repair_checkpoint_write_db.py`.
 
 **Targets de banco:** `local` (PostgreSQL local), `supabase-staging`, `supabase-live`. URLs em `config.py` (`DATABASE_LIVE_URL`, `DATABASE_STAGING_URL`, `LOCAL_DATABASE_URL`). Conexão psycopg2 `sslmode=require`.

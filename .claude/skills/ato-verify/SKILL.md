@@ -37,7 +37,7 @@ flutter analyze
 ```
 **Pipelines de dados:**
 ```
-cd corpus/etl-<x>
+cd ../etl/<lexml|questions>
 python main.py --phase validate-post --target <t>
 ```
 **Testes:** rode o runner se existir; se não houver suíte para a área tocada, **declare explicitamente** "sem cobertura automatizada para X" — não finja que passou.

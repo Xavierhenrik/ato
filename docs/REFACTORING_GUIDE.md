@@ -274,7 +274,7 @@ grep -r "fromJson" front/ato_app/lib/features/ | grep -v ".g.dart"
 ### Script de auditoria rápida (backend)
 
 ```bash
-cd lcf/back
+cd back
 
 echo "=== Erros manuais (deve ser 0) ==="
 grep -r "new Error(" src/ --include="*.ts" | grep -v ".test."
@@ -292,7 +292,7 @@ grep -r 'queryRaw(`' src/ --include="*.ts"
 ### Script de auditoria rápida (frontend)
 
 ```bash
-cd lcf/front/ato_app
+cd front/ato_app
 
 echo "=== Cores hardcoded (candidatos) ==="
 grep -r "Color(0x" lib/ --include="*.dart" | grep -v "_colors.dart"
