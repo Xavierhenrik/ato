@@ -23,8 +23,11 @@ pronto para adotar o núcleo do unified.
 - `lex-qa` ganhou frontmatter; `test-llmops.ts` foi para `back/test/`
 - Rename de conteúdo: app `front/ato_app` (package `ato_app`), widgets `Ato*`, agents e skills `ato-*`, specs `ATO_*.txt`, strings de UI; Lexia continua como nome da tutora
 
-**Pendente:** identidade do app (applicationId, bundle, deep link), que depende de Supabase e Firebase; senha do Postgres a rotacionar; mudança de pasta para `D:\projetos\ato\main`.
-Auditoria e plano completos: `D:\projetos\vida\pesquisa\ato-2026-10\`.
+- Nome exibido ATO no Android, iOS, web e Windows; `setup.ps1` e `run.ps1` em `scripts/`
+- Pastas: repositório em `D:\projetos\ato\main`, ETL em `D:\projetos\ato\etl\` (`lexml`, `questions`), acervo em `D:\projetos\ato\_acervo\`
+
+**Pendente:** identidade do app pronta na branch `chore/rename-ato-identidade`, para aplicar depois do app Android `com.bx.ato.app` no Firebase (com `google-services.json` novo) e do redirect `com.bx.ato.app://auth-callback` no Supabase; senha do Postgres a rotacionar (estava em scripts commitados); push das branches.
+Auditoria e plano completos: `D:\projetos\vida\pesquisa\ato-2026-10\`. Log: `sessions/2026-10-03_limpeza_rename_ato.md`.
 
 ---
 
@@ -425,7 +428,7 @@ flutter run \
 ### Como retomar
 
 ```bash
-cd corpus/etl-questions
+cd ../etl/questions
 python scripts/run_pipeline_loop.py   # reinicia automaticamente após quota
 ```
 
