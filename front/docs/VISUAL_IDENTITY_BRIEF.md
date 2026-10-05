@@ -1,13 +1,13 @@
-# LEX — Visual Identity Brief
+# ATO — Visual Identity Brief
 > Documento de referência para Claude Designs.
-> Fonte de verdade para todos os elementos visuais customizados do app LEX.
+> Fonte de verdade para todos os elementos visuais customizados do app ATO.
 > Leia este arquivo antes de criar qualquer ativo visual.
 
 ---
 
 ## O Produto
 
-**LEX** é um app EdTech jurídico mobile-first (iOS + Android). Estudantes de Direito e candidatos ao Exame da OAB usam o LEX para estudar legislação, praticar questões e interagir com a **Lexia** — a tutora IA jurídica do produto.
+**ATO** é um app EdTech jurídico mobile-first (iOS + Android). Estudantes de Direito e candidatos ao Exame da OAB usam o ATO para estudar legislação, praticar questões e interagir com a **Lexia** — a tutora IA jurídica do produto.
 
 Público: jovens adultos em preparação para a OAB. Ambiente mobile, uso diário, contexto de estudo sério.
 
@@ -96,7 +96,7 @@ Verde #4CAF50 → Apenas feedback de acerto no quiz
 
 ## Formato dos Assets
 
-**Destino:** `lcf/front/lex_app/assets/icons/` (SVGs inline no Flutter via `flutter_svg`)
+**Destino:** `front/ato_app/assets/icons/` (SVGs inline no Flutter via `flutter_svg`)
 
 Especificações técnicas:
 - Formato: SVG
@@ -111,11 +111,11 @@ Especificações técnicas:
 
 ### GRUPO A — Identidade de Marca (Prioridade 1)
 
-#### A1 — Logomark LEX
+#### A1 — Logomark ATO
 
 **O que é:** O símbolo central da marca. Aparece:
 - Tela de login: círculo de 88×88px com borda gold 2px
-- App bar: versão reduzida (apenas texto "Lex" no estilo `logoTitle` atualmente)
+- App bar: versão reduzida (apenas texto "ATO" no estilo `logoTitle` atualmente)
 - Deve funcionar como ícone de app (standalone)
 
 **Referência do design original (SCREENS.md):**
@@ -123,7 +123,7 @@ Especificações técnicas:
 
 **Conceito esperado:**
 - Círculo (ou shape derivado) com borda dourada #C9922A
-- Letras "LEX" em dourado, peso 700, Inter
+- Letras "ATO" em dourado, peso 700, Inter
 - Elementos jurídicos integrados ao símbolo: balança da justiça e/ou livro aberto
 - Tom: autoridade + acessibilidade. Não é o martelo do juiz — é a balança que pesa, o livro que ilumina.
 
@@ -137,7 +137,7 @@ Especificações técnicas:
 Container(
   width: 88, height: 88,
   decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppColors.borderAccent, width: 2)),
-  child: Text('Lex', style: AppTextStyles.logoTitle), // ← substituir por SvgPicture
+  child: Text('ATO', style: AppTextStyles.logoTitle), // ← substituir por SvgPicture
 )
 ```
 
@@ -145,7 +145,7 @@ Container(
 
 #### A2 — Lexia (Tutora IA) — Avatar e Orb
 
-**O que é:** A identidade visual da Tutora IA do LEX. Atualmente um ícone genérico `Icons.smart_toy` (robô). Lexia é o coração do produto — precisa de uma identidade própria.
+**O que é:** A identidade visual da Tutora IA do ATO. Atualmente um ícone genérico `Icons.smart_toy` (robô). Lexia é o coração do produto — precisa de uma identidade própria.
 
 **Conceito:** Não um robô genérico. Lexia é uma entidade jurídica sábia — pense em algo que evoca expertise + acessibilidade, sem ser humano realista. Pode ser:
 - Uma balança estilizada com elementos que sugerem "mente ativa"
@@ -182,13 +182,13 @@ Icon(Icons.smart_toy, color: AppColors.accent, size: 18) // ← substituir
 
 #### B1 — Crown PRÓ
 
-**O que é:** Ícone que representa o plano PRÓ do LEX. Atualmente `Icons.workspace_premium` (genérico).
+**O que é:** Ícone que representa o plano PRÓ do ATO. Atualmente `Icons.workspace_premium` (genérico).
 
 **Conceito:** Coroa com personalidade — não a coroa emoji genérica. Uma coroa clean, geométrica, com peso visual coerente com Inter. Pode ter um detalhe dourado que referencia os elementos jurídicos (pequena balança no topo central, ou iniciais L).
 
 **Tamanhos de uso:**
 - 64px: tela "Você já é PRÓ!"
-- 20px: LexProBannerCard, header da SubscriptionScreen
+- 20px: AtoProBannerCard, header da SubscriptionScreen
 - 16px: ProGateSheet (check circle ao lado)
 
 **Asset:** `crown_pro.svg` — viewBox 24×24 (escala por size no Flutter)
@@ -237,7 +237,7 @@ Icon(Icons.smart_toy, color: AppColors.accent, size: 18) // ← substituir
 |-------|-------|-------------|----------|
 | `phase_graduation_start.svg` | Início da faculdade | 🎓 | Capelo/diploma simples, início de jornada |
 | `phase_graduation_mid.svg` | Meio da faculdade | 📖 | Livro aberto com páginas visíveis |
-| `phase_graduation_end.svg` | Final da faculdade | ⚖️ | Balança da justiça (LEX style) |
+| `phase_graduation_end.svg` | Final da faculdade | ⚖️ | Balança da justiça (ATO style) |
 | `phase_oab_prep.svg` | Estudando para OAB | 🎒 | Certificado/diploma OAB, ou medalha/lacre oficial |
 
 **Paleta dos ícones de fase:**
@@ -302,7 +302,7 @@ Icon(Icons.smart_toy, color: AppColors.accent, size: 18) // ← substituir
 
 ```
 PRIORIDADE 1 (bloqueante para identidade):
-  A1 — Logomark LEX
+  A1 — Logomark ATO
   A2 — Lexia avatar/orb
   B1 — Crown PRÓ
   B2 — Streak Flame
@@ -341,7 +341,7 @@ O usuário confirmou: **nav bar fica como está** (Tutor, Anotações, Início, 
 ## Estrutura de Entrega Esperada
 
 ```
-lcf/front/lex_app/assets/icons/
+front/ato_app/assets/icons/
 ├── logo_mark.svg          ← A1
 ├── logo_icon.svg          ← A1 (standalone)
 ├── lexia_avatar.svg       ← A2
@@ -372,7 +372,7 @@ lcf/front/lex_app/assets/icons/
 
 ## Referências Visuais
 
-O app LEX tem estética de **"biblioteca jurídica digital noturna"**:
+O app ATO tem estética de **"biblioteca jurídica digital noturna"**:
 - Fundos: marrom escuro quase preto (`#1A0800`)
 - Superfícies: marrom médio (`#2D1200`, `#3D1200`)
 - Detalhes e destaques: dourado âmbar (`#C9922A`, `#E8B84B`)

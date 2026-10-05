@@ -1,4 +1,4 @@
-# LEX Backend — Architecture Overview
+# ATO Backend — Architecture Overview
 
 **Stack:** Node.js 20 + TypeScript strict + Fastify 4 + Prisma 5 + PostgreSQL (Supabase) + Redis (Upstash)  
 **Deploy:** Railway (Hobby ~$5/mês)  
@@ -9,7 +9,7 @@
 ## Estrutura de Pastas
 
 ```
-lcf-backend/
+ato-backend/
 ├── prisma/
 │   └── schema.prisma          # 9 modelos: User, Profile, Subscription, StudyPlan,
 │                              #   Topic, TutorSession, TutorMessage, Question,
@@ -48,7 +48,7 @@ lcf-backend/
 ```
 Flutter App
   → GET /auth (Supabase SDK) → JWT Supabase
-  → POST /auth/verify (LEX API, Bearer JWT)
+  → POST /auth/verify (ATO API, Bearer JWT)
      → requireAuth middleware: jwtVerify() com SUPABASE_JWT_SECRET
      → auto-provision User + Profile + Subscription(free) se novo
      → req.currentUser = { id, email }

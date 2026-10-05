@@ -2,36 +2,36 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "LEX Backend — staging",
-      "cwd": "lcf/back",
+      "name": "ATO Backend — staging",
+      "cwd": "back",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:staging"],
       "port": 3000
     },
     {
-      "name": "LEX Backend — live",
-      "cwd": "lcf/back",
+      "name": "ATO Backend — live",
+      "cwd": "back",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
     },
     {
       "name": "Prisma Studio — staging",
-      "cwd": "lcf/back",
+      "cwd": "back",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "db:studio:staging"],
       "port": 5555
     },
     {
       "name": "Privacy Policy",
-      "cwd": "lcf/docs",
+      "cwd": "docs",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "-p", "4321", "--no-clipboard"],
       "port": 4321
     },
     {
-      "name": "LEX App (Flutter Web)",
-      "cwd": "lcf/front/lex_app",
+      "name": "ATO App (Flutter Web)",
+      "cwd": "front/ato_app",
       "runtimeExecutable": "flutter",
       "runtimeArgs": [
         "run",
@@ -44,8 +44,8 @@
       "port": 8080
     },
     {
-      "name": "LEX App (Android — staging)",
-      "cwd": "lcf/front/lex_app",
+      "name": "ATO App (Android — staging)",
+      "cwd": "front/ato_app",
       "runtimeExecutable": "flutter",
       "runtimeArgs": [
         "run",

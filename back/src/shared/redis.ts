@@ -1,9 +1,22 @@
 import { Redis } from '@upstash/redis';
+import { MemoryRedis } from './memory-redis';
 
-export const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
+// REDIS_MODE=memory: workaround local enquanto o Upstash esta fora. Remover a linha do .env volta ao Upstash.
+const useMemory = process.env.REDIS_MODE === 'memory';
+
+if (useMemory && process.env.NODE_ENV === 'production') {
+  throw new Error('REDIS_MODE=memory nao e permitido em producao');
+}
+if (useMemory) {
+  console.warn('[redis] REDIS_MODE=memory: usando Redis em memoria (workaround local, estado volatil)');
+}
+
+export const redis: Redis = useMemory
+  ? (new MemoryRedis() as unknown as Redis)
+  : new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    });
 
 // Key builders
 export const keys = {

@@ -25,9 +25,9 @@ em que acontece. O Redis permanece **exclusivamente** como janela de contexto do
 | Retenção | Free vê últimos **7 dias**; PRO vê tudo. Gate aplicado **na leitura** (filtro de query) — sem cron de limpeza no v1 |
 | Conversas antigas | **Read-only.** Sem retomada de sessão no v1 (reidratar Redis ⇒ v1.1). CTA "Nova conversa sobre isso" |
 | `mode: simulado` | **Não é persistido.** Nenhuma escrita em DB para sessões simulado |
-| Entrada na UI | Ícone de histórico no `LcfAppBar` do Tutor (somente modo padrão, não no modo contexto) |
+| Entrada na UI | Ícone de histórico no `AtoAppBar` do Tutor (somente modo padrão, não no modo contexto) |
 | Memória entre sessões | Continua **inexistente** (decisão fixada, roadmap v2.0). Histórico não injeta nada no contexto do LLM |
-| Cache offline | **Sem Isar no v1.** Histórico exige rede; offline mostra `LcfErrorState` |
+| Cache offline | **Sem Isar no v1.** Histórico exige rede; offline mostra `AtoErrorState` |
 | Título da sessão | Primeira mensagem do usuário truncada em 80 chars — determinístico, **sem LLM** |
 
 ---
@@ -218,7 +218,7 @@ observar antes de escrever). Campos tolerantes a backend antigo onde fizer senti
 
 ### 4.2 Entrada — ícone no app bar do Tutor
 
-Em `shared/widgets/lcf_app_bar.dart`, o `LcfTutorAppBar` em **modo padrão** (não-contexto,
+Em `shared/widgets/ato_app_bar.dart`, o `AtoTutorAppBar` em **modo padrão** (não-contexto,
 `showBack == false`) ganha `IconButton` com `Icons.history_rounded` à direita →
 `context.push('/tutor/history')`. No modo contexto (gaveta do Manual) o ícone **não aparece**.
 
@@ -235,14 +235,14 @@ Em `shared/widgets/lcf_app_bar.dart`, o `LcfTutorAppBar` em **modo padrão** (n�
 - Long-press no card → dialog de confirmação → `DELETE /tutor/history/:id` → remove da lista.
 - **Banner Free**: se `retention == "7d"`, footer fixo discreto "Mostrando os últimos 7 dias · PRO guarda tudo"
   → tap abre `ProGateSheet`.
-- Estados: loading shimmer (`LcfLoadingShimmer`), vazio (`LcfEmptyState` com copy por segmento),
-  erro (`LcfErrorState` com retry).
+- Estados: loading shimmer (`AtoLoadingShimmer`), vazio (`AtoEmptyState` com copy por segmento),
+  erro (`AtoErrorState` com retry).
 
 ### 4.4 Tela read-only — `/tutor/history/:id`
 
-- `ListView` de `ChatBubble` (reuso direto — markdown via `LcfMarkdownBody` já embutido).
+- `ListView` de `ChatBubble` (reuso direto — markdown via `AtoMarkdownBody` já embutido).
   **Sem `ChatInputBar`**, sem chips, sem typing indicator.
-- Rodapé: `LcfButton` **"Nova conversa sobre isso"**:
+- Rodapé: `AtoButton` **"Nova conversa sobre isso"**:
   - `mode == 'reading' && topicId != null`: busca `getTopicDetail(topicId)` no `ManualRepository`
     → `context.push('/tutor/context', extra: TutorScreenArgs(topicContext: TutorTopicContext(topicTitle: ..., topicContent: ...)))` — reuso integral do fluxo do orbe.
   - `mode == 'direct'` (ou `topicId == null`): `ref.read(tutorNotifierProvider.notifier).endSession()`
@@ -251,7 +251,7 @@ Em `shared/widgets/lcf_app_bar.dart`, o `LcfTutorAppBar` em **modo padrão** (n�
 
 ### 4.5 O que NÃO muda no Flutter
 
-`TutorNotifier`, fluxo de envio de mensagem, fake streaming, orbe do Manual, `LcfGlassSheet` — intocados.
+`TutorNotifier`, fluxo de envio de mensagem, fake streaming, orbe do Manual, `AtoGlassSheet` — intocados.
 O `endSession` continua chamando `DELETE /tutor/session/:id` fire-and-forget (semântica nova é só backend).
 
 ---
@@ -296,7 +296,7 @@ cache Isar do histórico · busca no histórico · export. Nada disso deve ser "
 
 ```bash
 cd back && npx tsc --noEmit
-cd front/lcf_app && dart run build_runner build --delete-conflicting-outputs && flutter analyze
+cd front/ato_app && dart run build_runner build --delete-conflicting-outputs && flutter analyze
 ```
 
 Ambos com **zero erros/issues** são pré-condição de aceite. QA cruza o código implementado com as

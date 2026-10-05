@@ -1,4 +1,4 @@
-# LCF — Frontend Blueprint
+# ATO — Frontend Blueprint
 
 > Planta completa do desenvolvimento Flutter, organizada em sprints sequenciais.
 > Cada sprint é uma unidade de trabalho para um agente Claude Code autônomo.
@@ -22,7 +22,7 @@
 ## Arquitetura Flutter
 
 ```
-front/lcf_app/
+front/ato_app/
 ├── lib/
 │   ├── main.dart                          # Entry point + Supabase.initialize
 │   ├── app.dart                           # MaterialApp.router + tema
@@ -38,12 +38,12 @@ front/lcf_app/
 │   ├── shared/
 │   │   └── widgets/
 │   │       ├── scaffold_with_nav.dart     # ShellRoute wrapper + BottomNav
-│   │       ├── lcf_text_field.dart        # TextField estilizado reutilizável
-│   │       ├── lcf_button.dart            # Button variantes (primary, outline)
-│   │       ├── lcf_app_bar.dart           # AppBar padrão + variante Tutor
-│   │       ├── lcf_loading_shimmer.dart   # Shimmer loading genérico
-│   │       ├── lcf_error_state.dart       # Error state genérico
-│   │       ├── lcf_empty_state.dart       # Empty state genérico
+│   │       ├── ato_text_field.dart        # TextField estilizado reutilizável
+│   │       ├── ato_button.dart            # Button variantes (primary, outline)
+│   │       ├── ato_app_bar.dart           # AppBar padrão + variante Tutor
+│   │       ├── ato_loading_shimmer.dart   # Shimmer loading genérico
+│   │       ├── ato_error_state.dart       # Error state genérico
+│   │       ├── ato_empty_state.dart       # Empty state genérico
 │   │       ├── category_tag.dart          # Pill colorido de matéria
 │   │       └── pro_gate_sheet.dart        # Bottom sheet de upgrade PRO
 │   └── features/
@@ -219,7 +219,7 @@ dev_dependencies:
 - `core/theme/` — AppColors, AppTextStyles, AppTheme
 - `core/network/api_client.dart` — Dio + interceptor Supabase JWT
 - `core/router/app_router.dart` — GoRouter completo com guards
-- `shared/widgets/` — ScaffoldWithNav, LcfTextField, LcfButton, LcfAppBar
+- `shared/widgets/` — ScaffoldWithNav, AtoTextField, AtoButton, AtoAppBar
 - `features/auth/` — LoginScreen, CadastroScreen, ResetSenhaScreen
 - `features/onboarding/` — OnboardingScreen, DiagnosticoScreen
 
@@ -258,7 +258,7 @@ dev_dependencies:
 - `features/dashboard/providers/dashboard_provider.dart`
 - `features/dashboard/presentation/screens/dashboard_screen.dart`
 - Widgets: GreetingCard, MetasDiariasCard, RevisaoInteligenteCard, TarefasRapidasCard, CardsMateriaCard
-- `shared/widgets/lcf_loading_shimmer.dart`
+- `shared/widgets/ato_loading_shimmer.dart`
 
 **Telas:** Dashboard / Início
 
@@ -308,7 +308,7 @@ dev_dependencies:
 - [ ] Snackbar "Anotação salva" aparece se `autoSavedAnnotationId` presente (PRO)
 - [ ] 429 exibe `ProGateSheet` com CTA de upgrade
 - [ ] Sessão encerrada ao sair da tela (`DELETE /tutor/session/:id`)
-- [ ] Header do Tutor usa layout especial (LCF box + título à esquerda)
+- [ ] Header do Tutor usa layout especial (ATO box + título à esquerda)
 
 **Atenção Free vs PRO:**
 - Rate limit de 20 msgs/dia para Free → backend retorna 429 → ProGateSheet

@@ -1,8 +1,8 @@
-# LEX Backend — Roadmap de Desenvolvimento
+# ATO Backend — Roadmap de Desenvolvimento
 
 **Versão:** 1.0 — Abril 2026  
 **Stack:** Node.js 20 + TypeScript strict + Fastify 4 + Prisma 5 + PostgreSQL (Supabase) + Redis (Upstash)  
-**Referências:** `LCF_Especificacao_Sistema.txt` (v5.0), `LCF_ArquiteturaIA_MVP.txt`, `LCF_Stack_Infraestrutura_v1.0.txt`, `LCF_Free_vs_PRO.txt`
+**Referências:** `ATO_Especificacao_Sistema.txt` (v5.0), `ATO_ArquiteturaIA_MVP.txt`, `ATO_Stack_Infraestrutura_v1.0.txt`, `ATO_Free_vs_PRO.txt`
 
 > Este documento é o briefing técnico de desenvolvimento do backend. Cada bloco de módulo é **autocontido** — o dev responsável por aquele bloco não precisa ler os outros para iniciar. Siga a ordem de sprints, pois as dependências entre módulos são sequenciais.
 
@@ -544,7 +544,7 @@ Response 200: { ...profile }
 | Mudar `academicPhase` → atualizar `nivelamentoPath`: `"oab"` se novo valor for `oab_prep`, `"graduation"` para os demais | T21 |
 | `nivelamentoPendente` **não é alterado** pela troca de `academicPhase` — foi setado universalmente no onboarding e só muda via `/diagnostic/complete` ou `/diagnostic/dismiss` | T21, RF14 |
 | `graduation_end` é um valor válido de `academicPhase` — mesma duração de plano que `oab_prep` (90 dias) | Design 2026-05 |
-| Troca de senha → responsabilidade do Supabase Auth (SDK Flutter). Sem endpoint no backend LEX | T21 |
+| Troca de senha → responsabilidade do Supabase Auth (SDK Flutter). Sem endpoint no backend ATO | T21 |
 | Upload de foto de perfil → `avatarUrl` recebe URL já hospedada (Supabase Storage via Flutter). Sem upload direto no backend | T21 |
 
 #### Arquivos a tocar
@@ -655,13 +655,13 @@ Response 200: {
 | Regra | Referência |
 |-------|-----------|
 | Free: máximo 20 questões por simulado (`totalQ ≤ 20`). Retornar `400` se exceder | T16 |
-| Free: máximo 15 questões respondidas por dia. Contador Redis `simulado:daily:{userId}` TTL 24h. Retornar `429` ao exceder | LCF_Free_vs_PRO |
+| Free: máximo 15 questões respondidas por dia. Contador Redis `simulado:daily:{userId}` TTL 24h. Retornar `429` ao exceder | ATO_Free_vs_PRO |
 | `weak_areas` (PRO): calcular as 3 disciplinas com menor taxa de acerto nos últimos 60 dias em `SimuladoQuestion`. Usar esses subjects no filtro do `ORDER BY random()` | RF57, T23 |
 | `excludeAnswered` (PRO): excluir questões presentes em `UserQuestionAnswered` do usuário no `$queryRaw` | RF58 |
 | `submitAnswer` sempre faz upsert em `UserQuestionAnswered` — ignora conflito unique | RF58 |
 | `status: 'abandoned'` não preenche `completedAt` nem `score` | T17, T23 |
 | Máximo 1 simulado `in_progress` por usuário (constraint de negócio). Ao iniciar novo com outro `in_progress`, retornar `409 CONFLICT` com `{ error: "SIMULADO_IN_PROGRESS", inProgressId: "uuid" }` | T23 |
-| `explanation` em `getResults` — retornar apenas para usuários PRO (`isPro: true` verificado no controller via `db.subscription`) | T24, LCF_Free_vs_PRO |
+| `explanation` em `getResults` — retornar apenas para usuários PRO (`isPro: true` verificado no controller via `db.subscription`) | T24, ATO_Free_vs_PRO |
 
 #### Redis — novo namespace
 
@@ -739,7 +739,7 @@ Response 200: {
 | Regra | Referência |
 |-------|-----------|
 | `chips` são sempre os 4 estáticos de `chips.config.ts`, em toda resposta | RF42 |
-| Auto-save PRO: `confidence === "high"` E `isPro: true` → criar anotação com `title = primeiros 60 chars da mensagem`, `content = response.message`, `subject = derivado do contexto (topic_title ou question_bundle.subject)` | LCF_Free_vs_PRO |
+| Auto-save PRO: `confidence === "high"` E `isPro: true` → criar anotação com `title = primeiros 60 chars da mensagem`, `content = response.message`, `subject = derivado do contexto (topic_title ou question_bundle.subject)` | ATO_Free_vs_PRO |
 | Persistência de sessão: no `DELETE`, salvar `TutorSession` com `endedAt = now()` e `msgCount`, e `TutorMessage[]` com `role`, `content`, `sources` | Analytics interno |
 
 #### Arquivos a tocar
@@ -839,7 +839,7 @@ class NotificationsService {
 |-------|-----------|
 | Validar `oneSignalPlayerId` via `GET /players/:id` da OneSignal API antes de salvar. Se inválido, retornar `400` | T21 |
 | Se `ONESIGNAL_APP_ID` não estiver configurado, `sendPush()` loga aviso e retorna `{ success: false }` sem lançar exceção | Graceful degradation |
-| Streak reminder cron — **fora do backend LEX**. Implementar como Railway Cron Job ou Supabase Edge Function que consulta `GET /dashboard/streak` e dispara via `NotificationsService` | T21 |
+| Streak reminder cron — **fora do backend ATO**. Implementar como Railway Cron Job ou Supabase Edge Function que consulta `GET /dashboard/streak` e dispara via `NotificationsService` | T21 |
 
 #### Arquivos a tocar
 
@@ -963,7 +963,7 @@ Ao entregar o Sprint 4, fornecer:
 
 ## 7. Convenções do Projeto
 
-Leia esta seção antes de escrever qualquer código no backend LEX.
+Leia esta seção antes de escrever qualquer código no backend ATO.
 
 ### Extraindo o usuário autenticado
 

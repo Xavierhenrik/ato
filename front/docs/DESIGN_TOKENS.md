@@ -1,4 +1,4 @@
-# LCF — Design Tokens
+# ATO — Design Tokens
 
 > Extraído das telas enviadas em 2026-05-21.
 > ⚠️ A migração para azul-marinho (2026-06-09) foi **apenas um teste e sofreu rollback**. A paleta vigente é a **âmbar/dourado sobre fundo marrom escuro** — a fonte de verdade real é `lib/core/theme/app_colors.dart` (ex.: `background #1A0800`, `accent #C9922A`). Os valores azuis listados abaixo neste doc estão desatualizados e devem ser alinhados ao código.
@@ -193,7 +193,7 @@ class AppRadius {
 
 ## Componentes Reutilizáveis
 
-### LcfTextField
+### AtoTextField
 
 ```
 - Background: backgroundCard (#0D1E33)
@@ -207,7 +207,7 @@ class AppRadius {
 - Senha: ícone 👁 à direita (toggle show/hide)
 ```
 
-### LcfButton — Variantes
+### AtoButton — Variantes
 
 | Variante | Background | Texto | Border |
 |----------|-----------|-------|--------|
@@ -277,7 +277,7 @@ Azul (accent #2D7DD2):
   - BottomNav ativo, chips de filtro selecionados
 
 Âmbar (amber #E8963A):
-  - Identidade de marca: logo "LCF" na AppBar
+  - Identidade de marca: logo "ATO" na AppBar
   - Plano PRÓ: badges, banners, ícone crown, border cards PRÓ
   - Conquistas e streaks ativos (≥ 7 dias)
   - Anel de progresso (progressRing) e fogo de streak (streakFire)
@@ -305,7 +305,7 @@ NUNCA usar âmbar em:
 
 ```
 - Background: background (#050D1A) — sem elevação
-- Título: "LCF" centralizado, logoTitle style
+- Título: "ATO" centralizado, logoTitle style
 - Leading: ← ícone, textPrimary
 - Actions: ícones textPrimary ou accent
 ```
@@ -314,7 +314,7 @@ NUNCA usar âmbar em:
 
 ```
 - Diferente do padrão:
-- Leading: box com borda azul contendo "LCF" (logo box)
+- Leading: box com borda azul contendo "ATO" (logo box)
 - Title alinhado à esquerda: "Tutor IA" bold + subtítulo menor
 ```
 
@@ -423,7 +423,7 @@ ThemeData get darkTheme => ThemeData(
 
 ## Padrão de Vidro Translúcido (overlays)
 
-> Decidido na ideação do tutor contextual do Manual (jun/2026). **Padrão a reutilizar** em todos os overlays onde fizer sentido (gavetas, pop-ups, modais). Encapsular em `shared/widgets/lcf_glass_sheet.dart`.
+> Decidido na ideação do tutor contextual do Manual (jun/2026). **Padrão a reutilizar** em todos os overlays onde fizer sentido (gavetas, pop-ups, modais). Encapsular em `shared/widgets/ato_glass_sheet.dart`.
 
 Regras inegociáveis do padrão:
 
@@ -436,9 +436,9 @@ Regras inegociáveis do padrão:
 Tokens sugeridos a adicionar em `AppColors`/tema (constantes, não hardcoded):
 `glassSurfaceOpacity = 0.30`, `glassEdgeAccent = AppColors.accent.withOpacity(0.6)`.
 
-**Padrão obrigatório para TODOS os bottom sheets / barras que sobem.** Implementado em `shared/widgets/lcf_glass_sheet.dart` — ponto único de controle (mudar a opacidade lá propaga para todos). Aplicar em: tutor do Manual (`ManualTutorSheet` ✓), paywall PRO (`ProGateSheet`), sheet de cadastro (`cadastro_screen.dart`), e qualquer novo sheet. Cards estáticos (Dashboard, Simulados, etc.) NÃO usam vidro — só superfícies que deslizam para cima.
+**Padrão obrigatório para TODOS os bottom sheets / barras que sobem.** Implementado em `shared/widgets/ato_glass_sheet.dart` — ponto único de controle (mudar a opacidade lá propaga para todos). Aplicar em: tutor do Manual (`ManualTutorSheet` ✓), paywall PRO (`ProGateSheet`), sheet de cadastro (`cadastro_screen.dart`), e qualquer novo sheet. Cards estáticos (Dashboard, Simulados, etc.) NÃO usam vidro — só superfícies que deslizam para cima.
 
-**Implementação canônica (2026-06-10):** `shared/widgets/lcf_glass_sheet.dart` encapsula
+**Implementação canônica (2026-06-10):** `shared/widgets/ato_glass_sheet.dart` encapsula
 o padrão completo. Constantes `_kSurfaceOpacity = 0.30`, `_kTopBorderOpacity = 0.60` e
 `_kFrostSigma = 18.0` vivem no arquivo do componente. Uso atual: gaveta de vidro do
 Tutor IA no Manual (`ManualTutorOrb`).

@@ -1,12 +1,52 @@
 ---
-updated: 2026-06-18
-sprint: "Histórico da Lexia — planejado; delegação noturna agendada (temp-feat-historico)"
+updated: 2026-10-05
+sprint: "Limpeza do workspace e rename definitivo LCF/LEX para ATO"
 ---
 
-# LEX — Estado do Projeto
+# ATO — Estado do Projeto
 
 > Atualizado pelo Claude ao fim de cada sessão de trabalho.
 > Para detalhes de implementação de cada módulo, ver `../docs/ROADMAP.md`.
+> Nome do produto: ATO desde 2026-10-03 (LCF até 18/06, LEX até 03/10). As fases abaixo da 5
+> mantêm o nome da época em que foram registradas.
+
+---
+
+## Fase 5: Limpeza e rename para ATO 🔄 Em andamento (2026-10-03)
+
+**Objetivo:** tirar o que morreu, dar ao produto o nome definitivo e deixar o repositório
+pronto para adotar o núcleo do unified.
+
+**Resultado até aqui:**
+- Main local avançada por fast-forward com o setup de 4 camadas (`657968d`); trabalho na branch `chore/rename-ato`, sem push
+- Removidos: 5 skills que duplicavam os agents, `back/scripts` de uso único (3 com senha do banco), `ManualTutorSheet` sem import, captura e relatório de build rastreados
+- `lex-qa` ganhou frontmatter; `test-llmops.ts` foi para `back/test/`
+- Rename de conteúdo: app `front/ato_app` (package `ato_app`), widgets `Ato*`, agents e skills `ato-*`, specs `ATO_*.txt`, strings de UI; Lexia continua como nome da tutora
+
+- Nome exibido ATO no Android, iOS, web e Windows; `setup.ps1` e `run.ps1` em `scripts/`
+- Pastas: repositório em `D:\projetos\ato\main`, ETL em `D:\projetos\ato\etl\` (`lexml`, `questions`), acervo em `D:\projetos\ato\_acervo\`
+
+**Pendente:** identidade do app pronta na branch `chore/rename-ato-identidade`, para aplicar depois do app Android `com.bx.ato.app` no Firebase (com `google-services.json` novo) e do redirect `com.bx.ato.app://auth-callback` no Supabase; senha do Postgres a rotacionar nos dois projetos Supabase (estava em scripts commitados, continua no histórico); merge deste PR na `main` depois de confirmar se o Railway faz deploy por push.
+
+**Passagem (2026-10-05):** repo renomeado no GitHub para `Xavierhenrik/ato`; README na raiz; branches mescladas removidas; `chore/rename-ato` e `chore/rename-ato-identidade` enviadas; workaround `REDIS_MODE=memory` commitado. ETL continua em repos separados.
+Auditoria e plano completos: `D:\projetos\vida\pesquisa\ato-2026-10\`. Log: `sessions/2026-10-03_limpeza_rename_ato.md`.
+
+---
+
+## Fase 4: Setup `.claude` em 4 camadas ✅ Concluída (2026-06-24)
+
+**Objetivo:** Replicar a engenharia do projeto Maida — commands/agents/skills/memory — e criar
+um guardião de infraestrutura para o pré-lançamento.
+
+**Resultado:**
+- **Memory** (novo): 6 arquivos de contexto por domínio — `infra`, `backend`, `frontend`, `llm`, `security`, `launch`
+- **Agents** (novo): 6 domain experts isolados — `lex-tech-lead` (opus), `lex-infra` (NOVO), `lex-backend`, `flutter-lex`, `lex-security` (opus), `lex-llm-ops`
+- **Commands** (novo): `/start`, `/sprint`, `/infra`, `/review`, `/launch`
+- **Skills**: mantidas como infra de execução (forge, verify, versioning, code-health, qa, apple-compliance, data)
+- `CLAUDE.md` raiz documenta a arquitetura de 4 camadas
+- `lex-infra` é o guardião de Railway/Supabase/Upstash/LLMs/observabilidade com independência para sugerir melhorias e troca de provedor; mantém análises de desempenho em `memory/infra.md`
+
+**Próximo passo:** rodar `/infra` (auditoria de pré-lançamento) e `/launch` (checklist go/no-go).
 
 ---
 
@@ -390,7 +430,7 @@ flutter run \
 ### Como retomar
 
 ```bash
-cd corpus/etl-questions
+cd ../etl/questions
 python scripts/run_pipeline_loop.py   # reinicia automaticamente após quota
 ```
 

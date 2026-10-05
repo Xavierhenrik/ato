@@ -1,18 +1,49 @@
-# LEX — Contexto para Claude Code
+# ATO — Contexto para Claude Code
 
 > Leia este arquivo e `.claude/PROJECT_STATE.md` antes de começar qualquer trabalho.
 > Se existir um log recente em `.claude/sessions/`, leia também.
 
-## Skills Disponíveis
+## Arquitetura do Ambiente de IA — 4 Camadas
 
-Skills especializadas em `.claude/skills/` — use com `/skill <nome>`:
+O setup `.claude/` segue 4 camadas (engenharia replicada do projeto Maida, 2026-06-24):
 
-| Skill | Quando usar |
-|-------|------------|
-| `lex-tech-lead` | Análise técnica, decisões de arquitetura, prompts de implementação para agentes dev |
-| `lex-apple-compliance` | Auditoria de conformidade App Store, checklist de submissão, Sign in with Apple, privacy policy |
-| `lex-security` | Auditoria de segurança por camada (auth, injeção, rate limit, mobile, infra), prompts de correção |
-| `lex-qa` | Testes funcionais (perspectiva do usuário), refatoração segura, polish de módulos — usa TESTING_STRATEGY.md + REFACTORING_GUIDE.md |
+```
+.claude/
+├── commands/   ← 1. Entry points — orquestram, nunca implementam
+├── agents/     ← 2. Domain experts isolados — model + tools + permissionMode próprios
+├── skills/     ← 3. Infra de execução — chamadas pelos agents
+└── memory/     ← 4. Contexto persistente por domínio — injetado nos agents
+```
+
+### 1 · Commands (`.claude/commands/`)
+| Command | Orquestra |
+|---------|-----------|
+| `/start` | Início de sessão: carrega estado, classifica, delega |
+| `/sprint` | Implementação: tech-lead → domain expert → verify → versioning |
+| `/infra` | Infra: audita provedores, custo, deploy → `ato-infra` |
+| `/review` | Review multidimensional: security + tech-lead + code-health |
+| `/launch` | Checklist go/no-go: infra + security + apple-compliance + qa |
+
+### 2 · Agents (`.claude/agents/`)
+| Agent | Model | Mode | Domínio |
+|-------|-------|------|---------|
+| `ato-tech-lead` | opus | plan | Arquitetura, decisões cross-domain, orquestração |
+| `ato-infra` | sonnet | plan | Railway, Supabase, Redis, LLMs (config), deploy, custo, observabilidade |
+| `ato-backend` | sonnet | auto | Node/Fastify/Prisma/Redis |
+| `flutter-ato` | sonnet | auto | Flutter/Riverpod/Isar/GoRouter |
+| `ato-security` | opus | plan | Auth, IDOR, rate limit, LGPD |
+| `ato-llm-ops` | sonnet | auto | Roteamento LLM, custo/qualidade, anti-alucinação |
+
+### 3 · Skills (`.claude/skills/`) — execução, chamadas pelos agents
+`ato-forge` (padrão FORJAR de prompts) · `ato-verify` (portão de validação) · `ato-versioning` (git) ·
+`ato-code-health` · `ato-qa` · `ato-apple-compliance` · `ato-data` (ETL).
+
+### 4 · Memory (`.claude/memory/`) — contexto persistente por domínio
+`infra.md` · `backend.md` · `frontend.md` · `llm.md` · `security.md` · `launch.md`.
+Cada agent carrega só a memória do seu escopo. **Memória é viva** — agents atualizam ao fim de cada trabalho.
+
+> **Princípios:** command orquestra (nunca implementa) · model routing (opus análise / sonnet execução) ·
+> permissionMode por agent (análise em `plan`, execução em `auto`) · handoff explícito (cada agent declara o que o próximo verifica) · memória de domínio isolada.
 
 ---
 
@@ -20,7 +51,7 @@ Skills especializadas em `.claude/skills/` — use com `/skill <nome>`:
 
 ## O Projeto
 
-**LEX** — EdTech jurídica mobile-first para estudantes de Direito e candidatos ao Exame da OAB.
+**ATO** — EdTech jurídica mobile-first para estudantes de Direito e candidatos ao Exame da OAB.
 Modelo freemium (Free vs PRO). MVP em ~2 meses. Alvo: 100–500 assinantes nos primeiros 6 meses.
 
 Produto jurídico: **alucinação = perda de credibilidade imediata**. Toda decisão de arquitetura parte desse princípio.
@@ -52,11 +83,11 @@ Produto jurídico: **alucinação = perda de credibilidade imediata**. Toda deci
 | Documento | Caminho | Quando ler |
 |-----------|---------|-----------|
 | **Roadmap Backend** | `docs/ROADMAP.md` | Antes de implementar qualquer módulo — contém sprints, critérios de aceite e contratos de API |
-| **Spec MVP** | `docs/specs/LCF_Especificacao_Sistema.txt` | Requisitos funcionais completos |
-| **Free vs PRO** | `docs/specs/LCF_Free_vs_PRO.txt` | Sempre que implementar feature com diferenciação de plano |
-| **Arquitetura IA** | `docs/specs/LCF_ArquiteturaIA_MVP.txt` | Antes de tocar no módulo tutor-ia |
+| **Spec MVP** | `docs/specs/ATO_Especificacao_Sistema.txt` | Requisitos funcionais completos |
+| **Free vs PRO** | `docs/specs/ATO_Free_vs_PRO.txt` | Sempre que implementar feature com diferenciação de plano |
+| **Arquitetura IA** | `docs/specs/ATO_ArquiteturaIA_MVP.txt` | Antes de tocar no módulo tutor-ia |
 | **Histórico Lexia** | `docs/specs/TUTOR_HISTORY_SPEC.md` | Antes de tocar em persistência/histórico de sessões da Lexia |
-| **Stack Infra** | `docs/specs/LCF_Stack_Infraestrutura_v1.0.txt` | Decisões de infraestrutura |
+| **Stack Infra** | `docs/specs/ATO_Stack_Infraestrutura_v1.0.txt` | Decisões de infraestrutura |
 | **API Contract** | `docs/api-contract.md` | Referência de contratos |
 | **Arquitetura** | `docs/architecture-overview.md` | Visão geral da arquitetura do sistema |
 | **Env Setup** | `docs/env-checklist.md` | Checklist de variáveis de ambiente |
@@ -100,7 +131,7 @@ Para convenções de código obrigatórias (Errors factory, Zod, requireAuth, Re
 
 - **`legal_articles`**: 18.779 registros (CF/88, CC, CP, CLT, CPC, CPP, CTN, CDC, Estatuto OAB). Fora do Prisma — acessar via `$queryRaw`.
 - **Schema Prisma migrado**: User, Profile, StudyPlan, Subscription, Topic, TutorSession, TutorMessage, Question, SimuladoAttempt, SimuladoQuestion, Annotation, UserQuestionAnswered.
-- **Questões (M5)**: 2.210 questões OAB reais (`type: simulado`) + 5.791 questões de revisão geradas (`type: review`, `status: pending_review` — aguardando promoção via SQL ou endpoint admin Sprint 4).
+- **Questões (M5)**: 2.210 questões OAB reais (`type: simulado`) + 5.791 questões de revisão geradas (`type: review`, promovidas para `status: active` em 2026-05-24).
 
 ---
 

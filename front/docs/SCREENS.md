@@ -1,4 +1,4 @@
-# LCF — Documentação de Telas (UI Reference)
+# ATO — Documentação de Telas (UI Reference)
 
 > Gerado a partir das telas enviadas pelo designer em 2026-05-21.
 > Esta é a fonte de verdade para o desenvolvimento Flutter.
@@ -77,7 +77,7 @@ Presente em todas as telas autenticadas. 4 itens fixos:
 ### Layout
 
 ```
-[LCF Logo — círculo gold com texto + balança + livro]
+[ATO Logo — círculo gold com texto + balança + livro]
 [Tagline: "Sua aprovação para OAB começa aqui"]
 
 [Label: E-mail]
@@ -100,9 +100,9 @@ Presente em todas as telas autenticadas. 4 itens fixos:
 
 | Widget | Detalhes |
 |--------|----------|
-| `LcfLogo` | Círculo com borda gold, "LCF" + ícones internos. Reutilizável. |
-| `LcfTextField` | Rounded border, ícone leading, toggle senha opcional |
-| `LcfButton` | Full-width, variante primary (dark) |
+| `AtoLogo` | Círculo com borda gold, "ATO" + ícones internos. Reutilizável. |
+| `AtoTextField` | Rounded border, ícone leading, toggle senha opcional |
+| `AtoButton` | Full-width, variante primary (dark) |
 | `SocialAuthButton` | Full-width, ícone + texto, variante Apple / Google |
 
 ### Dados / Ações
@@ -129,7 +129,7 @@ Design mostra "Entrar com Apple". Spec técnica define: **"Sem Apple Sign In —
 
 ```
 [Fundo: background escuro #1A0800]
-[LCF Logo — topo centralizado]
+[ATO Logo — topo centralizado]
 [Tagline: "Sua aprovação para OAB começa aqui"]
 
 [Bottom Sheet — #3D1200, cantos superiores arredondados]
@@ -147,8 +147,8 @@ Design mostra "Entrar com Apple". Spec técnica define: **"Sem Apple Sign In —
 | Widget | Detalhes |
 |--------|----------|
 | `AuthBottomSheet` | Modal arrastável, altura ~60% da tela |
-| `LcfTextField` | Mesmo componente do Login |
-| `LcfButton` | Com ícone → sufixo |
+| `AtoTextField` | Mesmo componente do Login |
+| `AtoButton` | Com ícone → sufixo |
 
 ### Dados / Ações
 
@@ -170,7 +170,7 @@ Design mostra "Entrar com Apple". Spec técnica define: **"Sem Apple Sign In —
 ### Layout
 
 ```
-[AppBar: ← voltar | "LCF" centralizado]
+[AppBar: ← voltar | "ATO" centralizado]
 [Título: "Vamos montar seu plano de estudos"]
 [Subtítulo: ⏱ "Leva menos de 1 minuto"]
 
@@ -229,7 +229,7 @@ response: { flow, nivelamentoPendente }
 
 ```
 [Header Row]
-  [LCF logo — gold, left]
+  [ATO logo — gold, left]
   [Greeting: "Olá, {nome}! 👋 / Continue firme nos seus estudos"]
   [Streak badge: 🔥 {n} / "Dias seguido"]
   [Avatar — circle, green online dot]
@@ -253,9 +253,9 @@ response: { flow, nivelamentoPendente }
   [HorizontalScrollView de SubjectRevisionCards]
     Cada card: subject name (tag + título), "{n} respondidas" (totalAnswered, NÃO questões a fazer), [Revisar]
     Borda/bg gold = ESTADO DE TOQUE (mobile), não pré-seleção fixa
-    Tap no card → abre RevisarSheet (LcfGlassSheet) — porta dupla, não navega direto
+    Tap no card → abre RevisarSheet (AtoGlassSheet) — porta dupla, não navega direto
 
-[RevisarSheet] (bottom sheet de vidro — LcfGlassSheet)
+[RevisarSheet] (bottom sheet de vidro — AtoGlassSheet)
   [Título: subject + contexto de desempenho "Você errou {n}% · {n} respondidas"]
   [Botão "📖 Ler resumo"]      → /manual?subject={subject}  (resumos M3)
   [Botão "✍️ Praticar questões"] → POST /simulados/start {mode:'custom', subject, totalQ:5–10}
@@ -304,12 +304,12 @@ response: { flow, nivelamentoPendente }
 
 ```
 [Header — diferente do padrão]
-  [LCF logo box — gold border rectangle]
+  [ATO logo box — gold border rectangle]
   [Column: "Tutor IA" | "Direito inteligente para sua aprovação"]
 
 [WelcomeCard — dark card]
   [Left: Avatar robô em círculo gold]
-  [Right: "Olá, eu sou o tutor LCF ⚖️" + descrição]
+  [Right: "Olá, eu sou o tutor ATO ⚖️" + descrição]
   [Row de 3 FeatureBadges]
     [🎯 Respostas com base legal]
     [📖 Explicações claras e objetivas]
@@ -372,7 +372,7 @@ O backend retorna `chips` com 4 opções de continuação após cada resposta. R
 ### Layout
 
 ```
-[AppBar: ← voltar | "LCF" centralizado | ♡ favoritar (direita)]
+[AppBar: ← voltar | "ATO" centralizado | ♡ favoritar (direita)]
 
 [CategoryTag — pill dark red: "Direito constitucional"]
 [Título do artigo — grande, branco]
@@ -426,15 +426,15 @@ O design apresenta seções diferentes e mais genéricas. Os pipelines de geraç
 
 Ponto de entrada do Tutor IA dentro do resumo. Substitui o antigo gatilho ⚡ por seção (removido) por um **orbe flutuante único** com contexto do tópico inteiro.
 
-- **Orbe-robô** — botão circular flutuante (canto inferior direito), fundo `AppColors.accent`, borda `AppColors.accentLight`, **ícone/imagem do robô** do Tutor (sem texto "Lex").
+- **Orbe-robô** — botão circular flutuante (canto inferior direito), fundo `AppColors.accent`, borda `AppColors.accentLight`, **ícone/imagem do robô** do Tutor (sem texto "ATO").
 - **Abrir** — ao tocar, scrim translúcido leve (~12%, **sem blur** no fundo) e a **gaveta de vidro** sobe; o orbe **anima e ancora no topo da gaveta** como cabeçalho.
 - **Cancelar** — tocar fora ou no orbe novamente reverte a animação.
 - **Gaveta** — padrão de vidro translúcido (ver `DESIGN_TOKENS.md` › Padrão de Vidro Translúcido): translúcida, sem blur, cantos 30px, **fio dourado de acabamento** no topo.
 - **Conteúdo (sólido/opaco)** — 3 pills de ação rápida ("Resumo para a prova", "Como cai na OAB?", "Exemplo prático") + barra de input **idêntica à do chat** (reusar o widget `ChatInputBar`).
 - **Navegação** — tocar numa pill ou enviar texto → `context.push('/tutor/context', extra: TutorScreenArgs(initialMessage, topicContext: TutorTopicContext(topicTitle, topicContent)))`. Contexto = tópico inteiro.
-- **Header do Tutor em modo contexto** — `LcfTutorAppBar` com `showBack: true` exibe um voltar **sutil**: seta + texto **"Resumo"** (não "Voltar para o resumo"); o bloco de avatar/identidade do topo é **omitido** nesse modo (fica subentendido). A tab `/tutor` normal permanece inalterada.
+- **Header do Tutor em modo contexto** — `AtoTutorAppBar` com `showBack: true` exibe um voltar **sutil**: seta + texto **"Resumo"** (não "Voltar para o resumo"); o bloco de avatar/identidade do topo é **omitido** nesse modo (fica subentendido). A tab `/tutor` normal permanece inalterada.
 
-Arquivos: `manual_detail_screen.dart`, `manual_tutor_sheet.dart` (redesenhado), `topic_section_tile.dart` (⚡ removido), `tutor_screen.dart`/`LcfTutorAppBar` (header), `shared/widgets/lcf_glass_sheet.dart` (novo).
+Arquivos: `manual_detail_screen.dart`, `manual_tutor_sheet.dart` (redesenhado), `topic_section_tile.dart` (⚡ removido), `tutor_screen.dart`/`AtoTutorAppBar` (header), `shared/widgets/ato_glass_sheet.dart` (novo).
 
 ---
 
@@ -445,7 +445,7 @@ Arquivos: `manual_detail_screen.dart`, `manual_tutor_sheet.dart` (redesenhado), 
 ### Layout (scroll vertical)
 
 ```
-[AppBar: ← voltar | "LCF" centralizado]
+[AppBar: ← voltar | "ATO" centralizado]
 
 [ProfileHeader]
   [Avatar — círculo, overlay 📷 para editar]
@@ -466,8 +466,8 @@ Arquivos: `manual_detail_screen.dart`, `manual_tutor_sheet.dart` (redesenhado), 
   [Header: 🛡️ "Segurança da conta"]
   [Row: 🔒 "Alterar senha" + subtítulo | chevron →]
 
-[LcfProBannerCard — borda gold]
-  [Header: 👑 "LCF PRÓ"]
+[AtoProBannerCard — borda gold]
+  [Header: 👑 "ATO PRÓ"]
   [Subtítulo]
   [Lista de 4 features com ✅ gold]
   [Button: "Gerenciar plano" — full-width gold]
@@ -509,9 +509,9 @@ Arquivos: `manual_detail_screen.dart`, `manual_tutor_sheet.dart` (redesenhado), 
 ### Layout (scroll vertical)
 
 ```
-[AppBar: ← voltar | "LCF" centralizado]
+[AppBar: ← voltar | "ATO" centralizado]
 
-[Header: 👑 "LCF PRÓ" + subtítulo]
+[Header: 👑 "ATO PRÓ" + subtítulo]
 [Grid 2×2 de FeatureBlocks]
   [📤 Todos os materiais liberados     ] [🎯 Revisões ilimitadas e inteligentes]
   [✅ Simulados avançados e relatórios ] [💬 Suporte prioritário com IA        ]
@@ -532,7 +532,7 @@ Arquivos: `manual_detail_screen.dart`, `manual_tutor_sheet.dart` (redesenhado), 
   [Row: 💳 "Alterar dados de pagamento" | chevron →]
 
 [ResumoCard]
-  [Linha: Plano — "LCF PRÓ mensal"]
+  [Linha: Plano — "ATO PRÓ mensal"]
   [Linha: Valor mensal — "R$49,90" (gold)]          ⚠️
   [Linha: Próxima cobrança — data]
 
@@ -591,7 +591,7 @@ O design atual desta tela precisa ser **revisado pelo designer** para refletir o
 ### Layout
 
 ```
-[AppBar: igual ao estado vazio — LCF box | "Tutor IA" | subtítulo]
+[AppBar: igual ao estado vazio — ATO box | "Tutor IA" | subtítulo]
 
 [ListView de mensagens — ocupa todo o espaço disponível]
   [ChatBubble usuário — alinhada à direita]
@@ -652,7 +652,7 @@ Se `response.autoSavedAnnotationId != null`, exibir snackbar discreto abaixo do 
 ### Layout
 
 ```
-[AppBar: ← voltar | "LCF" centralizado | 🔍 search icon]
+[AppBar: ← voltar | "ATO" centralizado | 🔍 search icon]
 
 [SearchBar — aparece ao tocar 🔍, colapsa com X]
   TextField: "Buscar tópicos, artigos..."
@@ -714,7 +714,7 @@ Se `response.autoSavedAnnotationId != null`, exibir snackbar discreto abaixo do 
 ### Layout
 
 ```
-[AppBar: ← voltar | "LCF" centralizado]
+[AppBar: ← voltar | "ATO" centralizado]
 
 [HeaderCard — dark card]
   [Título: "Simulado"]
@@ -821,7 +821,7 @@ Se `response.autoSavedAnnotationId != null`, exibir snackbar discreto abaixo do 
 ### Layout
 
 ```
-[AppBar: ← voltar | "LCF" centralizado]
+[AppBar: ← voltar | "ATO" centralizado]
 
 [ScoreHeader — card com fundo especial]
   [% de acerto em destaque — accentLarge]
@@ -869,7 +869,7 @@ Se `response.autoSavedAnnotationId != null`, exibir snackbar discreto abaixo do 
 ### Layout
 
 ```
-[AppBar: "LCF" centralizado | 🔍 search | ✏️ nova anotação]
+[AppBar: "ATO" centralizado | 🔍 search | ✏️ nova anotação]
 
 [SearchBar — expansível, mesma lógica do Manual]
   Busca em title e content (GET /annotations com parâmetro q)
@@ -1009,7 +1009,7 @@ Se `response.autoSavedAnnotationId != null`, exibir snackbar discreto abaixo do 
 ### Layout — Estado input
 
 ```
-[AppBar: ← voltar | "LCF" centralizado]
+[AppBar: ← voltar | "ATO" centralizado]
 [Ícone cadeado em círculo gold]
 [Título: "Recuperar senha"]
 [Subtítulo: "Digite seu e-mail e enviaremos um link de recuperação"]
@@ -1028,7 +1028,7 @@ Se `response.autoSavedAnnotationId != null`, exibir snackbar discreto abaixo do 
 
 ### Dados / Ações
 
-`supabase.auth.resetPasswordForEmail(email)` — sem endpoint LCF direto.
+`supabase.auth.resetPasswordForEmail(email)` — sem endpoint ATO direto.
 
 ---
 

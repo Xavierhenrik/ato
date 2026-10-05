@@ -1,7 +1,7 @@
-# Padrão FORJAR — Prompt de Handoff do LEX
+# Padrão FORJAR — Prompt de Handoff do ATO
 
-> Fonte única do formato de prompt de implementação do LEX.
-> Toda skill que SENTE (audita) ou DECIDE emite neste formato — diretamente, via `/lex-forge`.
+> Fonte única do formato de prompt de implementação do ATO.
+> Toda skill que SENTE (audita) ou DECIDE emite neste formato — diretamente, via `/ato-forge`.
 > Nunca criar arquivo com o prompt; entregar sempre no chat para o usuário copiar.
 
 ```
@@ -36,7 +36,7 @@ BM25 sem pgvector, RevenueCat sem Stripe, monolito modular, staging antes de liv
 ### Fechamento OBRIGATÓRIO
 - [ ] atualizar `.claude/PROJECT_STATE.md`
 - [ ] criar `.claude/sessions/YYYY-MM-DD_<slug>.md`
-- [ ] commit + push seguindo `lex-versioning` (segredos nunca entram)
+- [ ] commit + push seguindo `ato-versioning` (segredos nunca entram)
 ```
 
 ## Regras do padrão

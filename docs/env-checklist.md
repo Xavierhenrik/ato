@@ -1,4 +1,4 @@
-# LEX Backend — Environment Checklist
+# ATO Backend — Environment Checklist
 
 Variáveis obrigatórias antes do primeiro deploy. Copie `.env.example` para `.env`.
 
