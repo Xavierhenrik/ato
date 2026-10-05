@@ -1,5 +1,5 @@
 ---
-updated: 2026-10-03
+updated: 2026-10-05
 sprint: "Limpeza do workspace e rename definitivo LCF/LEX para ATO"
 ---
 
@@ -26,7 +26,9 @@ pronto para adotar o núcleo do unified.
 - Nome exibido ATO no Android, iOS, web e Windows; `setup.ps1` e `run.ps1` em `scripts/`
 - Pastas: repositório em `D:\projetos\ato\main`, ETL em `D:\projetos\ato\etl\` (`lexml`, `questions`), acervo em `D:\projetos\ato\_acervo\`
 
-**Pendente:** identidade do app pronta na branch `chore/rename-ato-identidade`, para aplicar depois do app Android `com.bx.ato.app` no Firebase (com `google-services.json` novo) e do redirect `com.bx.ato.app://auth-callback` no Supabase; senha do Postgres a rotacionar (estava em scripts commitados); push das branches.
+**Pendente:** identidade do app pronta na branch `chore/rename-ato-identidade`, para aplicar depois do app Android `com.bx.ato.app` no Firebase (com `google-services.json` novo) e do redirect `com.bx.ato.app://auth-callback` no Supabase; senha do Postgres a rotacionar nos dois projetos Supabase (estava em scripts commitados, continua no histórico); merge deste PR na `main` depois de confirmar se o Railway faz deploy por push.
+
+**Passagem (2026-10-05):** repo renomeado no GitHub para `Xavierhenrik/ato`; README na raiz; branches mescladas removidas; `chore/rename-ato` e `chore/rename-ato-identidade` enviadas; workaround `REDIS_MODE=memory` commitado. ETL continua em repos separados.
 Auditoria e plano completos: `D:\projetos\vida\pesquisa\ato-2026-10\`. Log: `sessions/2026-10-03_limpeza_rename_ato.md`.
 
 ---
